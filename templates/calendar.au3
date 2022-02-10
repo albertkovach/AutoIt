@@ -57,6 +57,53 @@ Global $40 = GUICtrlCreateLabel("x40", 95, 130, 20, 20)
 Global $41 = GUICtrlCreateLabel("x41", 115, 130, 20, 20)
 Global $42 = GUICtrlCreateLabel("x42", 135, 130, 20, 20)
 
+
+Global $Weekday
+Global $MyDate, $MyTime
+Global $DateLabel
+
+
+
+
+; Переход на первый день месяца, вычисление дня недели этого дня
+$NewDate = _DateAdd('d', -@MDAY+1, _NowCalcDate())
+_DateTimeSplit($NewDate, $MyDate, $MyTime)
+Global $MonthFirstWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+
+
+; Переход на первый день первой недели календаря
+$NewDate = _DateAdd('d', -$MonthFirstWeekday+1, $NewDate)
+_DateTimeSplit($NewDate, $MyDate, $MyTime)
+Global $CurrentWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+MsgBox(4096, "MyDate " & $MyDate[3], "CurrentWeekday " & $CurrentWeekday)
+
+
+; Отрисовка следующих дней
+For $x = 0 To 42
+	$NewDate1 = _DateAdd('d', +$x, $NewDate)
+	_DateTimeSplit($NewDate1, $MyDate, $MyTime)
+	Global $xoffset = $x + 3 ; Смещение для правильного подключения к GUILabel
+	GUICtrlSetData ("$" + $xoffset, $MyDate[3])
+	
+	;MsgBox(4096, "MyDate " & $MyDate[3], "x " & $x & ", xoffset " & $xoffset)
+Next
+
+
+
+
+	
+While 1
+	Sleep(100)
+WEnd
+
+Func CLOSEClicked()
+	Exit
+EndFunc
+
+
+
+
+
 #comments-start
 
 MsgBox(4096, "", "Сегодня : " & _DateDayOfWeek($iWeekDay))
@@ -171,49 +218,15 @@ For $x = $MonthFirstWeekday-1 To 42-$MonthFirstWeekday
 Next
 
 
-
-#comments-end
-
-
-
-
-Global $Weekday
-Global $MyDate, $MyTime
-Global $DateLabel
-
-
-
-
-; Переход на первый день месяца, вычисление дня недели этого дня
-$NewDate = _DateAdd('d', -@MDAY+1, _NowCalcDate())
-_DateTimeSplit($NewDate, $MyDate, $MyTime)
-Global $MonthFirstWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
-
+$x = $MonthFirstWeekday * 1
 $DateLabel = "$" + $MonthFirstWeekday
+
 GUICtrlSetData ($DateLabel, $MyDate[3])
 
 
-
-
-
-; Отрисовка следующих дней
-
-For $x = $MonthFirstWeekday To 42-$MonthFirstWeekday
-	$NewDate = _DateAdd('d', +$x, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ("$" + $x, $MyDate[3])
-	
-	MsgBox(4096, $MyDate[3], $x)
-Next
+MsgBox(4096, $MyDate[3], $MonthFirstWeekday)
 
 
 
 
-	
-While 1
-	Sleep(100)
-WEnd
-
-Func CLOSEClicked()
-	Exit
-EndFunc
+#comments-end
