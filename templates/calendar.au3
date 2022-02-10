@@ -140,25 +140,59 @@ GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*4), $ClndGUIstartY + (
 GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*5), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 
-
-Global $MonthPrevBtn = GUICtrlCreateButton("<<", $ClndGUIstartX, 						      $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
-Global $MonthNextBtn = GUICtrlCreateButton(">>", $ClndGUIstartX + ($ClndGUIxStretch * 6) + 5, $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
-
-
-
 For $x = -5 To 42
 	$xoffset = $x + 10 ; Применение шрифта по умолчанию
 	GUICtrlSetFont($xoffset, $ClndrTextSize, $ClndrTextThickness, 0)
 Next
 
 
+
+Global $MonthPrevBtn = GUICtrlCreateButton("<<", $ClndGUIstartX, 						      $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
+Global $MonthNextBtn = GUICtrlCreateButton(">>", $ClndGUIstartX + ($ClndGUIxStretch * 6) + 5, $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
+GUICtrlSetOnEvent($MonthPrevBtn, "MonthPrev")
+GUICtrlSetOnEvent($MonthNextBtn, "MonthNext")
+
+
+
 ClndInitDay()
 RenderCalendar()
 
+Global $NewDate
 
+Func ClndInitDay()
+	_DateTimeSplit(_NowCalcDate(), $MyDate, $MyTime)
 
+	Global $ClndSelectedDate = _NowCalcDate()
+	Global $ClndSelectedYear = $MyDate[1]
+	Global $ClndSelectedMonth = $MyDate[2]
+	Global $ClndSelectedDay = 1
+	Global $ClndOutputDate
 
+	Global $ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
+	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
+EndFunc
 
+Func MonthPrev()
+	$ClndSelectedDate = _DateAdd('M', -1, $ClndSelectedDate)
+	_DateTimeSplit($ClndSelectedDate, $MyDate, $MyTime)
+	$ClndSelectedYear = $MyDate[1]
+	$ClndSelectedMonth = $MyDate[2]
+	$ClndSelectedDay = 1
+	$ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
+	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
+	RenderCalendar()
+EndFunc
+
+Func MonthNext()
+	$ClndSelectedDate = _DateAdd('M', +1, $ClndSelectedDate)
+	_DateTimeSplit($ClndSelectedDate, $MyDate, $MyTime)
+	$ClndSelectedYear = $MyDate[1]
+	$ClndSelectedMonth = $MyDate[2]
+	$ClndSelectedDay = 1
+	$ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
+	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
+	RenderCalendar()
+EndFunc
 
 
 
@@ -173,32 +207,21 @@ Func CLOSEClicked()
 EndFunc
 
 
-Func ClndInitDay()
-	_DateTimeSplit(_NowCalcDate(), $MyDate, $MyTime)
-
-	Global $ClndSelectedYear = $MyDate[1]
-	Global $ClndSelectedMonth = $MyDate[2]
-	Global $ClndSelectedDay = 1
-
-	Global $ClndSelectedMonthFirstDay = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
-
-	$NewDate = _DateAdd('d', +1, $ClndSelectedMonthFirstDay)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-EndFunc
-
-
 
 Func RenderCalendar()
+
+	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($MyDate[2]))
+
 	Global $MonthFirstWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
 	; Переход на первый день первой недели календаря
-	$NewDate = _DateAdd('d', -$MonthFirstWeekday+1, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
+	$ClndOutputDate = _DateAdd('d', -$MonthFirstWeekday+1, $ClndOutputDate)
+	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
 	Global $CurrentWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
 
 
 	; Отрисовка следующих дней
 	For $x = 0 To 42
-		$NewDate1 = _DateAdd('d', +$x, $NewDate)
+		$NewDate1 = _DateAdd('d', +$x, $ClndOutputDate)
 		_DateTimeSplit($NewDate1, $MyDate, $MyTime)
 		Global $xoffset = $x + 11 ; Смещение для правильного подключения к GUILabel (считаются по порядку)
 		; Подключен к каждой ячейке календаря по очереди
@@ -232,6 +255,7 @@ Func RenderCalendar()
 	Next
 
 EndFunc
+
 
 
 Func DateToMonthShort($month)
