@@ -10,10 +10,10 @@ GUISetOnEvent($GUI_EVENT_CLOSE, "CLOSEClicked")
 GUISetState(@SW_SHOW)
 
 
-Global $ClndGUIstartX = 30
+Global $ClndGUIstartX = 20
 Global $ClndGUIxStretch = 25
 
-Global $ClndGUIstartY = 60
+Global $ClndGUIstartY = 35
 Global $ClndGUIyStretch = 25
 
 
