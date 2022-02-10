@@ -152,9 +152,7 @@ For $x = -5 To 42
 Next
 
 
-
-Global $ClndSelectedMonth = _NowCalcDate()
-
+ClndInitDay()
 RenderCalendar()
 
 
@@ -164,18 +162,38 @@ RenderCalendar()
 
 
 
-Func RenderCalendar()
-	; Переход на первый день месяца, вычисление дня недели этого дня
-	$NewDate = _DateAdd('d', -@MDAY+1, _NowCalcDate())
+
+	
+While 1
+	Sleep(100)
+WEnd
+
+Func CLOSEClicked()
+	Exit
+EndFunc
+
+
+Func ClndInitDay()
+	_DateTimeSplit(_NowCalcDate(), $MyDate, $MyTime)
+
+	Global $ClndSelectedYear = $MyDate[1]
+	Global $ClndSelectedMonth = $MyDate[2]
+	Global $ClndSelectedDay = 1
+
+	Global $ClndSelectedMonthFirstDay = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
+
+	$NewDate = _DateAdd('d', +1, $ClndSelectedMonthFirstDay)
 	_DateTimeSplit($NewDate, $MyDate, $MyTime)
+EndFunc
+
+
+
+Func RenderCalendar()
 	Global $MonthFirstWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
-
-
 	; Переход на первый день первой недели календаря
 	$NewDate = _DateAdd('d', -$MonthFirstWeekday+1, $NewDate)
 	_DateTimeSplit($NewDate, $MyDate, $MyTime)
 	Global $CurrentWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
-	
 
 
 	; Отрисовка следующих дней
@@ -216,20 +234,6 @@ Func RenderCalendar()
 EndFunc
 
 
-
-
-
-	
-While 1
-	Sleep(100)
-WEnd
-
-Func CLOSEClicked()
-	Exit
-EndFunc
-
-
-
 Func DateToMonthShort($month)
     Switch $month
         Case 01
@@ -264,6 +268,8 @@ EndFunc
 #comments-start
 
 MsgBox(4096, "", $x)
+
+MsgBox(4096, "", $MyDate[1] & "/" & $MyDate[2] & "/" & $MyDate[3])
 
 MsgBox(4096, "", "Сегодня : " & _DateDayOfWeek($iWeekDay))
 
