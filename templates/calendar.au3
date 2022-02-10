@@ -140,6 +140,9 @@ GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*4), $ClndGUIstartY + (
 GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*5), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 
+Global $ClndrYearLabel = GUICtrlCreateLabel(@YEAR, $ClndGUIstartX + ($ClndGUIxStretch*5) + 8, $ClndGUIstartY + ($ClndGUIyStretch*7), $ClndGUIxStretch*2, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
+GUICtrlSetFont($ClndrYearLabel, $ClndrTextSize+2, $ClndrTextThickness, 0)
+
 For $x = -5 To 42
 	$xoffset = $x + 10 ; Применение шрифта по умолчанию
 	GUICtrlSetFont($xoffset, $ClndrTextSize, $ClndrTextThickness, 0)
@@ -209,8 +212,9 @@ EndFunc
 
 
 Func RenderCalendar()
-
 	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($MyDate[2]))
+	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])  
+	
 
 	Global $MonthFirstWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
 	; Переход на первый день первой недели календаря
@@ -228,13 +232,13 @@ Func RenderCalendar()
 		
 
 
-		If $MyDate[2] <> @MON Then
-			GUICtrlSetColor($xoffset, 0x6a6a6a)
-			GUICtrlSetFont($xoffset, $ClndrTextSize-2, $ClndrTextThickness, 0, $ClndrFont)
+		If $MyDate[2] <> $ClndSelectedMonth Then
+			;GUICtrlSetColor($xoffset, 0x6a6a6a)
+			;GUICtrlSetFont($xoffset, $ClndrTextSize-2, $ClndrTextThickness, 0, $ClndrFont)
 		Else
-			GUICtrlSetColor($xoffset, 0x000000)
-			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness, 0, $ClndrFont)
-			GUICtrlSetStyle($xoffset+42, $SS_BLACKFRAME)
+			;GUICtrlSetColor($xoffset, 0x000000)
+			;GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness, 0, $ClndrFont)
+			;GUICtrlSetStyle($xoffset+42, $SS_BLACKFRAME)
 		EndIf
 		
 		GUICtrlSetData ($xoffset, $MyDate[3])
@@ -250,6 +254,8 @@ Func RenderCalendar()
 		If $NewDate1 >= $StartDate Then
 			If $DaysAmount-(Int($DaysAmount/($WorkDay+$OffDay))* ($WorkDay+$OffDay)) <= ($WorkDay-1) Then
 				GUICtrlSetBkColor ($x + 11, 0xa2c4c9 )
+			Else
+				GUICtrlSetBkColor ($x + 11, 0xeeeeee )
 			EndIf
 		EndIf
 	Next
