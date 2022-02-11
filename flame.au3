@@ -1869,7 +1869,10 @@ EndFunc
 Func CalendarGUIinit()
 	Global $ClndrMonthLabel = GUICtrlCreateLabel(DateToMonthShort(@MON), $ClndGUIstartX + $ClndGUIxStretch, $ClndGUIstartY - $ClndGUIyStretch+5, $ClndGUIxStretch*5, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	GUICtrlSetFont($ClndrMonthLabel, $ClndrTextSize+3, $ClndrTextThickness, 0)
+	
 	; Добавить запись почасовки в память
+	; Количество дней до зарплаты
+	
 	Global $xoffset
 	Global $calendxoffsetfirstitem = int($ClndrMonthLabel)-3
 	Global $calendxoffsetidforfont
