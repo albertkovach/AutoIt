@@ -2,10 +2,11 @@
 #include <GUIConstantsEx.au3>
 #include <WindowsConstants.au3>
 #include <StaticConstants.au3>
+#include <EditConstants.au3>
 
 Opt("GUIOnEventMode", 1)
 
-Global $mainwindow = GUICreate("FLAME.exe", 300, 300)
+Global $mainwindow = GUICreate("Календарь смен", 325, 245)
 GUISetOnEvent($GUI_EVENT_CLOSE, "CLOSEClicked")
 GUISetState(@SW_SHOW)
 
@@ -33,12 +34,9 @@ Global $OffDay = 2
 Global $NewDate
 
 
-
-
 CalendarGUIinit()
 CalendarInitDay()
 RenderCalendar()
-
 
 
 
@@ -54,9 +52,16 @@ EndFunc
 
 
 
+
 Func CalendarGUIinit()
 	Global $ClndrMonthLabel = GUICtrlCreateLabel(DateToMonthShort(@MON), $ClndGUIstartX + $ClndGUIxStretch, $ClndGUIstartY - $ClndGUIyStretch+5, $ClndGUIxStretch*5, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	GUICtrlSetFont($ClndrMonthLabel, $ClndrTextSize+3, $ClndrTextThickness, 0)
+	; Добавить запись почасовки в память
+	Global $xoffset
+	Global $calendxoffsetfirstitem = int($ClndrMonthLabel)-3
+	Global $calendxoffsetidforfont
+	Global $calendxoffsetcurrmonth = 42
+	Global $calendxoffsettimetableid
 
 	Global $mon = GUICtrlCreateLabel("Пн", $ClndGUIstartX, 						  $ClndGUIstartY, $ClndGUIxStretch, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	Global $tue = GUICtrlCreateLabel("Вт", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY, $ClndGUIxStretch, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
@@ -116,42 +121,42 @@ Func CalendarGUIinit()
 	Global $42 = GUICtrlCreateLabel("x42", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 
 
-	Global $Bx01 = GUICtrlCreateLabel("", $ClndGUIstartX, 						  $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
+	Global $Bx01 = GUICtrlCreateLabel("", $ClndGUIstartX, 						 $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx02 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx03 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*2), $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx04 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*3), $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx05 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*4), $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx06 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*5), $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx07 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*1), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
-	Global $Bx08 = GUICtrlCreateLabel("", $ClndGUIstartX, 						  $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
+	Global $Bx08 = GUICtrlCreateLabel("", $ClndGUIstartX, 						 $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx09 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx10 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*2), $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx11 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*3), $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx12 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*4), $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx13 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*5), $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx14 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*2), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
-	Global $Bx15 = GUICtrlCreateLabel("", $ClndGUIstartX, 						  $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
+	Global $Bx15 = GUICtrlCreateLabel("", $ClndGUIstartX, 						 $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx16 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx17 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*2), $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx18 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*3), $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx19 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*4), $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx20 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*5), $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx21 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*3), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
-	Global $Bx22 = GUICtrlCreateLabel("", $ClndGUIstartX, 						  $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
+	Global $Bx22 = GUICtrlCreateLabel("", $ClndGUIstartX, 						 $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx23 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx24 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*2), $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx25 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*3), $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx26 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*4), $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx27 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*5), $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx28 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*4), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
-	Global $Bx29 = GUICtrlCreateLabel("", $ClndGUIstartX, 						  $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
+	Global $Bx29 = GUICtrlCreateLabel("", $ClndGUIstartX, 						 $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx30 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx31 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*2), $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx32 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*3), $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx33 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*4), $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx34 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*5), $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx35 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*5), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
-	Global $Bx36 = GUICtrlCreateLabel("", $ClndGUIstartX, 					      $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
+	Global $Bx36 = GUICtrlCreateLabel("", $ClndGUIstartX, 					     $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx37 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx38 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*2), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 	Global $Bx39 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*3), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
@@ -161,16 +166,39 @@ Func CalendarGUIinit()
 
 	Global $ClndrYearLabel = GUICtrlCreateLabel(@YEAR, $ClndGUIstartX + ($ClndGUIxStretch*5) + 8, $ClndGUIstartY + ($ClndGUIyStretch*7), $ClndGUIxStretch*2, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	GUICtrlSetFont($ClndrYearLabel, $ClndrTextSize+2, $ClndrTextThickness, 0)
+	
+	Global $ClndrWorkdayCountLabel = GUICtrlCreateLabel("Рабочих дней:", $ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*1), 		$ClndGUIxStretch*4)
+	Global $ClndrOffdayCountLabel = GUICtrlCreateLabel("Выходных:", 		$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*2) -5, 	$ClndGUIxStretch*4)
+	
+	Global $ClndrHourSalaryInput = GUICtrlCreateInput ("296", 				$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*3) -5, 	35, 20, $ES_CENTER)
+	Global $ClndrHourSalaryInputNote = GUICtrlCreateLabel("в час", 			$ClndGUIstartX + ($ClndGUIxStretch*9) + 6, 		$ClndGUIstartY + ($ClndGUIyStretch*3) -2, 	$ClndGUIxStretch+5)
+	;Global $ClndrHourSalaryOkBtn = GUICtrlCreateButton("ок", 				$ClndGUIstartX + ($ClndGUIxStretch*10) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*3) -5, 	20, 20)
+	;GUICtrlSetOnEvent($ClndrHourSalaryOkBtn, "ClndrHourSalarySave")
+	
+	Global $ClndrMonthSalaryDirtyLabel = GUICtrlCreateLabel("Грязными:", 	$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*4), 		$ClndGUIxStretch*6)
+	Global $ClndrMonthSalaryCleanLabel = GUICtrlCreateLabel("Чистыми:", 	$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*5) -5, 	$ClndGUIxStretch*6)
+	GUICtrlSetFont($ClndrWorkdayCountLabel, $ClndrTextSize, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrOffdayCountLabel, $ClndrTextSize, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrMonthSalaryDirtyLabel, $ClndrTextSize, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrMonthSalaryCleanLabel, $ClndrTextSize, $ClndrTextThickness, 0)
+	
 
 	For $x = -5 To 42
-		$xoffset = $x + 10 ; Применение шрифта по умолчанию
-		GUICtrlSetFont($xoffset, $ClndrTextSize, $ClndrTextThickness, 0)
+		Global $calendxoffsetidforfont = $calendxoffsetfirstitem + $x + 10 ; Применение шрифта по умолчанию
+		GUICtrlSetFont($calendxoffsetidforfont, $ClndrTextSize, $ClndrTextThickness, 0)
 	Next
 
 	Global $ClndMonthPrevBtn = GUICtrlCreateButton("<<", $ClndGUIstartX, 						      $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
 	Global $ClndMonthNextBtn = GUICtrlCreateButton(">>", $ClndGUIstartX + ($ClndGUIxStretch * 6) + 5, $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
 	GUICtrlSetOnEvent($ClndMonthPrevBtn, "CalendarMonthPrev")
 	GUICtrlSetOnEvent($ClndMonthNextBtn, "CalendarMonthNext")
+	
+	
+	Global $ClndrWorkdayCount
+	Global $ClndrOffdayCount
+	Global $ClndrHourSalaryInputText
+	Global $ClndrMonthSalaryDirty
+	Global $ClndrMonthSalaryClean
 
 EndFunc
 
@@ -184,23 +212,25 @@ Func RenderCalendar()
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
 	Global $CurrentWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
 
+	$ClndrWorkdayCount = 0
+	$ClndrOffdayCount = 0
 
 	; Отрисовка следующих дней
 	For $x = 0 To 42
 		$InternalCycleDate = _DateAdd('d', +$x, $ClndOutputDate)
 		_DateTimeSplit($InternalCycleDate, $MyDate, $MyTime)
-		Global $xoffset = $x + 11 ; Смещение для правильного подключения к GUILabel (считаются по порядку)
+		$xoffset = $calendxoffsetfirstitem + $x + 11 ; Смещение для правильного подключения к GUILabel (считаются по порядку)
 		; Подключен к каждой ячейке календаря по очереди
 		
 		; Выделение дней текущего выбранного месяца
 		If $MyDate[2] <> $ClndSelectedMonth Then
 			GUICtrlSetColor($xoffset, 0x6a6a6a)
 			GUICtrlSetFont($xoffset, $ClndrTextSize-2, $ClndrTextThickness, 0, $ClndrFont)
-			GUICtrlSetStyle($xoffset+42, $SS_ETCHEDFRAME)
+			GUICtrlSetStyle($xoffset+$calendxoffsetcurrmonth, $SS_ETCHEDFRAME)
 		Else
 			GUICtrlSetColor($xoffset, 0x000000)
 			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness, 0, $ClndrFont)
-			GUICtrlSetStyle($xoffset+42, $SS_BLACKFRAME)
+			GUICtrlSetStyle($xoffset+$calendxoffsetcurrmonth, $SS_BLACKFRAME)
 		EndIf
 
 		
@@ -219,10 +249,17 @@ Func RenderCalendar()
 		$DaysAmount = _DateDiff( 'D',$StartDate, $InternalCycleDate)
 		
 		If $InternalCycleDate >= $StartDate Then
+			$calendxoffsettimetableid = $calendxoffsetfirstitem + $x + 11
 			If $DaysAmount-(Int($DaysAmount/($WorkDay+$OffDay))* ($WorkDay+$OffDay)) <= ($WorkDay-1) Then
-				GUICtrlSetBkColor ($x + 11, 0xa2c4c9 )
+				GUICtrlSetBkColor ($calendxoffsettimetableid, 0xa2c4c9 )
+				If $MyDate[2] = $ClndSelectedMonth Then
+					$ClndrWorkdayCount = $ClndrWorkdayCount +1
+				EndIf
 			Else
-				GUICtrlSetBkColor ($x + 11, 0xeeeeee )
+				GUICtrlSetBkColor ($calendxoffsettimetableid, 0xeeeeee )
+				If $MyDate[2] = $ClndSelectedMonth Then
+					$ClndrOffdayCount = $ClndrOffdayCount +1
+				EndIf
 			EndIf
 		EndIf
 		
@@ -233,6 +270,16 @@ Func RenderCalendar()
 	; Установка стиля на место, это заплатка из-за смещения в цикле
 	GUICtrlSetStyle($ClndrYearLabel, $GUI_SS_DEFAULT_LABEL)
 	GUICtrlSetStyle($ClndrYearLabel, $SS_CENTER + $SS_CENTERIMAGE)
+	
+	GUICtrlSetData($ClndrWorkdayCountLabel, "Рабочих дней: " & $ClndrWorkdayCount)
+	GUICtrlSetData($ClndrOffdayCountLabel, "Выходных: " & $ClndrOffdayCount)
+	
+	$ClndrHourSalaryInputText = GUICtrlRead($ClndrHourSalaryInput)
+	$ClndrMonthSalaryDirty = int($ClndrHourSalaryInputText*11*$ClndrWorkdayCount)
+	$ClndrMonthSalaryClean = int($ClndrHourSalaryInputText*11*$ClndrWorkdayCount*0.87)
+	
+	GUICtrlSetData($ClndrMonthSalaryDirtyLabel, "Грязными: " & $ClndrMonthSalaryDirty)
+	GUICtrlSetData($ClndrMonthSalaryCleanLabel, "Чистыми: " & $ClndrMonthSalaryClean)
 
 EndFunc
 
@@ -285,7 +332,7 @@ Func CalendarInitDay()
 	Global $ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
 	
-	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($MyDate[2]))
+	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($ClndSelectedMonth))
 	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])
 EndFunc
 
@@ -298,10 +345,11 @@ Func CalendarMonthPrev()
 	$ClndSelectedDay = 1
 	$ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
-	RenderCalendar()
 	
-	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($MyDate[2]))
+	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($ClndSelectedMonth))
 	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])
+	
+	RenderCalendar()
 EndFunc
 
 
@@ -313,10 +361,11 @@ Func CalendarMonthNext()
 	$ClndSelectedDay = 1
 	$ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
-	RenderCalendar()
 	
 	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($MyDate[2]))
 	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])
+	
+	RenderCalendar()
 EndFunc
 
 
@@ -324,131 +373,37 @@ EndFunc
 
 #comments-start
 
-MsgBox(4096, "", $x)
+	MsgBox(4096, "", $x)
 
-MsgBox(4096, "", $MyDate[1] & "/" & $MyDate[2] & "/" & $MyDate[3])
+	MsgBox(4096, "", $MyDate[1] & "/" & $MyDate[2] & "/" & $MyDate[3])
 
-MsgBox(4096, "", "Сегодня : " & _DateDayOfWeek($iWeekDay))
+	MsgBox(4096, "", "Сегодня : " & _DateDayOfWeek($iWeekDay))
 
-; Получит полное название дня недели
-$sLongDayName = _DateDayOfWeek( @WDAY )
+	; Получит полное название дня недели
+	$sLongDayName = _DateDayOfWeek( @WDAY )
 
-; Получит сокращенное название дня недели
-$sShortDayName = _DateDayOfWeek( @WDAY, 1 )
+	; Получит сокращенное название дня недели
+	$sShortDayName = _DateDayOfWeek( @WDAY, 1 )
 
-MsgBox( 4096, "День недели", "Сегодня : " & $sLongDayName & " (" & $sShortDayName & ")" )
-
-; Subtract 2 weeks from today
-$sNewDate = _DateAdd('w', -2, _NowCalcDate())
-MsgBox($MB_SYSTEMMODAL, "", "Today minus 2 weeks: " & $sNewDate)
-
-; Add 15 minutes to current time
-$sNewDate = _DateAdd('n', 15, _NowCalc())
-MsgBox($MB_SYSTEMMODAL, "", "Current time +15 minutes: " & $sNewDate)
-
-; Calculated eventlogdate which returns second since 1970/01/01 00:00:00
-$sNewDate = _DateAdd('s', 1087497645, "1970/01/01 00:00:00")
-MsgBox($MB_SYSTEMMODAL, "", "Date: " & $sNewDate)
+	MsgBox( 4096, "День недели", "Сегодня : " & $sLongDayName & " (" & $sShortDayName & ")" )
 
 
-
-Global $MyDate, $MyTime
-_DateTimeSplit("2005/01/01 14:30", $MyDate, $MyTime)
-
-For $x = 1 To $MyDate[0]
-    MsgBox(4096, $x, $MyDate[$x])
-Next
-For $x = 1 To $MyTime[0]
-    MsgBox(4096, $x, $MyTime[$x])
-Next
+	; Calculated eventlogdate which returns second since 1970/01/01 00:00:00
+	$sNewDate = _DateAdd('s', 1087497645, "1970/01/01 00:00:00")
+	MsgBox($MB_SYSTEMMODAL, "", "Date: " & $sNewDate)
 
 
-$iWeekday = _DateToDayOfWeek (@YEAR, @MON, @MDAY)
-MsgBox(4096, "", "Номер дня недели сегодня: " & $iWeekDay)
-Global $sNewDate = _DateAdd('d', 5, _NowCalcDate())
-MsgBox($MB_SYSTEMMODAL, "", "Today + 5 days: " & $sNewDate)
+	_DateTimeSplit("2005/01/01 14:30", $MyDate, $MyTime)
+
+	For $x = 1 To $MyDate[0]
+		MsgBox(4096, $x, $MyDate[$x])
+	Next
+	For $x = 1 To $MyTime[0]
+		MsgBox(4096, $x, $MyTime[$x])
+	Next
 
 
-If $Weekday >= 1 AND @MDAY >= 7 Then
-	; Вторая неделя месяца. Вычисление прошлой недели
-	PreviousWeekRefresh()
-Else
-	$NewDate = _DateAdd('d', $Weekday-2, _NowCalcDate())
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($21, $MyDate[3])
-	
-EndIf
-
-
-Func PreviousWeekRefresh()
-	$NewDate = _DateAdd('d', $Weekday-2, _NowCalcDate())
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($17, $MyDate[3])
-	
-	$NewDate = _DateAdd('d', -1, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($16, $MyDate[3])
-	
-	$NewDate = _DateAdd('d', -1, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($15, $MyDate[3])
-	
-	$NewDate = _DateAdd('d', -1, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($14, $MyDate[3])
-	
-	$NewDate = _DateAdd('d', -1, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($13, $MyDate[3])
-	
-	$NewDate = _DateAdd('d', -1, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($12, $MyDate[3])
-	
-	$NewDate = _DateAdd('d', -1, $NewDate)
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ($11, $MyDate[3])
-EndFunc
-
-Global $Weekday = _DateToDayOfWeekISO (@YEAR, @MON, @MDAY)
-
-
-; Проверка на какой строчке будет первый день
-If $Weekday >= 1 AND @MDAY >= 7 Then
-	; Вторая неделя месяца. Вычисление прошлой недели
-Else
-
-EndIf
-
-
-
-
-
-; Отрисовка предыдущих дней
-For $x = 1 To $MonthFirstWeekday
-	$NewDate = _DateAdd('d', - $x, _NowCalcDate())
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ("$" + $x, $MyDate[3])
-Next
-
-
-; Отрисовка следующих дней
-For $x = $MonthFirstWeekday-1 To 42-$MonthFirstWeekday
-	$NewDate = _DateAdd('d', +$x, _NowCalcDate())
-	_DateTimeSplit($NewDate, $MyDate, $MyTime)
-	GUICtrlSetData ("$" + $x, $MyDate[3])
-Next
-
-
-$x = $MonthFirstWeekday * 1
-$DateLabel = "$" + $MonthFirstWeekday
-
-GUICtrlSetData ($DateLabel, $MyDate[3])
-
-
-MsgBox(4096, $MyDate[3], $MonthFirstWeekday)
-
-
+	Global $Weekday = _DateToDayOfWeekISO (@YEAR, @MON, @MDAY)
 
 
 #comments-end
