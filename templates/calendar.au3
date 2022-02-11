@@ -178,12 +178,47 @@ Func CalendarGUIinit()
 	;Global $ClndrHourSalaryOkBtn = GUICtrlCreateButton("ок", 				$ClndGUIstartX + ($ClndGUIxStretch*10) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*3) -5, 	20, 20)
 	;GUICtrlSetOnEvent($ClndrHourSalaryOkBtn, "ClndrHourSalarySave")
 	
-	Global $ClndrMonthSalaryDirtyLabel = GUICtrlCreateLabel("Грязными:", 	$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*4), 		$ClndGUIxStretch*6)
-	Global $ClndrMonthSalaryCleanLabel = GUICtrlCreateLabel("Чистыми:", 	$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*5) -5, 	$ClndGUIxStretch*6)
+	Global $ClndrMonthSalaryDirtyLabel = GUICtrlCreateLabel("Грязными:", 				$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*4), 		$ClndGUIxStretch*6)
+	Global $ClndrMonthSalaryCleanLabel = GUICtrlCreateLabel("Чистыми:", 				$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*5) -5, 	$ClndGUIxStretch*6)
+	Global $ClndrMonthSalaryRemainDaysLabel = GUICtrlCreateLabel("Дней до з/п:", 		$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*6) -10, 	$ClndGUIxStretch*6)
 	GUICtrlSetFont($ClndrWorkdayCountLabel, $ClndrTextSize, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrOffdayCountLabel, $ClndrTextSize, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrMonthSalaryDirtyLabel, $ClndrTextSize, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrMonthSalaryCleanLabel, $ClndrTextSize, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrMonthSalaryRemainDaysLabel, $ClndrTextSize, $ClndrTextThickness, 0)
+	
+	If @MDAY < 11 OR @MDAY > 26 Then
+		; Считаем до 11
+		
+		If @MDAY > 26 Then
+			; В другом месяце
+			
+			Local $SalaryDate
+			Local $DaysAmountSalary
+			
+			$SalaryDate = _DateAdd('M', +1, _NowCalcDate)
+			_DateTimeSplit(_NowCalcDate, $MyDate, $MyTime)
+			;_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			MsgBox(4096, "", $MyDate[2])
+			
+			$SalaryDate = @YEAR & "/" & $MyDate[2] & "/11 00:00:00"
+
+			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
+			
+			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до з/п: " & $DaysAmountSalary)
+			
+			;MsgBox(4096, "", $MyDate[1] & "/" & $MyDate[2] & "/" & $MyDate[3])
+			MsgBox(4096, "", $SalaryDate)
+		
+		EndIf
+
+	ElseIf @MDAY > 11 OR @MDAY < 26 Then
+		; Считаем до 26
+		
+		
+	EndIf
+	
+	;Global $Weekday = _DateToDayOfWeekISO (@YEAR, @MON, @MDAY)
 	
 
 	For $x = -5 To 42
