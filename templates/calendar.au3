@@ -38,7 +38,10 @@ CalendarGUIinit()
 CalendarInitDay()
 RenderCalendar()
 
-
+	
+; Добавить запись почасовки в память
+; Количество дней до зарплаты
+	
 
 While 1
 	Sleep(100)
