@@ -297,8 +297,7 @@ Func RenderCalendar()
 
 		
 		; Выделение сегодняшнего дня
-		Local $TempDate
-		Local $TempTime
+		Local $TempDate, $TempTime
 		_DateTimeSplit(_NowCalcDate(), $TempDate, $TempTime)
 		
 		If $MyDate[1] = $TempDate[1] AND $MyDate[2] = $TempDate[2] AND $MyDate[3] = $TempDate[3] Then
