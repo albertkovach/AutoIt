@@ -6,7 +6,7 @@
 
 Opt("GUIOnEventMode", 1)
 
-Global $mainwindow = GUICreate("Календарь смен", 325, 245)
+Global $mainwindow = GUICreate("Календарь смен", 330, 245)
 GUISetOnEvent($GUI_EVENT_CLOSE, "CLOSEClicked")
 GUISetState(@SW_SHOW)
 
@@ -187,38 +187,62 @@ Func CalendarGUIinit()
 	GUICtrlSetFont($ClndrMonthSalaryCleanLabel, $ClndrTextSize, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrMonthSalaryRemainDaysLabel, $ClndrTextSize, $ClndrTextThickness, 0)
 	
-	If @MDAY < 11 OR @MDAY > 26 Then
-		; Считаем до 11
+	Local $SalaryDate
+	Local $SalaryWeekday
+	Local $DaysAmountSalary
+	
+	If @MDAY < 11 OR @MDAY > 26 Then	; Считаем до 11
 		
-		If @MDAY > 26 Then
-			; В другом месяце
-			
-			Local $SalaryDate
-			Local $DaysAmountSalary
-			
-			$SalaryDate = _DateAdd('M', +1, _NowCalcDate)
-			_DateTimeSplit(_NowCalcDate, $MyDate, $MyTime)
-			;_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
-			MsgBox(4096, "", $MyDate[2])
-			
+		If @MDAY > 26 Then	; В другом месяце
+		
+			$SalaryDate = _DateAdd('M', +1, _NowCalcDate())
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
 			$SalaryDate = @YEAR & "/" & $MyDate[2] & "/11 00:00:00"
-
-			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
 			
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+			If $SalaryWeekday = 6 Then
+				$SalaryDate = _DateAdd('D', -1, $SalaryDate)
+			ElseIf $SalaryWeekday = 7 Then
+				$SalaryDate = _DateAdd('D' -2, $SalaryDate)
+			EndIf
+			
+			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
 			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до з/п: " & $DaysAmountSalary)
 			
-			;MsgBox(4096, "", $MyDate[1] & "/" & $MyDate[2] & "/" & $MyDate[3])
-			MsgBox(4096, "", $SalaryDate)
+		ElseIf @MDAY < 11 Then	; В этом месяце
 		
+			$SalaryDate = @YEAR & "/" & @MON & "/11 00:00:00"
+			
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+			If $SalaryWeekday = 6 Then
+				$SalaryDate = _DateAdd('D', -1, $SalaryDate)
+			ElseIf $SalaryWeekday = 7 Then
+				$SalaryDate = _DateAdd('D', -2, $SalaryDate)
+			EndIf
+			
+			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
+			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до з/п: " & $DaysAmountSalary)
 		EndIf
-
-	ElseIf @MDAY > 11 OR @MDAY < 26 Then
-		; Считаем до 26
 		
+	ElseIf @MDAY > 11 OR @MDAY < 26 Then	; Считаем до 26
+	
+			$SalaryDate = @YEAR & "/" & @MON & "/26 00:00:00"
+			
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+			If $SalaryWeekday = 6 Then
+				$SalaryDate = _DateAdd('D', -1, $SalaryDate)
+			ElseIf $SalaryWeekday = 7 Then
+				$SalaryDate = _DateAdd('D', -2, $SalaryDate)
+			EndIf
+			
+			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
+			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до аванса: " & $DaysAmountSalary)
 		
 	EndIf
-	
-	;Global $Weekday = _DateToDayOfWeekISO (@YEAR, @MON, @MDAY)
+
 	
 
 	For $x = -5 To 42
