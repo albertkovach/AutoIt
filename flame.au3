@@ -12,8 +12,8 @@
 
 
 
-Global $VersionText = "ver 5.1"
-Global $VersionNumber = 51
+Global $VersionText = "ver 5.4"
+Global $VersionNumber = 54
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -1833,7 +1833,7 @@ EndFunc
 
 Func CalendarOpen()
 	GUISetState(@SW_DISABLE, $mainwindow)
-	Global $INSERTsetwin = GUICreate("Календарь смен", 325, 245)
+	Global $calendarwindow = GUICreate("Календарь смен", 335, 245)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "CalendarClose")
 	GUISetState(@SW_SHOW)
 	
@@ -1842,7 +1842,6 @@ Func CalendarOpen()
 
 	Global $ClndGUIstartY = 35
 	Global $ClndGUIyStretch = 25
-
 
 	Global $ClndrFont = "Gregoria"
 	Global $ClndrTextSize = 9
@@ -1859,25 +1858,45 @@ Func CalendarOpen()
 
 	Global $NewDate
 
-
 	CalendarGUIinit()
 	CalendarInitDay()
-	RenderCalendar()
 EndFunc
+
+
+Func CalendarClose()
+	GUISetState(@SW_ENABLE, $mainwindow)
+	GUIDelete($calendarwindow)
+EndFunc
+
+
 
 
 Func CalendarGUIinit()
 	Global $ClndrMonthLabel = GUICtrlCreateLabel(DateToMonthShort(@MON), $ClndGUIstartX + $ClndGUIxStretch, $ClndGUIstartY - $ClndGUIyStretch+5, $ClndGUIxStretch*5, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	GUICtrlSetFont($ClndrMonthLabel, $ClndrTextSize+3, $ClndrTextThickness, 0)
-	
 	; Добавить запись почасовки в память
-	; Количество дней до зарплаты
 	
 	Global $xoffset
 	Global $calendxoffsetfirstitem = int($ClndrMonthLabel)-3
 	Global $calendxoffsetidforfont
 	Global $calendxoffsetcurrmonth = 42
 	Global $calendxoffsettimetableid
+	
+	Global $SalaryDate
+	Global $SalaryWeekday
+	Global $DaysAmountSalary
+	Global $ClndrHourSalary = 296
+	Global $ClndrMonthSalaryAdvance
+	Global $ClndrMonthSalaryRemains
+	
+	Global $ClndrWorkdayCount
+	Global $ClndrOffdayCount
+	Global $ClndrHourSalaryInputText
+	Global $ClndrMonthSalaryDirty
+	Global $ClndrMonthSalaryClean
+	Global $ClndrAdvanceDays
+	Global $ClndrIsHoliday
+	
 
 	Global $mon = GUICtrlCreateLabel("Пн", $ClndGUIstartX, 						  $ClndGUIstartY, $ClndGUIxStretch, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	Global $tue = GUICtrlCreateLabel("Вт", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY, $ClndGUIxStretch, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
@@ -1981,40 +2000,85 @@ Func CalendarGUIinit()
 	Global $Bx42 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 
 	Global $ClndrYearLabel = GUICtrlCreateLabel(@YEAR, $ClndGUIstartX + ($ClndGUIxStretch*5) + 8, $ClndGUIstartY + ($ClndGUIyStretch*7), $ClndGUIxStretch*2, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
+	
+	Global $ClndrWorkdayCountLabel = GUICtrlCreateLabel("Рабочих дней:", 				$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*1), 		$ClndGUIxStretch*5)
+	Global $ClndrOffdayCountLabel = GUICtrlCreateLabel("Выходных:", 					$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*2) -5, 	$ClndGUIxStretch*5)
+	Global $ClndrMonthSalaryRemainDaysLabel = GUICtrlCreateLabel("Дней до з/п:", 		$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*3) -10, 	$ClndGUIxStretch*7)
+
+	Global $ClndrSalaryButton = GUICtrlCreateButton("", 	  $ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY - $ClndGUIyStretch+10, 20, 20)
+	Global $ClndMonthPrevBtn = GUICtrlCreateButton("<<",      $ClndGUIstartX, 						        $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
+	Global $ClndMonthNextBtn = GUICtrlCreateButton(">>",      $ClndGUIstartX + ($ClndGUIxStretch * 6) + 5,  $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
+	Global $ClndrToCurrMonthButton = GUICtrlCreateButton("\/",$ClndGUIstartX + ($ClndGUIxStretch * 8) + 15, $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER)
+
+	GUICtrlSetOnEvent($ClndrSalaryButton, "SalaryOpen")
+	GUICtrlSetOnEvent($ClndMonthPrevBtn, "CalendarMonthPrev")
+	GUICtrlSetOnEvent($ClndMonthNextBtn, "CalendarMonthNext")
+	GUICtrlSetOnEvent($ClndrToCurrMonthButton, "CalendarInitDay")
+	
 	GUICtrlSetFont($ClndrYearLabel, $ClndrTextSize+2, $ClndrTextThickness, 0)
 	
-	Global $ClndrWorkdayCountLabel = GUICtrlCreateLabel("Рабочих дней:", $ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*1), 		$ClndGUIxStretch*4)
-	Global $ClndrOffdayCountLabel = GUICtrlCreateLabel("Выходных:", 		$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*2) -5, 	$ClndGUIxStretch*4)
+	GUICtrlSetFont($ClndrWorkdayCountLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrOffdayCountLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrMonthSalaryRemainDaysLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
+
 	
-	Global $ClndrHourSalaryInput = GUICtrlCreateInput ("296", 				$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*3) -5, 	35, 20, $ES_CENTER)
-	Global $ClndrHourSalaryInputNote = GUICtrlCreateLabel("в час", 			$ClndGUIstartX + ($ClndGUIxStretch*9) + 6, 		$ClndGUIstartY + ($ClndGUIyStretch*3) -2, 	$ClndGUIxStretch+5)
-	;Global $ClndrHourSalaryOkBtn = GUICtrlCreateButton("ок", 				$ClndGUIstartX + ($ClndGUIxStretch*10) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*3) -5, 	20, 20)
-	;GUICtrlSetOnEvent($ClndrHourSalaryOkBtn, "ClndrHourSalarySave")
+	If @MDAY < 11 OR @MDAY > 26 Then	; Считаем до 11
+		
+		If @MDAY > 26 Then	; В другом месяце
+		
+			$SalaryDate = _DateAdd('M', +1, _NowCalcDate())
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			$SalaryDate = @YEAR & "/" & $MyDate[2] & "/11 00:00:00"
+			
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+			If $SalaryWeekday = 6 Then
+				$SalaryDate = _DateAdd('D', -1, $SalaryDate)
+			ElseIf $SalaryWeekday = 7 Then
+				$SalaryDate = _DateAdd('D' -2, $SalaryDate)
+			EndIf
+			
+			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
+			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до з/п: " & $DaysAmountSalary)
+			
+		ElseIf @MDAY < 11 Then	; В этом месяце
+		
+			$SalaryDate = @YEAR & "/" & @MON & "/11 00:00:00"
+			
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+			If $SalaryWeekday = 6 Then
+				$SalaryDate = _DateAdd('D', -1, $SalaryDate)
+			ElseIf $SalaryWeekday = 7 Then
+				$SalaryDate = _DateAdd('D', -2, $SalaryDate)
+			EndIf
+			
+			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
+			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до з/п: " & $DaysAmountSalary)
+		EndIf
+		
+	ElseIf @MDAY > 11 OR @MDAY < 26 Then	; Считаем до 26
 	
-	Global $ClndrMonthSalaryDirtyLabel = GUICtrlCreateLabel("Грязными:", 	$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*4), 		$ClndGUIxStretch*6)
-	Global $ClndrMonthSalaryCleanLabel = GUICtrlCreateLabel("Чистыми:", 	$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*5) -5, 	$ClndGUIxStretch*6)
-	GUICtrlSetFont($ClndrWorkdayCountLabel, $ClndrTextSize, $ClndrTextThickness, 0)
-	GUICtrlSetFont($ClndrOffdayCountLabel, $ClndrTextSize, $ClndrTextThickness, 0)
-	GUICtrlSetFont($ClndrMonthSalaryDirtyLabel, $ClndrTextSize, $ClndrTextThickness, 0)
-	GUICtrlSetFont($ClndrMonthSalaryCleanLabel, $ClndrTextSize, $ClndrTextThickness, 0)
-	
+			$SalaryDate = @YEAR & "/" & @MON & "/26 00:00:00"
+			
+			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
+			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
+			If $SalaryWeekday = 6 Then
+				$SalaryDate = _DateAdd('D', -1, $SalaryDate)
+			ElseIf $SalaryWeekday = 7 Then
+				$SalaryDate = _DateAdd('D', -2, $SalaryDate)
+			EndIf
+			
+			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
+			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до аванса: " & $DaysAmountSalary)
+		
+	EndIf
+
 
 	For $x = -5 To 42
 		Global $calendxoffsetidforfont = $calendxoffsetfirstitem + $x + 10 ; Применение шрифта по умолчанию
 		GUICtrlSetFont($calendxoffsetidforfont, $ClndrTextSize, $ClndrTextThickness, 0)
 	Next
-
-	Global $ClndMonthPrevBtn = GUICtrlCreateButton("<<", $ClndGUIstartX, 						      $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
-	Global $ClndMonthNextBtn = GUICtrlCreateButton(">>", $ClndGUIstartX + ($ClndGUIxStretch * 6) + 5, $ClndGUIstartY - $ClndGUIyStretch+10, $ClndGUIxStretch-5, $ClndGUIyStretch-6, $SS_CENTER + $SS_CENTERIMAGE)
-	GUICtrlSetOnEvent($ClndMonthPrevBtn, "CalendarMonthPrev")
-	GUICtrlSetOnEvent($ClndMonthNextBtn, "CalendarMonthNext")
-	
-	
-	Global $ClndrWorkdayCount
-	Global $ClndrOffdayCount
-	Global $ClndrHourSalaryInputText
-	Global $ClndrMonthSalaryDirty
-	Global $ClndrMonthSalaryClean
 
 EndFunc
 
@@ -2030,6 +2094,7 @@ Func RenderCalendar()
 
 	$ClndrWorkdayCount = 0
 	$ClndrOffdayCount = 0
+	$ClndrAdvanceDays = 0
 
 	; Отрисовка следующих дней
 	For $x = 0 To 42
@@ -2048,11 +2113,35 @@ Func RenderCalendar()
 			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness, 0, $ClndrFont)
 			GUICtrlSetStyle($xoffset+$calendxoffsetcurrmonth, $SS_BLACKFRAME)
 		EndIf
+		
+		If $MyDate[2] = 1 AND $MyDate[3] <= 8 Then
+			$ClndrIsHoliday = 1
+		ElseIf $MyDate[2] = 2 AND $MyDate[3] = 23 Then
+			$ClndrIsHoliday = 1
+		ElseIf $MyDate[2] = 3 AND $MyDate[3] = 8 Then
+			$ClndrIsHoliday = 1
+		ElseIf $MyDate[2] = 5 AND $MyDate[3] = 1 Then
+			$ClndrIsHoliday = 1
+		ElseIf $MyDate[2] = 5 AND $MyDate[3] = 1 Then
+			$ClndrIsHoliday = 1
+		ElseIf $MyDate[2] = 5 AND $MyDate[3] = 9 Then
+			$ClndrIsHoliday = 1
+		ElseIf $MyDate[2] = 6 AND $MyDate[3] = 12 Then
+			$ClndrIsHoliday = 1
+		ElseIf $MyDate[2] = 11 AND $MyDate[3] = 4 Then
+			$ClndrIsHoliday = 1
+		Else
+			$ClndrIsHoliday = 0
+		EndIf
+
+		If $ClndrIsHoliday = 1 Then
+			GUICtrlSetColor($xoffset, 0xf34723)
+			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness+200, 0, $ClndrFont)
+		EndIf
 
 		
 		; Выделение сегодняшнего дня
-		Local $TempDate
-		Local $TempTime
+		Local $TempDate, $TempTime
 		_DateTimeSplit(_NowCalcDate(), $TempDate, $TempTime)
 		
 		If $MyDate[1] = $TempDate[1] AND $MyDate[2] = $TempDate[2] AND $MyDate[3] = $TempDate[3] Then
@@ -2068,8 +2157,16 @@ Func RenderCalendar()
 			$calendxoffsettimetableid = $calendxoffsetfirstitem + $x + 11
 			If $DaysAmount-(Int($DaysAmount/($WorkDay+$OffDay))* ($WorkDay+$OffDay)) <= ($WorkDay-1) Then
 				GUICtrlSetBkColor ($calendxoffsettimetableid, 0xa2c4c9 )
+				
+				If $ClndrIsHoliday = 1 Then
+					GUICtrlSetBkColor ($calendxoffsettimetableid, 0xA8D7BD );b6d7a8
+				EndIf
+				
 				If $MyDate[2] = $ClndSelectedMonth Then
 					$ClndrWorkdayCount = $ClndrWorkdayCount +1
+					If $MyDate[3] <= 15 Then
+						$ClndrAdvanceDays = $ClndrAdvanceDays +1
+					EndIf
 				EndIf
 			Else
 				GUICtrlSetBkColor ($calendxoffsettimetableid, 0xeeeeee )
@@ -2089,16 +2186,7 @@ Func RenderCalendar()
 	
 	GUICtrlSetData($ClndrWorkdayCountLabel, "Рабочих дней: " & $ClndrWorkdayCount)
 	GUICtrlSetData($ClndrOffdayCountLabel, "Выходных: " & $ClndrOffdayCount)
-	
-	$ClndrHourSalaryInputText = GUICtrlRead($ClndrHourSalaryInput)
-	$ClndrMonthSalaryDirty = int($ClndrHourSalaryInputText*11*$ClndrWorkdayCount)
-	$ClndrMonthSalaryClean = int($ClndrHourSalaryInputText*11*$ClndrWorkdayCount*0.87)
-	
-	GUICtrlSetData($ClndrMonthSalaryDirtyLabel, "Грязными: " & $ClndrMonthSalaryDirty)
-	GUICtrlSetData($ClndrMonthSalaryCleanLabel, "Чистыми: " & $ClndrMonthSalaryClean)
-
 EndFunc
-
 
 
 Func DateToMonthShort($month)
@@ -2134,9 +2222,10 @@ EndFunc
 
 
 
-
-
 Func CalendarInitDay()
+	GUICtrlSetState($ClndrToCurrMonthButton,$GUI_HIDE)
+	GUICtrlSetState($ClndrMonthSalaryRemainDaysLabel,$GUI_SHOW)
+	
 	_DateTimeSplit(_NowCalcDate(), $MyDate, $MyTime)
 
 	Global $ClndSelectedDate = _NowCalcDate()
@@ -2148,12 +2237,17 @@ Func CalendarInitDay()
 	Global $ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
 	
-	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($MyDate[2]))
+	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($ClndSelectedMonth))
 	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])
+	
+	RenderCalendar()
 EndFunc
 
 
 Func CalendarMonthPrev()
+	GUICtrlSetState($ClndrToCurrMonthButton,$GUI_SHOW)
+	GUICtrlSetState($ClndrMonthSalaryRemainDaysLabel,$GUI_HIDE)
+
 	$ClndSelectedDate = _DateAdd('M', -1, $ClndSelectedDate)
 	_DateTimeSplit($ClndSelectedDate, $MyDate, $MyTime)
 	$ClndSelectedYear = $MyDate[1]
@@ -2170,6 +2264,9 @@ EndFunc
 
 
 Func CalendarMonthNext()
+	GUICtrlSetState($ClndrToCurrMonthButton,$GUI_SHOW)
+	GUICtrlSetState($ClndrMonthSalaryRemainDaysLabel,$GUI_HIDE)
+
 	$ClndSelectedDate = _DateAdd('M', +1, $ClndSelectedDate)
 	_DateTimeSplit($ClndSelectedDate, $MyDate, $MyTime)
 	$ClndSelectedYear = $MyDate[1]
@@ -2187,17 +2284,58 @@ EndFunc
 
 
 
+Func SalaryOpen()
+	GUISetState(@SW_DISABLE, $calendarwindow)
+	Global $salarywindow = GUICreate("Зарплата", 155, 155)
+	GUISetOnEvent($GUI_EVENT_CLOSE, "SalaryClose")
+	GUISetState(@SW_SHOW)
+	
+	Global $ClndrMonthSalaryDirtyLabel = GUICtrlCreateLabel("Грязными:", 20, 20, 150)
+	Global $ClndrMonthSalaryCleanLabel = GUICtrlCreateLabel("Чистыми:", 20, 40, 150)
+	Global $ClndrMonthSalaryAdvanceLabel = GUICtrlCreateLabel("В аванс:", 20, 65, 150)
+	Global $ClndrMonthSalaryRemainsLabel = GUICtrlCreateLabel("В зарплату:", 20, 85, 150)
+	
+	Global $ClndrHourSalaryInput = GUICtrlCreateInput ("296", 35, 116, 40, 20, $ES_CENTER)
+	Global $ClndrHourSalaryInputNote = GUICtrlCreateLabel("в час", 80, 119, 30)
+	Global $ClndrHourSalaryBtnOk = GUICtrlCreateButton("ок", 110, 116, 20, 20)
+	GUICtrlSetOnEvent($ClndrHourSalaryBtnOk, "SalaryHourOK")
 
-
-
-Func CalendarClose()
-
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($INSERTsetwin)
+	$ClndrHourSalary = IniRead($sPath_ini, "CalendarDATA", "$ClndrHourSalary", "296")
+	GUICtrlSetData($ClndrHourSalaryInput, $ClndrHourSalary)
+	
+	
+	$ClndrMonthSalaryDirty = int($ClndrHourSalary*11*$ClndrWorkdayCount)
+	$ClndrMonthSalaryClean = int($ClndrHourSalary*11*$ClndrWorkdayCount*0.87)
+	$ClndrMonthSalaryAdvance = int(1200 * $ClndrAdvanceDays * 0.87)
+	$ClndrMonthSalaryRemains = $ClndrMonthSalaryClean - $ClndrMonthSalaryAdvance
+	
+	GUICtrlSetData($ClndrMonthSalaryDirtyLabel, "Грязными: " & $ClndrMonthSalaryDirty)
+	GUICtrlSetData($ClndrMonthSalaryCleanLabel, "Чистыми: " & $ClndrMonthSalaryClean)
+	GUICtrlSetData($ClndrMonthSalaryAdvanceLabel, "В аванс: " & $ClndrMonthSalaryAdvance)
+	GUICtrlSetData($ClndrMonthSalaryRemainsLabel, "В зарплату: " & $ClndrMonthSalaryRemains)
+	
+	GUICtrlSetFont($ClndrMonthSalaryDirtyLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrMonthSalaryCleanLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrMonthSalaryAdvanceLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
+	GUICtrlSetFont($ClndrMonthSalaryRemainsLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
 EndFunc
 
 
+Func SalaryHourOK()
+	$ClndrHourSalary = GUICtrlRead($ClndrHourSalaryInput)
+	IniWrite($sPath_ini, "CalendarDATA", "$ClndrHourSalary", $ClndrHourSalary)
+
+	SalaryClose()
+	Sleep(50)
+	SalaryOpen()
+EndFunc
+
+
+Func SalaryClose()
+   GUISetState(@SW_ENABLE, $calendarwindow)
+   GUIDelete($salarywindow)
+   $RefreshTimer = TimerInit()
+EndFunc
 
 
 
