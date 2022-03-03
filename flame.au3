@@ -12,8 +12,8 @@
 
 
 
-Global $VersionText = "ver 5.4"
-Global $VersionNumber = 54
+Global $VersionText = "ver 5.5"
+Global $VersionNumber = 55
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -27,7 +27,7 @@ Global $NoPassword = 1
 Global $Rus = '00000419'; Раскладка русского языка
 Global $Eng = '00000409'; Раскладка английского языка
 
-Global $GUIsize = IniRead($sPath_ini, "EditDATA", "$GUIsize", "0")
+Global $GUIsize = IniRead($sPath_ini, "ProgramDATA", "$GUIsize", "0")
 Global $GUIheight
 Global $GUIctrltoffset
 Global $GUIresizecaption = "-"
@@ -78,7 +78,14 @@ CreateGUI()
 Func CreateGUI()
 	Global $mainwindow = GUICreate("FLAME.exe", 665, $GUIheight)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "CLOSEClicked")
-	GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEClicked")
+	
+	Global $minimizetotray = IniRead($sPath_ini, "ProgramDATA", "$minimizetotray", "0")
+	If $minimizetotray = 1 Then
+		GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEtoTrayClicked")
+	Else
+		GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEtoTasksClicked")
+	EndIf
+	
 	GUISetState(@SW_SHOW)
 
 	Global $INSERTlabelbtn = GUICtrlCreateButton("INSERT", 14, 10, 55, 20)
@@ -132,6 +139,9 @@ Func InitializeGUI()
    Global $PGUPlabelbtn = GUICtrlCreateButton("PGUP", 444, 10, 55, 20)
    Global $PGUPedit = GUICtrlCreateInput ( "", 445, 30, 200)
    GUICtrlSetOnEvent($PGUPlabelbtn, "PGUPset")
+   
+   Global $MinimizeWindowButton = GUICtrlCreateButton("\/", 626, 9, 18, 18)
+   GUICtrlSetOnEvent($MinimizeWindowButton, "MINIMIZEtoTrayClicked")
 
    Global $ENDlabelbtn = GUICtrlCreateButton("END", 229, 70, 55, 20)
    Global $ENDedit = GUICtrlCreateInput ( "", 230, 90, 200)
@@ -194,6 +204,10 @@ Func InitializeGUI()
    Global $INSERTcopyHowTo = GUICtrlCreateLabel("Вставить скопированное на клавишу Insert - F3", 393, 280+$GUIctrltoffset, 350, 25)
    Global $VersionLabel = GUICtrlCreateLabel("ver 2.5 d", 300, 280+$GUIctrltoffset, 45, 15)
    GUICtrlSetData ($VersionLabel, $VersionText)
+   
+	If $minimizetotray = 1 Then
+		GUICtrlSetState($MinimizeWindowButton,$GUI_HIDE)
+	EndIf
 
    LoadPrefs()
 EndFunc
@@ -302,8 +316,9 @@ Func LoadPrefs()
    Global $NumPLUSsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$NumPLUSsetAddBACKSPACE", "0")
    Global $NumPLUSsetDETECT = IniRead($sPath_ini, "EditSET", "$NumPLUSsetDETECT", "0")
 
-   Global $langfastchange = IniRead($sPath_ini, "EditSET", "$langfastchange", "0")
-   Global $clipboardpaste = IniRead($sPath_ini, "EditSET", "$clipboardpaste", "0")
+   Global $langfastchange = IniRead($sPath_ini, "ProgramDATA", "$langfastchange", "0")
+   Global $clipboardpaste = IniRead($sPath_ini, "ProgramDATA", "$clipboardpaste", "0")
+   Global $minimizetotray = IniRead($sPath_ini, "ProgramDATA", "$minimizetotray", "0")
 
    $orbhtext = IniRead($sPath_ini, "DetectDATA", "$orbhtext", "WindowsForms10.Window.8.app.0.21093c0_r6_ad1")
    $orbitext = IniRead($sPath_ini, "DetectDATA", "$orbitext", "WindowsForms10.EDIT.app.0.21093c0_r6_ad11")
@@ -480,7 +495,7 @@ Func ResizeGUI()
 		$GUIresizecaption = "-"
 	EndIf
 
-	IniWrite($sPath_ini, "EditDATA", "$GUIsize", $GUIsize)
+	IniWrite($sPath_ini, "ProgramDATA", "$GUIsize", $GUIsize)
 
 	GUIDelete($mainwindow)
 
@@ -623,7 +638,7 @@ EndFunc
 
 Func SETUPset()
    GUISetState(@SW_DISABLE, $mainwindow)
-   Global $INSERTsetwin = GUICreate("Настройки",300,215)
+   Global $INSERTsetwin = GUICreate("Настройки",300,230)
    GUISetOnEvent($GUI_EVENT_CLOSE, "SETUPsetClose")
    GUISetState(@SW_SHOW)
 
@@ -649,8 +664,15 @@ Func SETUPset()
    Else
 	  GUICtrlSetState($clipboardpastechkbx, $GUI_UNCHECKED)
    EndIf
+   
+   Global $minimizetotraychkbx = GUICtrlCreateCheckbox("Сворачивать в трей", 17, 180, 250)
+   If $minimizetotray = 1 Then
+	  GUICtrlSetState($minimizetotraychkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($minimizetotraychkbx, $GUI_UNCHECKED)
+   EndIf
 
-   Global $updatecheckbtn = GUICtrlCreateButton("Проверить обновления", 15, 185, 130, 20)
+   Global $updatecheckbtn = GUICtrlCreateButton("Проверить обновления", 15, 205, 130, 20)
    GUICtrlSetOnEvent($updatecheckbtn, "UpdateCheckManual")
 
    $orbtext = ControlGetText($orbh, "", $orbitext)
@@ -680,19 +702,34 @@ Func SETUPsetClose()
    Else
 	 $langfastchange = 0
    EndIf
-   IniWrite($sPath_ini, "EditSET", "$langfastchange", $langfastchange)
+   IniWrite($sPath_ini, "ProgramDATA", "$langfastchange", $langfastchange)
 
    If BitAND(GUICtrlRead($clipboardpastechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
 	 $clipboardpaste = 1
    Else
 	 $clipboardpaste = 0
    EndIf
-   IniWrite($sPath_ini, "EditSET", "$clipboardpaste", $clipboardpaste)
+   IniWrite($sPath_ini, "ProgramDATA", "$clipboardpaste", $clipboardpaste)
+   
+   If BitAND(GUICtrlRead($minimizetotraychkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $minimizetotray = 1
+   Else
+	 $minimizetotray = 0
+   EndIf
+   IniWrite($sPath_ini, "ProgramDATA", "$minimizetotray", $minimizetotray)
 
    DetectCheck()
 
    GUISetState(@SW_ENABLE, $mainwindow)
    GUIDelete($INSERTsetwin)
+   
+	If $minimizetotray = 1 Then
+		GUICtrlSetState($MinimizeWindowButton,$GUI_HIDE)
+		GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEtoTrayClicked")
+	Else
+		GUICtrlSetState($MinimizeWindowButton,$GUI_SHOW)
+		GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEtoTasksClicked")
+	EndIf
 
 	ApplyStates()
 EndFunc
@@ -2390,11 +2427,14 @@ Func CLOSEClicked()
 EndFunc
 
 
-Func MINIMIZEClicked()
+Func MINIMIZEtoTrayClicked()
 	GUISetState(@SW_HIDE)
 	TraySetState(1)
 EndFunc
 
+Func MINIMIZEtoTasksClicked()
+	GUISetState(@SW_MINIMIZE)
+EndFunc
 
 Func RESTOREClicked()
     TraySetState(2)
