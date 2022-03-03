@@ -71,6 +71,8 @@ Global $orbitext
 Global $orbtext
 Global $orbh
 
+
+
 CreateGUI()
 
 
@@ -1648,6 +1650,10 @@ Func PGUP()
 		  Send("{ENTER}")
 		EndIf
    EndIf
+   
+   MouseClick("left", 184, 178, 1, 0)
+   MouseClick("left", 112, 96, 1, 0)
+   
 EndFunc
 
 Func END()
@@ -1672,6 +1678,10 @@ Func PGDN()
 		  Send("{ENTER}")
 		EndIf
    EndIf
+   
+	MouseClick("left", 62, 177, 1, 1)
+	MouseClick("left", 518, 217, 1, 1)
+   
 EndFunc
 
 Func ctrl1()
@@ -1763,13 +1773,17 @@ Func NumPLUS()
 EndFunc
 
 Func Detect()
+
+Local $SearchResult
+Local $LettersFinded = 0
+
    If WinGetHandle($orbhfulltext) = 0 Then
 		;MsgBox(0, 'Ошибка', "Нет подключения")
    Else
 		$orbtext = ControlGetText($orbh, "", $orbitext)
-		;MsgBox(0, 'Результат', $orbtext)
 		Send("{Enter}")
-		Send($orbtext)
+		ControlSetText ($orbh, "", $orbitext, $orbtext)
+		Sleep(100)
 		Send("{Enter}")
    EndIf
 EndFunc
@@ -2455,6 +2469,22 @@ num+ backspace
 
  ; ^ CTRL, + SHIFT; ! ALT
 ;Send ("#{SPACE}")
+
+		Global $Letters[58] = ['й','ц','у','к','е','н','г','ш','щ','з','х','ъ','ф','ы','в','а','п','р','о','л','д','ж','э','я','ч','с','м','и','т','ь','б','ю','q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m']
+
+		For $i = 0 To 47
+			$SearchResult = StringInStr($orbtext, $Letters[$i])
+			If $SearchResult > 0 Then
+				$LettersFinded = 1
+			EndIf
+		Next
+
+		$LettersFinded = 0
+		fastlangchangeF2()
+		
+		;ControlSend($orbh, "", $orbitext, $orbtext, 1)
+		;Send($orbtext, 1)
+
 
 Выделить проверку на подключение к WinHandle в отдельный класс
 Перевод языка до и после поля
