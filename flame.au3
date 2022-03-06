@@ -889,7 +889,7 @@ EndFunc
 
 Func PGUPset()
    GUISetState(@SW_DISABLE, $mainwindow)
-   Global $PGUPsetwin = GUICreate("PGUPset",300,300)
+   Global $PGUPsetwin = GUICreate("PGUPset",450,300)
    GUISetState(@SW_SHOW)
    Global $PGUPsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
    Global $PGUPsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
