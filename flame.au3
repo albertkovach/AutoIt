@@ -1,8 +1,10 @@
 #include <GUIConstantsEx.au3>
 #include <WindowsConstants.au3>
 #include <EditConstants.au3>
+#include <ButtonConstants.au3>
 #include <Timers.au3>
 #include <File.au3>
+#include <Misc.au3>
 
 #include <Date.au3>
 #include <StaticConstants.au3>
@@ -12,8 +14,8 @@
 
 
 
-Global $VersionText = "ver 5.5"
-Global $VersionNumber = 55
+Global $VersionText = "ver 5.7"
+Global $VersionNumber = 57
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -119,8 +121,21 @@ Func CreateGUI()
 			Runwait(@ComSpec & " /c " & "xcopy " & '"' & $source & '"' & ' "' & $destination & '"' & " /Y /H /I","",@SW_HIDE)
 		EndIf
 	EndIf
+	
+	SingleScript(0)
 
 EndFunc
+
+
+
+
+
+
+
+
+
+
+
 
 
 Func Unlocker()
@@ -269,6 +284,11 @@ Func LoadPrefs()
    Global $PGUPsetENABLE = IniRead($sPath_ini, "EditSET", "$PGUPsetENABLE", "1")
    Global $PGUPsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGUPsetAddENTER", "1")
    Global $PGUPsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", "0")
+   Global $PGUPsetMouseEnable = IniRead($sPath_ini, "EditSET", "$PGUPsetMouseEnable", "0")
+   Global $PGUPsetMouse1x = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse1x", "")
+   Global $PGUPsetMouse1y = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse1y", "")
+   Global $PGUPsetMouse2x = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse2x", "")
+   Global $PGUPsetMouse2y = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse2y", "")
 
    Global $ENDtext = IniRead($sPath_ini, "EditDATA", "$ENDtext", "")
    Global $ENDsetENABLE = IniRead($sPath_ini, "EditSET", "$ENDsetENABLE", "1")
@@ -279,6 +299,11 @@ Func LoadPrefs()
    Global $PGDNsetENABLE = IniRead($sPath_ini, "EditSET", "$PGDNsetENABLE", "1")
    Global $PGDNsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGDNsetAddENTER", "1")
    Global $PGDNsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", "0")
+   Global $PGDNsetMouseEnable = IniRead($sPath_ini, "EditSET", "$PGDNsetMouseEnable", "0")
+   Global $PGDNsetMouse1x = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse1x", "")
+   Global $PGDNsetMouse1y = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse1y", "")
+   Global $PGDNsetMouse2x = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse2x", "")
+   Global $PGDNsetMouse2y = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse2y", "")
 
    If $GUIsize = 1 Then
 	   Global $ctrl1text = IniRead($sPath_ini, "EditDATA", "$ctrl1text", "")
@@ -378,13 +403,25 @@ Func ApplyStates()
 		HotKeySet("{HOME}")
    EndIf
 
-   If $PGUPsetENABLE = 1 Then
-		GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
+
+
+	If $PGUPsetENABLE = 1 Then
+		If $PGUPsetMouseEnable = 1 Then
+			GUICtrlSetStyle($PGUPedit, $ES_READONLY)
+			GUICtrlSetData ($PGUPedit, "using mouse clicks")
+		Else
+			GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetData ($PGUPedit, $PGUPtext)
+		EndIf
+		
 		HotKeySet("{PGUP}", "PGUP")
-   Else
+	Else
 		GUICtrlSetStyle($PGUPedit, $ES_READONLY)
+		GUICtrlSetData ($PGUPedit, $PGUPtext)
 		HotKeySet("{PGUP}")
-   EndIf
+	EndIf
+
+
 
    If $ENDsetENABLE = 1 Then
 		GUICtrlSetStyle($ENDedit, $GUI_SS_DEFAULT_INPUT)
@@ -394,13 +431,23 @@ Func ApplyStates()
 		HotKeySet("{END}")
    EndIf
 
-   If $PGDNsetENABLE = 1 Then
-		GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
+
+
+	If $PGDNsetENABLE = 1 Then
+		If $PGDNsetMouseEnable = 1 Then
+			GUICtrlSetStyle($PGDNedit, $ES_READONLY)
+			GUICtrlSetData ($PGDNedit, "using mouse clicks")
+		Else
+			GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetData ($PGDNedit, $PGDNtext)
+		EndIf
+		
 		HotKeySet("{PGDN}", "PGDN")
-   Else
+	Else
 		GUICtrlSetStyle($PGDNedit, $ES_READONLY)
+		GUICtrlSetData ($PGDNedit, $PGDNtext)
 		HotKeySet("{PGDN}")
-   EndIf
+	EndIf
 
 
 	If $GUIsize = 1 Then
@@ -889,7 +936,7 @@ EndFunc
 
 Func PGUPset()
    GUISetState(@SW_DISABLE, $mainwindow)
-   Global $PGUPsetwin = GUICreate("PGUPset",450,300)
+   Global $PGUPsetwin = GUICreate("PGUPset",400,300)
    GUISetState(@SW_SHOW)
    Global $PGUPsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
    Global $PGUPsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
@@ -897,27 +944,137 @@ Func PGUPset()
    Global $PGUPsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $PGUPsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
    Global $PGUPsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
-   GUICtrlSetData ($PGUPsetEdit, $PGUPtext)
+   
+   
+	Local $yadd = -70
+   
+	Global $PGUPsetMouseMainLabel = GUICtrlCreateLabel("Нажатия по координатам", 290, 20, 100, 40, $SS_CENTER)
+	Global $PGUPsetMouseEnablechkbx = GUICtrlCreateCheckbox("Включить", 300, 55)
 
-   If $PGUPsetENABLE = 1 Then
-	  GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
+	Global $PGUPsetMouse1Label = GUICtrlCreateLabel("Первое нажатие", 300, 85, 140, 20)
+	Global $PGUPsetMouse1xLabel = GUICtrlCreateLabel("X :", 320, 110, 20, 20)
+	Global $PGUPsetMouse1yLabel = GUICtrlCreateLabel("Y :", 320, 135, 20, 20)
+	Global $PGUPsetMouse1xEdit = GUICtrlCreateInput ( "", 340, 105, 40, 20)
+	Global $PGUPsetMouse1yEdit = GUICtrlCreateInput ( "", 340, 130, 40, 20)
+	Global $PGUPsetMouse2Label = GUICtrlCreateLabel("Второе нажатие", 300, 155, 140, 20)
+	Global $PGUPsetMouse2xLabel = GUICtrlCreateLabel("X :", 320, 180, 20, 20)
+	Global $PGUPsetMouse2yLabel = GUICtrlCreateLabel("Y :", 320, 205, 20, 20)
+	Global $PGUPsetMouse2xEdit = GUICtrlCreateInput ( "", 340, 175, 40, 20)
+	Global $PGUPsetMouse2yEdit = GUICtrlCreateInput ( "", 340, 200, 40, 20)
+   
+	Global $PGUPsetMouse1btn = GUICtrlCreateButton("Сканирование -> Сканировать", 298, 230, 84, 30, $BS_MULTILINE + $BS_VCENTER)
+	Global $PGUPsetMouse2btn = GUICtrlCreateButton("Ввод данных -> Новая папка", 298, 265, 84, 30, $BS_MULTILINE + $BS_VCENTER)
+	
+	GUICtrlSetOnEvent($PGUPsetENABLEchkbx, "PGUPsetStates")
+	GUICtrlSetOnEvent($PGUPsetMouseEnablechkbx, "PGUPsetStates")
+	GUICtrlSetOnEvent($PGUPsetMouse1btn, "PGUPsetMouseScan")
+	GUICtrlSetOnEvent($PGUPsetMouse2btn, "PGUPsetMouseIndex")
+	
+	GUICtrlSetData ($PGUPsetMouse1xEdit, $PGUPsetMouse1x)
+	GUICtrlSetData ($PGUPsetMouse1yEdit, $PGUPsetMouse1y)
+	GUICtrlSetData ($PGUPsetMouse2xEdit, $PGUPsetMouse2x)
+	GUICtrlSetData ($PGUPsetMouse2yEdit, $PGUPsetMouse2y)
+   
+	GUICtrlSetData ($PGUPsetEdit, $PGUPtext)
 
-   If $PGUPsetAddENTER = 1 Then
-	  GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
+	If $PGUPsetENABLE = 1 Then
+		GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_UNCHECKED)
+	EndIf
 
-   If $PGUPsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
+	If $PGUPsetAddENTER = 1 Then
+		GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_UNCHECKED)
+	EndIf
 
-   GUISetOnEvent($GUI_EVENT_CLOSE, "PGUPsetClose")
+	If $PGUPsetAddBACKSPACE = 1 Then
+		GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
+	EndIf
+
+	If $PGUPsetMouseEnable = 1 Then
+		GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_UNCHECKED)
+	EndIf
+
+
+	PGUPsetStates()
+
+	GUISetOnEvent($GUI_EVENT_CLOSE, "PGUPsetClose")
+EndFunc
+
+
+Func PGUPsetStates()
+	If BitAND(GUICtrlRead($PGUPsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGUPsetMouseEnable = 1
+	Else
+		$PGUPsetMouseEnable = 0
+	EndIf
+   
+	If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGUPsetENABLE = 1
+	Else
+		$PGUPsetENABLE = 0
+	EndIf
+   
+	If $PGUPsetENABLE = 1 Then
+		If $PGUPsetMouseEnable = 1 Then
+			GUICtrlSetStyle($PGUPedit, $ES_READONLY)
+			GUICtrlSetStyle($PGUPsetEdit, $ES_READONLY)
+			
+			GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_ENABLE)
+			GUICtrlSetState($PGUPsetMouse1btn, $GUI_SHOW)
+			GUICtrlSetState($PGUPsetMouse2btn, $GUI_SHOW)
+			GUICtrlSetStyle($PGUPsetMouse1xEdit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGUPsetMouse1yEdit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGUPsetMouse2xEdit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGUPsetMouse2yEdit, $GUI_SS_DEFAULT_INPUT)
+		Else
+			GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGUPsetEdit, $GUI_SS_DEFAULT_INPUT)
+			
+			GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_ENABLE)
+			GUICtrlSetState($PGUPsetMouse1btn, $GUI_HIDE)
+			GUICtrlSetState($PGUPsetMouse2btn, $GUI_HIDE)
+			GUICtrlSetStyle($PGUPsetMouse1xEdit, $ES_READONLY)
+			GUICtrlSetStyle($PGUPsetMouse1yEdit, $ES_READONLY)
+			GUICtrlSetStyle($PGUPsetMouse2xEdit, $ES_READONLY)
+			GUICtrlSetStyle($PGUPsetMouse2yEdit, $ES_READONLY)
+			
+		EndIf
+	Else
+		GUICtrlSetStyle($PGUPedit, $ES_READONLY)
+		GUICtrlSetStyle($PGUPsetEdit, $ES_READONLY)
+		
+		GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_DISABLE)
+		GUICtrlSetState($PGUPsetMouse1btn, $GUI_HIDE)
+		GUICtrlSetState($PGUPsetMouse2btn, $GUI_HIDE)
+		
+		GUICtrlSetStyle($PGUPsetMouse1xEdit, $ES_READONLY)
+		GUICtrlSetStyle($PGUPsetMouse1yEdit, $ES_READONLY)
+		GUICtrlSetStyle($PGUPsetMouse2xEdit, $ES_READONLY)
+		GUICtrlSetStyle($PGUPsetMouse2yEdit, $ES_READONLY)
+	EndIf
+   
+EndFunc
+
+
+Func PGUPsetMouseScan()
+	GUICtrlSetData ($PGUPsetMouse1xEdit, 167)
+	GUICtrlSetData ($PGUPsetMouse1yEdit, 161)
+	GUICtrlSetData ($PGUPsetMouse2xEdit, 120)
+	GUICtrlSetData ($PGUPsetMouse2yEdit, 88)
+EndFunc
+
+Func PGUPsetMouseIndex()
+	GUICtrlSetData ($PGUPsetMouse1xEdit, 58)
+	GUICtrlSetData ($PGUPsetMouse1yEdit, 158)
+	GUICtrlSetData ($PGUPsetMouse2xEdit, 518)
+	GUICtrlSetData ($PGUPsetMouse2yEdit, 199)
 EndFunc
 
 Func PGUPsetClose()
@@ -925,32 +1082,49 @@ Func PGUPsetClose()
 	GUICtrlSetData ($PGUPedit, $PGUPtext)
 	IniWrite($sPath_ini, "EditDATA", "$PGUPtext", $PGUPtext)
 
-   If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGUPsetENABLE = 1
-   Else
-	 $PGUPsetENABLE = 0
-   EndIf
+	If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGUPsetENABLE = 1
+	Else
+		$PGUPsetENABLE = 0
+	EndIf
 
-   If BitAND(GUICtrlRead($PGUPsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGUPsetAddENTER = 1
-   Else
-	 $PGUPsetAddENTER = 0
-   EndIf
+	If BitAND(GUICtrlRead($PGUPsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGUPsetAddENTER = 1
+	Else
+		$PGUPsetAddENTER = 0
+	EndIf
 
-   If BitAND(GUICtrlRead($PGUPsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGUPsetAddBACKSPACE = 1
-   Else
-	 $PGUPsetAddBACKSPACE = 0
-   EndIf
+	If BitAND(GUICtrlRead($PGUPsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGUPsetAddBACKSPACE = 1
+	Else
+		$PGUPsetAddBACKSPACE = 0
+	EndIf
 
-   IniWrite($sPath_ini, "EditSET", "$PGUPsetENABLE", $PGUPsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$PGUPsetAddENTER", $PGUPsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", $PGUPsetAddBACKSPACE)
+	If BitAND(GUICtrlRead($PGUPsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGUPsetMouseEnable = 1
+	Else
+		$PGUPsetMouseEnable = 0
+	EndIf
+	
+	$PGUPsetMouse1x = GUICtrlRead($PGUPsetMouse1xEdit)
+	$PGUPsetMouse1y = GUICtrlRead($PGUPsetMouse1yEdit)
+	$PGUPsetMouse2x = GUICtrlRead($PGUPsetMouse2xEdit)
+	$PGUPsetMouse2y = GUICtrlRead($PGUPsetMouse2yEdit)
 
-   ApplyStates()
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetENABLE", $PGUPsetENABLE)
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetAddENTER", $PGUPsetAddENTER)
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", $PGUPsetAddBACKSPACE)
 
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($PGUPsetwin)
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouseEnable", $PGUPsetMouseEnable)
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse1x", $PGUPsetMouse1x)
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse1y", $PGUPsetMouse1y)
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse2x", $PGUPsetMouse2x)
+	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse2y", $PGUPsetMouse2y)
+
+	ApplyStates()
+
+	GUISetState(@SW_ENABLE, $mainwindow)
+	GUIDelete($PGUPsetwin)
 EndFunc
 
 
@@ -1021,9 +1195,10 @@ Func ENDsetClose()
 EndFunc
 
 
+
 Func PGDNset()
    GUISetState(@SW_DISABLE, $mainwindow)
-   Global $PGDNsetwin = GUICreate("PGDNset",300,300)
+   Global $PGDNsetwin = GUICreate("PGDNset",400,300)
    GUISetState(@SW_SHOW)
    Global $PGDNsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
    Global $PGDNsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
@@ -1031,27 +1206,137 @@ Func PGDNset()
    Global $PGDNsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $PGDNsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
    Global $PGDNsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
-   GUICtrlSetData ($PGDNsetEdit, $PGDNtext)
+   
+   
+	Local $yadd = -70
+   
+	Global $PGDNsetMouseMainLabel = GUICtrlCreateLabel("Нажатия по координатам", 290, 20, 100, 40, $SS_CENTER)
+	Global $PGDNsetMouseEnablechkbx = GUICtrlCreateCheckbox("Включить", 300, 55)
 
-   If $PGDNsetENABLE = 1 Then
-	  GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
+	Global $PGDNsetMouse1Label = GUICtrlCreateLabel("Первое нажатие", 300, 85, 140, 20)
+	Global $PGDNsetMouse1xLabel = GUICtrlCreateLabel("X :", 320, 110, 20, 20)
+	Global $PGDNsetMouse1yLabel = GUICtrlCreateLabel("Y :", 320, 135, 20, 20)
+	Global $PGDNsetMouse1xEdit = GUICtrlCreateInput ( "", 340, 105, 40, 20)
+	Global $PGDNsetMouse1yEdit = GUICtrlCreateInput ( "", 340, 130, 40, 20)
+	Global $PGDNsetMouse2Label = GUICtrlCreateLabel("Второе нажатие", 300, 155, 140, 20)
+	Global $PGDNsetMouse2xLabel = GUICtrlCreateLabel("X :", 320, 180, 20, 20)
+	Global $PGDNsetMouse2yLabel = GUICtrlCreateLabel("Y :", 320, 205, 20, 20)
+	Global $PGDNsetMouse2xEdit = GUICtrlCreateInput ( "", 340, 175, 40, 20)
+	Global $PGDNsetMouse2yEdit = GUICtrlCreateInput ( "", 340, 200, 40, 20)
+   
+	Global $PGDNsetMouse1btn = GUICtrlCreateButton("Сканирование -> Сканировать", 298, 230, 84, 30, $BS_MULTILINE + $BS_VCENTER)
+	Global $PGDNsetMouse2btn = GUICtrlCreateButton("Ввод данных -> Новая папка", 298, 265, 84, 30, $BS_MULTILINE + $BS_VCENTER)
+	
+	GUICtrlSetOnEvent($PGDNsetENABLEchkbx, "PGDNsetStates")
+	GUICtrlSetOnEvent($PGDNsetMouseEnablechkbx, "PGDNsetStates")
+	GUICtrlSetOnEvent($PGDNsetMouse1btn, "PGDNsetMouseScan")
+	GUICtrlSetOnEvent($PGDNsetMouse2btn, "PGDNsetMouseIndex")
+	
+	GUICtrlSetData ($PGDNsetMouse1xEdit, $PGDNsetMouse1x)
+	GUICtrlSetData ($PGDNsetMouse1yEdit, $PGDNsetMouse1y)
+	GUICtrlSetData ($PGDNsetMouse2xEdit, $PGDNsetMouse2x)
+	GUICtrlSetData ($PGDNsetMouse2yEdit, $PGDNsetMouse2y)
+   
+	GUICtrlSetData ($PGDNsetEdit, $PGDNtext)
 
-   If $PGDNsetAddENTER = 1 Then
-	  GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
+	If $PGDNsetENABLE = 1 Then
+		GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_UNCHECKED)
+	EndIf
 
-   If $PGDNsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
+	If $PGDNsetAddENTER = 1 Then
+		GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_UNCHECKED)
+	EndIf
 
-   GUISetOnEvent($GUI_EVENT_CLOSE, "PGDNsetClose")
+	If $PGDNsetAddBACKSPACE = 1 Then
+		GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
+	EndIf
+
+	If $PGDNsetMouseEnable = 1 Then
+		GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_UNCHECKED)
+	EndIf
+
+
+	PGDNsetStates()
+
+	GUISetOnEvent($GUI_EVENT_CLOSE, "PGDNsetClose")
+EndFunc
+
+
+Func PGDNsetStates()
+	If BitAND(GUICtrlRead($PGDNsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGDNsetMouseEnable = 1
+	Else
+		$PGDNsetMouseEnable = 0
+	EndIf
+   
+	If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGDNsetENABLE = 1
+	Else
+		$PGDNsetENABLE = 0
+	EndIf
+   
+	If $PGDNsetENABLE = 1 Then
+		If $PGDNsetMouseEnable = 1 Then
+			GUICtrlSetStyle($PGDNedit, $ES_READONLY)
+			GUICtrlSetStyle($PGDNsetEdit, $ES_READONLY)
+			
+			GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_ENABLE)
+			GUICtrlSetState($PGDNsetMouse1btn, $GUI_SHOW)
+			GUICtrlSetState($PGDNsetMouse2btn, $GUI_SHOW)
+			GUICtrlSetStyle($PGDNsetMouse1xEdit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGDNsetMouse1yEdit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGDNsetMouse2xEdit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGDNsetMouse2yEdit, $GUI_SS_DEFAULT_INPUT)
+		Else
+			GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
+			GUICtrlSetStyle($PGDNsetEdit, $GUI_SS_DEFAULT_INPUT)
+			
+			GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_ENABLE)
+			GUICtrlSetState($PGDNsetMouse1btn, $GUI_HIDE)
+			GUICtrlSetState($PGDNsetMouse2btn, $GUI_HIDE)
+			GUICtrlSetStyle($PGDNsetMouse1xEdit, $ES_READONLY)
+			GUICtrlSetStyle($PGDNsetMouse1yEdit, $ES_READONLY)
+			GUICtrlSetStyle($PGDNsetMouse2xEdit, $ES_READONLY)
+			GUICtrlSetStyle($PGDNsetMouse2yEdit, $ES_READONLY)
+			
+		EndIf
+	Else
+		GUICtrlSetStyle($PGDNedit, $ES_READONLY)
+		GUICtrlSetStyle($PGDNsetEdit, $ES_READONLY)
+		
+		GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_DISABLE)
+		GUICtrlSetState($PGDNsetMouse1btn, $GUI_HIDE)
+		GUICtrlSetState($PGDNsetMouse2btn, $GUI_HIDE)
+		
+		GUICtrlSetStyle($PGDNsetMouse1xEdit, $ES_READONLY)
+		GUICtrlSetStyle($PGDNsetMouse1yEdit, $ES_READONLY)
+		GUICtrlSetStyle($PGDNsetMouse2xEdit, $ES_READONLY)
+		GUICtrlSetStyle($PGDNsetMouse2yEdit, $ES_READONLY)
+	EndIf
+   
+EndFunc
+
+
+Func PGDNsetMouseScan()
+	GUICtrlSetData ($PGDNsetMouse1xEdit, 167)
+	GUICtrlSetData ($PGDNsetMouse1yEdit, 161)
+	GUICtrlSetData ($PGDNsetMouse2xEdit, 120)
+	GUICtrlSetData ($PGDNsetMouse2yEdit, 88)
+EndFunc
+
+Func PGDNsetMouseIndex()
+	GUICtrlSetData ($PGDNsetMouse1xEdit, 58)
+	GUICtrlSetData ($PGDNsetMouse1yEdit, 158)
+	GUICtrlSetData ($PGDNsetMouse2xEdit, 518)
+	GUICtrlSetData ($PGDNsetMouse2yEdit, 199)
 EndFunc
 
 Func PGDNsetClose()
@@ -1059,32 +1344,49 @@ Func PGDNsetClose()
 	GUICtrlSetData ($PGDNedit, $PGDNtext)
 	IniWrite($sPath_ini, "EditDATA", "$PGDNtext", $PGDNtext)
 
-   If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGDNsetENABLE = 1
-   Else
-	 $PGDNsetENABLE = 0
-   EndIf
+	If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGDNsetENABLE = 1
+	Else
+		$PGDNsetENABLE = 0
+	EndIf
 
-   If BitAND(GUICtrlRead($PGDNsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGDNsetAddENTER = 1
-   Else
-	 $PGDNsetAddENTER = 0
-   EndIf
+	If BitAND(GUICtrlRead($PGDNsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGDNsetAddENTER = 1
+	Else
+		$PGDNsetAddENTER = 0
+	EndIf
 
-   If BitAND(GUICtrlRead($PGDNsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGDNsetAddBACKSPACE = 1
-   Else
-	 $PGDNsetAddBACKSPACE = 0
-   EndIf
+	If BitAND(GUICtrlRead($PGDNsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGDNsetAddBACKSPACE = 1
+	Else
+		$PGDNsetAddBACKSPACE = 0
+	EndIf
 
-   IniWrite($sPath_ini, "EditSET", "$PGDNsetENABLE", $PGDNsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$PGDNsetAddENTER", $PGDNsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", $PGDNsetAddBACKSPACE)
+	If BitAND(GUICtrlRead($PGDNsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$PGDNsetMouseEnable = 1
+	Else
+		$PGDNsetMouseEnable = 0
+	EndIf
+	
+	$PGDNsetMouse1x = GUICtrlRead($PGDNsetMouse1xEdit)
+	$PGDNsetMouse1y = GUICtrlRead($PGDNsetMouse1yEdit)
+	$PGDNsetMouse2x = GUICtrlRead($PGDNsetMouse2xEdit)
+	$PGDNsetMouse2y = GUICtrlRead($PGDNsetMouse2yEdit)
 
-   ApplyStates()
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetENABLE", $PGDNsetENABLE)
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetAddENTER", $PGDNsetAddENTER)
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", $PGDNsetAddBACKSPACE)
 
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($PGDNsetwin)
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouseEnable", $PGDNsetMouseEnable)
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse1x", $PGDNsetMouse1x)
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse1y", $PGDNsetMouse1y)
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse2x", $PGDNsetMouse2x)
+	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse2y", $PGDNsetMouse2y)
+
+	ApplyStates()
+
+	GUISetState(@SW_ENABLE, $mainwindow)
+	GUIDelete($PGDNsetwin)
 EndFunc
 
 
@@ -1641,19 +1943,20 @@ Func HOME()
 EndFunc
 
 Func PGUP()
-   If $PGUPsetENABLE = 1 Then
-		Send($PGUPtext)
-		If $PGUPsetAddBACKSPACE = 1 Then
-		  Send("{BACKSPACE}")
+	If $PGUPsetENABLE = 1 Then
+		If $PGUPsetMouseEnable = 1 Then
+			MouseClick("left", $PGUPsetMouse1x, $PGUPsetMouse1y, 1, 0)
+			MouseClick("left", $PGUPsetMouse2x, $PGUPsetMouse2y, 1, 0)
+		Else
+			Send($PGUPtext)
+			If $PGUPsetAddBACKSPACE = 1 Then
+				Send("{BACKSPACE}")
+			EndIf
+			If $PGUPsetAddENTER = 1 Then
+				Send("{ENTER}")
+			EndIf
 		EndIf
-		If $PGUPsetAddENTER = 1 Then
-		  Send("{ENTER}")
-		EndIf
-   EndIf
-   
-   MouseClick("left", 184, 178, 1, 0)
-   MouseClick("left", 112, 96, 1, 0)
-   
+	EndIf
 EndFunc
 
 Func END()
@@ -1669,19 +1972,20 @@ Func END()
 EndFunc
 
 Func PGDN()
-   If $PGDNsetENABLE = 1 Then
-		Send($PGDNtext)
-		If $PGDNsetAddBACKSPACE = 1 Then
-		  Send("{BACKSPACE}")
+	If $PGDNsetENABLE = 1 Then
+		If $PGDNsetMouseEnable = 1 Then
+			MouseClick("left", $PGDNsetMouse1x, $PGDNsetMouse1y, 1, 0)
+			MouseClick("left", $PGDNsetMouse2x, $PGDNsetMouse2y, 1, 0)
+		Else
+			Send($PGDNtext)
+			If $PGDNsetAddBACKSPACE = 1 Then
+				Send("{BACKSPACE}")
+			EndIf
+			If $PGDNsetAddENTER = 1 Then
+				Send("{ENTER}")
+			EndIf
 		EndIf
-		If $PGDNsetAddENTER = 1 Then
-		  Send("{ENTER}")
-		EndIf
-   EndIf
-   
-	MouseClick("left", 62, 177, 1, 1)
-	MouseClick("left", 518, 217, 1, 1)
-   
+	EndIf
 EndFunc
 
 Func ctrl1()
@@ -2457,7 +2761,46 @@ Func RESTOREClicked()
 EndFunc
 
 
+Func SingleScript($iMode = 0)
+	; iMode=0  Close all executing scripts with the same name and continue.
+	; iMode=1  Wait for completion of predecessor scripts with the same name.
+	; iMode=2  Exit if other scripts with the same name are executing.
+	; iMode=3  Test, if other scripts with the same name are executing.
+	
+	; UDF Name:         _SingleScript.au3
+	; Author:       Exit   ( http://www.autoitscript.com/forum/user/45639-exit )
+	; SourceCode:   http://www.autoitscript.com/forum/index.php?showtopic=178681   Version: 2021.04.14
 
+    Local $oWMI, $oProcess, $oProcesses, $aHandle, $aError
+    Local $sPrefix = StringLeft(@ScriptName, StringInStr(@ScriptName, ".") - 1)
+    Local $sMutexName = "_SingleScript " & $sPrefix
+    If $iMode < 0 Or $iMode > 3 Then Return SetError(-1, -1, -1)
+    If $iMode = 0 Or $iMode = 3 Then ; (iMode = 0) close all other scripts with the same name.  (iMode = 3) check, if others are running.
+        $oWMI = ObjGet("winmgmts:\\" & @ComputerName & "\root\CIMV2")
+        If @error Then
+            RunWait(@ComSpec & ' /c net start winmgmt  ', '', @SW_HIDE)
+            RunWait(@ComSpec & ' /c net continue winmgmt  ', '', @SW_HIDE)
+            $oWMI = ObjGet("winmgmts:\\" & @ComputerName & "\root\CIMV2")
+        EndIf
+        $oProcesses = $oWMI.ExecQuery("SELECT * FROM Win32_Process", "WQL", 0x30)
+        For $oProcess In $oProcesses
+            If $oProcess.ProcessId = @AutoItPID Then ContinueLoop
+            If ($oProcess.Name = "AutoIt3.exe" And StringInStr($oProcess.CommandLine, "AutoIt3Wrapper")) Then ContinueLoop
+            If Not (StringInStr($oProcess.Name & $oProcess.CommandLine, $sPrefix)) Then ContinueLoop
+            If $iMode = 3 Then Return SetError(0, 1, 1) ; indicate other script is running. Return value and @extended set to 1.
+            Sleep(1000) ; allow previous process to terminate
+            If ProcessClose($oProcess.ProcessId) Then ContinueLoop
+            MsgBox(262144, "Debug " & @ScriptName, "Error: " & @error & " Extended: " & @extended & @LF & "SingleScript Processclose error: " & $oProcess.Name & @LF & "******", 5)
+        Next
+    EndIf
+    $aHandle = DllCall("kernel32.dll", "handle", "CreateMutexW", "struct*", 0, "bool", 1, "wstr", $sMutexName) ; try to create Mutex
+    $aError = DllCall("kernel32.dll", "dword", "GetLastError") ; retrieve last error
+    If Not $aError[0] Then Return SetError(0, 0, 0)
+    If $iMode = "2" Then Exit 1
+    If $iMode = "0" Then Return SetError(1, 0, 1) ; should not occur
+    DllCall("kernel32.dll", "dword", "WaitForSingleObject", "handle", $aHandle[0], "dword", -1) ; infinite wait for lock
+    Return SetError(0, 0, 0)
+EndFunc
 
 
 #comments-start
