@@ -318,7 +318,7 @@ Func RenderCalendar()
 
 		If $ClndrIsHoliday = 1 Then
 			GUICtrlSetColor($xoffset, 0xf34723)
-			;GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness+200, 0, $ClndrFont)
+			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness+200, 0, $ClndrFont)
 		EndIf
 
 		
