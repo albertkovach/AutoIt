@@ -14,8 +14,8 @@
 
 
 
-Global $VersionText = "ver 5.7"
-Global $VersionNumber = 57
+Global $VersionText = "ver 5.8"
+Global $VersionNumber = 58
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -82,14 +82,14 @@ CreateGUI()
 Func CreateGUI()
 	Global $mainwindow = GUICreate("FLAME.exe", 665, $GUIheight)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "CLOSEClicked")
-	
+
 	Global $minimizetotray = IniRead($sPath_ini, "ProgramDATA", "$minimizetotray", "0")
 	If $minimizetotray = 1 Then
 		GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEtoTrayClicked")
 	Else
 		GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEtoTasksClicked")
 	EndIf
-	
+
 	GUISetState(@SW_SHOW)
 
 	Global $INSERTlabelbtn = GUICtrlCreateButton("INSERT", 14, 10, 55, 20)
@@ -121,7 +121,7 @@ Func CreateGUI()
 			Runwait(@ComSpec & " /c " & "xcopy " & '"' & $source & '"' & ' "' & $destination & '"' & " /Y /H /I","",@SW_HIDE)
 		EndIf
 	EndIf
-	
+
 	SingleScript(0)
 
 EndFunc
@@ -156,7 +156,7 @@ Func InitializeGUI()
    Global $PGUPlabelbtn = GUICtrlCreateButton("PGUP", 444, 10, 55, 20)
    Global $PGUPedit = GUICtrlCreateInput ( "", 445, 30, 200)
    GUICtrlSetOnEvent($PGUPlabelbtn, "PGUPset")
-   
+
    Global $MinimizeWindowButton = GUICtrlCreateButton("\/", 626, 9, 18, 18)
    GUICtrlSetOnEvent($MinimizeWindowButton, "MINIMIZEtoTrayClicked")
 
@@ -213,7 +213,7 @@ Func InitializeGUI()
    Global $SETUPbtn = GUICtrlCreateButton("", 15, 276+$GUIctrltoffset, 20, 20)
    Global $STATUSlabel = GUICtrlCreateLabel("ОК", 18, 279+$GUIctrltoffset-21, 20, 18)
    GUICtrlSetOnEvent($SETUPbtn, "SETUPset")
-   
+
    Global $Calendarbtn = GUICtrlCreateButton("K", 45, 276+$GUIctrltoffset, 20, 20)
    GUICtrlSetOnEvent($Calendarbtn, "CalendarOpen")
 
@@ -221,7 +221,7 @@ Func InitializeGUI()
    Global $INSERTcopyHowTo = GUICtrlCreateLabel("Вставить скопированное на клавишу Insert - F3", 393, 280+$GUIctrltoffset, 350, 25)
    Global $VersionLabel = GUICtrlCreateLabel("ver 2.5 d", 300, 280+$GUIctrltoffset, 45, 15)
    GUICtrlSetData ($VersionLabel, $VersionText)
-   
+
 	If $minimizetotray = 1 Then
 		GUICtrlSetState($MinimizeWindowButton,$GUI_HIDE)
 	EndIf
@@ -413,7 +413,7 @@ Func ApplyStates()
 			GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
 			GUICtrlSetData ($PGUPedit, $PGUPtext)
 		EndIf
-		
+
 		HotKeySet("{PGUP}", "PGUP")
 	Else
 		GUICtrlSetStyle($PGUPedit, $ES_READONLY)
@@ -441,7 +441,7 @@ Func ApplyStates()
 			GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
 			GUICtrlSetData ($PGDNedit, $PGDNtext)
 		EndIf
-		
+
 		HotKeySet("{PGDN}", "PGDN")
 	Else
 		GUICtrlSetStyle($PGDNedit, $ES_READONLY)
@@ -713,7 +713,7 @@ Func SETUPset()
    Else
 	  GUICtrlSetState($clipboardpastechkbx, $GUI_UNCHECKED)
    EndIf
-   
+
    Global $minimizetotraychkbx = GUICtrlCreateCheckbox("Сворачивать в трей", 17, 180, 250)
    If $minimizetotray = 1 Then
 	  GUICtrlSetState($minimizetotraychkbx, $GUI_CHECKED)
@@ -759,7 +759,7 @@ Func SETUPsetClose()
 	 $clipboardpaste = 0
    EndIf
    IniWrite($sPath_ini, "ProgramDATA", "$clipboardpaste", $clipboardpaste)
-   
+
    If BitAND(GUICtrlRead($minimizetotraychkbx), $GUI_CHECKED) = $GUI_CHECKED Then
 	 $minimizetotray = 1
    Else
@@ -771,7 +771,7 @@ Func SETUPsetClose()
 
    GUISetState(@SW_ENABLE, $mainwindow)
    GUIDelete($INSERTsetwin)
-   
+
 	If $minimizetotray = 1 Then
 		GUICtrlSetState($MinimizeWindowButton,$GUI_HIDE)
 		GUISetOnEvent($GUI_EVENT_MINIMIZE, "MINIMIZEtoTrayClicked")
@@ -944,10 +944,10 @@ Func PGUPset()
    Global $PGUPsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $PGUPsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
    Global $PGUPsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
-   
-   
+
+
 	Local $yadd = -70
-   
+
 	Global $PGUPsetMouseMainLabel = GUICtrlCreateLabel("Нажатия по координатам", 290, 20, 100, 40, $SS_CENTER)
 	Global $PGUPsetMouseEnablechkbx = GUICtrlCreateCheckbox("Включить", 300, 55)
 
@@ -961,20 +961,20 @@ Func PGUPset()
 	Global $PGUPsetMouse2yLabel = GUICtrlCreateLabel("Y :", 320, 205, 20, 20)
 	Global $PGUPsetMouse2xEdit = GUICtrlCreateInput ( "", 340, 175, 40, 20)
 	Global $PGUPsetMouse2yEdit = GUICtrlCreateInput ( "", 340, 200, 40, 20)
-   
+
 	Global $PGUPsetMouse1btn = GUICtrlCreateButton("Сканирование -> Сканировать", 298, 230, 84, 30, $BS_MULTILINE + $BS_VCENTER)
 	Global $PGUPsetMouse2btn = GUICtrlCreateButton("Ввод данных -> Новая папка", 298, 265, 84, 30, $BS_MULTILINE + $BS_VCENTER)
-	
+
 	GUICtrlSetOnEvent($PGUPsetENABLEchkbx, "PGUPsetStates")
 	GUICtrlSetOnEvent($PGUPsetMouseEnablechkbx, "PGUPsetStates")
 	GUICtrlSetOnEvent($PGUPsetMouse1btn, "PGUPsetMouseScan")
 	GUICtrlSetOnEvent($PGUPsetMouse2btn, "PGUPsetMouseIndex")
-	
+
 	GUICtrlSetData ($PGUPsetMouse1xEdit, $PGUPsetMouse1x)
 	GUICtrlSetData ($PGUPsetMouse1yEdit, $PGUPsetMouse1y)
 	GUICtrlSetData ($PGUPsetMouse2xEdit, $PGUPsetMouse2x)
 	GUICtrlSetData ($PGUPsetMouse2yEdit, $PGUPsetMouse2y)
-   
+
 	GUICtrlSetData ($PGUPsetEdit, $PGUPtext)
 
 	If $PGUPsetENABLE = 1 Then
@@ -1014,18 +1014,18 @@ Func PGUPsetStates()
 	Else
 		$PGUPsetMouseEnable = 0
 	EndIf
-   
+
 	If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
 		$PGUPsetENABLE = 1
 	Else
 		$PGUPsetENABLE = 0
 	EndIf
-   
+
 	If $PGUPsetENABLE = 1 Then
 		If $PGUPsetMouseEnable = 1 Then
 			GUICtrlSetStyle($PGUPedit, $ES_READONLY)
 			GUICtrlSetStyle($PGUPsetEdit, $ES_READONLY)
-			
+
 			GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_ENABLE)
 			GUICtrlSetState($PGUPsetMouse1btn, $GUI_SHOW)
 			GUICtrlSetState($PGUPsetMouse2btn, $GUI_SHOW)
@@ -1036,7 +1036,7 @@ Func PGUPsetStates()
 		Else
 			GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
 			GUICtrlSetStyle($PGUPsetEdit, $GUI_SS_DEFAULT_INPUT)
-			
+
 			GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_ENABLE)
 			GUICtrlSetState($PGUPsetMouse1btn, $GUI_HIDE)
 			GUICtrlSetState($PGUPsetMouse2btn, $GUI_HIDE)
@@ -1044,22 +1044,22 @@ Func PGUPsetStates()
 			GUICtrlSetStyle($PGUPsetMouse1yEdit, $ES_READONLY)
 			GUICtrlSetStyle($PGUPsetMouse2xEdit, $ES_READONLY)
 			GUICtrlSetStyle($PGUPsetMouse2yEdit, $ES_READONLY)
-			
+
 		EndIf
 	Else
 		GUICtrlSetStyle($PGUPedit, $ES_READONLY)
 		GUICtrlSetStyle($PGUPsetEdit, $ES_READONLY)
-		
+
 		GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_DISABLE)
 		GUICtrlSetState($PGUPsetMouse1btn, $GUI_HIDE)
 		GUICtrlSetState($PGUPsetMouse2btn, $GUI_HIDE)
-		
+
 		GUICtrlSetStyle($PGUPsetMouse1xEdit, $ES_READONLY)
 		GUICtrlSetStyle($PGUPsetMouse1yEdit, $ES_READONLY)
 		GUICtrlSetStyle($PGUPsetMouse2xEdit, $ES_READONLY)
 		GUICtrlSetStyle($PGUPsetMouse2yEdit, $ES_READONLY)
 	EndIf
-   
+
 EndFunc
 
 
@@ -1105,7 +1105,7 @@ Func PGUPsetClose()
 	Else
 		$PGUPsetMouseEnable = 0
 	EndIf
-	
+
 	$PGUPsetMouse1x = GUICtrlRead($PGUPsetMouse1xEdit)
 	$PGUPsetMouse1y = GUICtrlRead($PGUPsetMouse1yEdit)
 	$PGUPsetMouse2x = GUICtrlRead($PGUPsetMouse2xEdit)
@@ -1206,10 +1206,10 @@ Func PGDNset()
    Global $PGDNsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $PGDNsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
    Global $PGDNsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
-   
-   
+
+
 	Local $yadd = -70
-   
+
 	Global $PGDNsetMouseMainLabel = GUICtrlCreateLabel("Нажатия по координатам", 290, 20, 100, 40, $SS_CENTER)
 	Global $PGDNsetMouseEnablechkbx = GUICtrlCreateCheckbox("Включить", 300, 55)
 
@@ -1223,20 +1223,20 @@ Func PGDNset()
 	Global $PGDNsetMouse2yLabel = GUICtrlCreateLabel("Y :", 320, 205, 20, 20)
 	Global $PGDNsetMouse2xEdit = GUICtrlCreateInput ( "", 340, 175, 40, 20)
 	Global $PGDNsetMouse2yEdit = GUICtrlCreateInput ( "", 340, 200, 40, 20)
-   
+
 	Global $PGDNsetMouse1btn = GUICtrlCreateButton("Сканирование -> Сканировать", 298, 230, 84, 30, $BS_MULTILINE + $BS_VCENTER)
 	Global $PGDNsetMouse2btn = GUICtrlCreateButton("Ввод данных -> Новая папка", 298, 265, 84, 30, $BS_MULTILINE + $BS_VCENTER)
-	
+
 	GUICtrlSetOnEvent($PGDNsetENABLEchkbx, "PGDNsetStates")
 	GUICtrlSetOnEvent($PGDNsetMouseEnablechkbx, "PGDNsetStates")
 	GUICtrlSetOnEvent($PGDNsetMouse1btn, "PGDNsetMouseScan")
 	GUICtrlSetOnEvent($PGDNsetMouse2btn, "PGDNsetMouseIndex")
-	
+
 	GUICtrlSetData ($PGDNsetMouse1xEdit, $PGDNsetMouse1x)
 	GUICtrlSetData ($PGDNsetMouse1yEdit, $PGDNsetMouse1y)
 	GUICtrlSetData ($PGDNsetMouse2xEdit, $PGDNsetMouse2x)
 	GUICtrlSetData ($PGDNsetMouse2yEdit, $PGDNsetMouse2y)
-   
+
 	GUICtrlSetData ($PGDNsetEdit, $PGDNtext)
 
 	If $PGDNsetENABLE = 1 Then
@@ -1276,18 +1276,18 @@ Func PGDNsetStates()
 	Else
 		$PGDNsetMouseEnable = 0
 	EndIf
-   
+
 	If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
 		$PGDNsetENABLE = 1
 	Else
 		$PGDNsetENABLE = 0
 	EndIf
-   
+
 	If $PGDNsetENABLE = 1 Then
 		If $PGDNsetMouseEnable = 1 Then
 			GUICtrlSetStyle($PGDNedit, $ES_READONLY)
 			GUICtrlSetStyle($PGDNsetEdit, $ES_READONLY)
-			
+
 			GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_ENABLE)
 			GUICtrlSetState($PGDNsetMouse1btn, $GUI_SHOW)
 			GUICtrlSetState($PGDNsetMouse2btn, $GUI_SHOW)
@@ -1298,7 +1298,7 @@ Func PGDNsetStates()
 		Else
 			GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
 			GUICtrlSetStyle($PGDNsetEdit, $GUI_SS_DEFAULT_INPUT)
-			
+
 			GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_ENABLE)
 			GUICtrlSetState($PGDNsetMouse1btn, $GUI_HIDE)
 			GUICtrlSetState($PGDNsetMouse2btn, $GUI_HIDE)
@@ -1306,22 +1306,22 @@ Func PGDNsetStates()
 			GUICtrlSetStyle($PGDNsetMouse1yEdit, $ES_READONLY)
 			GUICtrlSetStyle($PGDNsetMouse2xEdit, $ES_READONLY)
 			GUICtrlSetStyle($PGDNsetMouse2yEdit, $ES_READONLY)
-			
+
 		EndIf
 	Else
 		GUICtrlSetStyle($PGDNedit, $ES_READONLY)
 		GUICtrlSetStyle($PGDNsetEdit, $ES_READONLY)
-		
+
 		GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_DISABLE)
 		GUICtrlSetState($PGDNsetMouse1btn, $GUI_HIDE)
 		GUICtrlSetState($PGDNsetMouse2btn, $GUI_HIDE)
-		
+
 		GUICtrlSetStyle($PGDNsetMouse1xEdit, $ES_READONLY)
 		GUICtrlSetStyle($PGDNsetMouse1yEdit, $ES_READONLY)
 		GUICtrlSetStyle($PGDNsetMouse2xEdit, $ES_READONLY)
 		GUICtrlSetStyle($PGDNsetMouse2yEdit, $ES_READONLY)
 	EndIf
-   
+
 EndFunc
 
 
@@ -1367,7 +1367,7 @@ Func PGDNsetClose()
 	Else
 		$PGDNsetMouseEnable = 0
 	EndIf
-	
+
 	$PGDNsetMouse1x = GUICtrlRead($PGDNsetMouse1xEdit)
 	$PGDNsetMouse1y = GUICtrlRead($PGDNsetMouse1yEdit)
 	$PGDNsetMouse2x = GUICtrlRead($PGDNsetMouse2xEdit)
@@ -2191,7 +2191,7 @@ Func CalendarOpen()
 	Global $calendarwindow = GUICreate("Календарь смен", 335, 245)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "CalendarClose")
 	GUISetState(@SW_SHOW)
-	
+
 	Global $ClndGUIstartX = 20
 	Global $ClndGUIxStretch = 25
 
@@ -2230,20 +2230,20 @@ Func CalendarGUIinit()
 	Global $ClndrMonthLabel = GUICtrlCreateLabel(DateToMonthShort(@MON), $ClndGUIstartX + $ClndGUIxStretch, $ClndGUIstartY - $ClndGUIyStretch+5, $ClndGUIxStretch*5, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	GUICtrlSetFont($ClndrMonthLabel, $ClndrTextSize+3, $ClndrTextThickness, 0)
 	; Добавить запись почасовки в память
-	
+
 	Global $xoffset
 	Global $calendxoffsetfirstitem = int($ClndrMonthLabel)-3
 	Global $calendxoffsetidforfont
 	Global $calendxoffsetcurrmonth = 42
 	Global $calendxoffsettimetableid
-	
+
 	Global $SalaryDate
 	Global $SalaryWeekday
 	Global $DaysAmountSalary
 	Global $ClndrHourSalary = 296
 	Global $ClndrMonthSalaryAdvance
 	Global $ClndrMonthSalaryRemains
-	
+
 	Global $ClndrWorkdayCount
 	Global $ClndrOffdayCount
 	Global $ClndrHourSalaryInputText
@@ -2251,7 +2251,7 @@ Func CalendarGUIinit()
 	Global $ClndrMonthSalaryClean
 	Global $ClndrAdvanceDays
 	Global $ClndrIsHoliday
-	
+
 
 	Global $mon = GUICtrlCreateLabel("Пн", $ClndGUIstartX, 						  $ClndGUIstartY, $ClndGUIxStretch, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
 	Global $tue = GUICtrlCreateLabel("Вт", $ClndGUIstartX + ($ClndGUIxStretch*1), $ClndGUIstartY, $ClndGUIxStretch, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
@@ -2355,7 +2355,7 @@ Func CalendarGUIinit()
 	Global $Bx42 = GUICtrlCreateLabel("", $ClndGUIstartX + ($ClndGUIxStretch*6), $ClndGUIstartY + ($ClndGUIyStretch*6), $ClndGUIxStretch, $ClndGUIyStretch, $SS_ETCHEDFRAME)
 
 	Global $ClndrYearLabel = GUICtrlCreateLabel(@YEAR, $ClndGUIstartX + ($ClndGUIxStretch*5) + 8, $ClndGUIstartY + ($ClndGUIyStretch*7), $ClndGUIxStretch*2, $ClndGUIyStretch, $SS_CENTER + $SS_CENTERIMAGE)
-	
+
 	Global $ClndrWorkdayCountLabel = GUICtrlCreateLabel("Рабочих дней:", 				$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*1), 		$ClndGUIxStretch*5)
 	Global $ClndrOffdayCountLabel = GUICtrlCreateLabel("Выходных:", 					$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*2) -5, 	$ClndGUIxStretch*5)
 	Global $ClndrMonthSalaryRemainDaysLabel = GUICtrlCreateLabel("Дней до з/п:", 		$ClndGUIstartX + ($ClndGUIxStretch*7) + 15, 	$ClndGUIstartY + ($ClndGUIyStretch*3) -10, 	$ClndGUIxStretch*7)
@@ -2369,22 +2369,22 @@ Func CalendarGUIinit()
 	GUICtrlSetOnEvent($ClndMonthPrevBtn, "CalendarMonthPrev")
 	GUICtrlSetOnEvent($ClndMonthNextBtn, "CalendarMonthNext")
 	GUICtrlSetOnEvent($ClndrToCurrMonthButton, "CalendarInitDay")
-	
+
 	GUICtrlSetFont($ClndrYearLabel, $ClndrTextSize+2, $ClndrTextThickness, 0)
-	
+
 	GUICtrlSetFont($ClndrWorkdayCountLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrOffdayCountLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrMonthSalaryRemainDaysLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
 
-	
+
 	If @MDAY < 11 OR @MDAY > 26 Then	; Считаем до 11
-		
+
 		If @MDAY > 26 Then	; В другом месяце
-		
+
 			$SalaryDate = _DateAdd('M', +1, _NowCalcDate())
 			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
 			$SalaryDate = @YEAR & "/" & $MyDate[2] & "/11 00:00:00"
-			
+
 			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
 			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
 			If $SalaryWeekday = 6 Then
@@ -2392,14 +2392,14 @@ Func CalendarGUIinit()
 			ElseIf $SalaryWeekday = 7 Then
 				$SalaryDate = _DateAdd('D' -2, $SalaryDate)
 			EndIf
-			
+
 			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
 			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до з/п: " & $DaysAmountSalary)
-			
+
 		ElseIf @MDAY < 11 Then	; В этом месяце
-		
+
 			$SalaryDate = @YEAR & "/" & @MON & "/11 00:00:00"
-			
+
 			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
 			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
 			If $SalaryWeekday = 6 Then
@@ -2407,15 +2407,15 @@ Func CalendarGUIinit()
 			ElseIf $SalaryWeekday = 7 Then
 				$SalaryDate = _DateAdd('D', -2, $SalaryDate)
 			EndIf
-			
+
 			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
 			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до з/п: " & $DaysAmountSalary)
 		EndIf
-		
+
 	ElseIf @MDAY > 11 OR @MDAY < 26 Then	; Считаем до 26
-	
+
 			$SalaryDate = @YEAR & "/" & @MON & "/26 00:00:00"
-			
+
 			_DateTimeSplit($SalaryDate, $MyDate, $MyTime)
 			$SalaryWeekday = _DateToDayOfWeekISO ($MyDate[1], $MyDate[2], $MyDate[3])
 			If $SalaryWeekday = 6 Then
@@ -2423,10 +2423,10 @@ Func CalendarGUIinit()
 			ElseIf $SalaryWeekday = 7 Then
 				$SalaryDate = _DateAdd('D', -2, $SalaryDate)
 			EndIf
-			
+
 			$DaysAmountSalary = _DateDiff('D', _NowCalcDate(), $SalaryDate)
 			GUICtrlSetData ($ClndrMonthSalaryRemainDaysLabel, "Дней до аванса: " & $DaysAmountSalary)
-		
+
 	EndIf
 
 
@@ -2457,7 +2457,7 @@ Func RenderCalendar()
 		_DateTimeSplit($InternalCycleDate, $MyDate, $MyTime)
 		$xoffset = $calendxoffsetfirstitem + $x + 11 ; Смещение для правильного подключения к GUILabel (считаются по порядку)
 		; Подключен к каждой ячейке календаря по очереди
-		
+
 		; Выделение дней текущего выбранного месяца
 		If $MyDate[2] <> $ClndSelectedMonth Then
 			GUICtrlSetColor($xoffset, 0x6a6a6a)
@@ -2468,7 +2468,7 @@ Func RenderCalendar()
 			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness, 0, $ClndrFont)
 			GUICtrlSetStyle($xoffset+$calendxoffsetcurrmonth, $SS_BLACKFRAME)
 		EndIf
-		
+
 		If $MyDate[2] = 1 AND $MyDate[3] <= 8 Then
 			$ClndrIsHoliday = 1
 		ElseIf $MyDate[2] = 2 AND $MyDate[3] = 23 Then
@@ -2494,11 +2494,11 @@ Func RenderCalendar()
 			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness+200, 0, $ClndrFont)
 		EndIf
 
-		
+
 		; Выделение сегодняшнего дня
 		Local $TempDate, $TempTime
 		_DateTimeSplit(_NowCalcDate(), $TempDate, $TempTime)
-		
+
 		If $MyDate[1] = $TempDate[1] AND $MyDate[2] = $TempDate[2] AND $MyDate[3] = $TempDate[3] Then
 			GUICtrlSetColor($xoffset, 0x000000)
 			GUICtrlSetFont($xoffset, $ClndrTextSize+0.5, $ClndrTextThickness+200, 0, $ClndrFont)
@@ -2507,16 +2507,16 @@ Func RenderCalendar()
 
 		; Отрисовка графика
 		$DaysAmount = _DateDiff( 'D',$StartDate, $InternalCycleDate)
-		
+
 		If $InternalCycleDate >= $StartDate Then
 			$calendxoffsettimetableid = $calendxoffsetfirstitem + $x + 11
 			If $DaysAmount-(Int($DaysAmount/($WorkDay+$OffDay))* ($WorkDay+$OffDay)) <= ($WorkDay-1) Then
 				GUICtrlSetBkColor ($calendxoffsettimetableid, 0xa2c4c9 )
-				
+
 				If $ClndrIsHoliday = 1 Then
 					GUICtrlSetBkColor ($calendxoffsettimetableid, 0xA8D7BD );b6d7a8
 				EndIf
-				
+
 				If $MyDate[2] = $ClndSelectedMonth Then
 					$ClndrWorkdayCount = $ClndrWorkdayCount +1
 					If $MyDate[3] <= 15 Then
@@ -2530,15 +2530,15 @@ Func RenderCalendar()
 				EndIf
 			EndIf
 		EndIf
-		
+
 		; Установка даты в ячейку
 		GUICtrlSetData ($xoffset, $MyDate[3])
 	Next
-	
+
 	; Установка стиля на место, это заплатка из-за смещения в цикле
 	GUICtrlSetStyle($ClndrYearLabel, $GUI_SS_DEFAULT_LABEL)
 	GUICtrlSetStyle($ClndrYearLabel, $SS_CENTER + $SS_CENTERIMAGE)
-	
+
 	GUICtrlSetData($ClndrWorkdayCountLabel, "Рабочих дней: " & $ClndrWorkdayCount)
 	GUICtrlSetData($ClndrOffdayCountLabel, "Выходных: " & $ClndrOffdayCount)
 EndFunc
@@ -2580,7 +2580,7 @@ EndFunc
 Func CalendarInitDay()
 	GUICtrlSetState($ClndrToCurrMonthButton,$GUI_HIDE)
 	GUICtrlSetState($ClndrMonthSalaryRemainDaysLabel,$GUI_SHOW)
-	
+
 	_DateTimeSplit(_NowCalcDate(), $MyDate, $MyTime)
 
 	Global $ClndSelectedDate = _NowCalcDate()
@@ -2591,10 +2591,10 @@ Func CalendarInitDay()
 
 	Global $ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
-	
+
 	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($ClndSelectedMonth))
 	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])
-	
+
 	RenderCalendar()
 EndFunc
 
@@ -2610,10 +2610,10 @@ Func CalendarMonthPrev()
 	$ClndSelectedDay = 1
 	$ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
-	
+
 	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($ClndSelectedMonth))
 	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])
-	
+
 	RenderCalendar()
 EndFunc
 
@@ -2629,10 +2629,10 @@ Func CalendarMonthNext()
 	$ClndSelectedDay = 1
 	$ClndOutputDate = $ClndSelectedYear & "/" & $ClndSelectedMonth & "/" & $ClndSelectedDay & " 00:00:00"
 	_DateTimeSplit($ClndOutputDate, $MyDate, $MyTime)
-	
+
 	GUICtrlSetData ($ClndrMonthLabel, DateToMonthShort($MyDate[2]))
 	GUICtrlSetData ($ClndrYearLabel, $MyDate[1])
-	
+
 	RenderCalendar()
 EndFunc
 
@@ -2644,12 +2644,12 @@ Func SalaryOpen()
 	Global $salarywindow = GUICreate("Зарплата", 155, 155)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "SalaryClose")
 	GUISetState(@SW_SHOW)
-	
+
 	Global $ClndrMonthSalaryDirtyLabel = GUICtrlCreateLabel("Грязными:", 20, 20, 150)
 	Global $ClndrMonthSalaryCleanLabel = GUICtrlCreateLabel("Чистыми:", 20, 40, 150)
 	Global $ClndrMonthSalaryAdvanceLabel = GUICtrlCreateLabel("В аванс:", 20, 65, 150)
 	Global $ClndrMonthSalaryRemainsLabel = GUICtrlCreateLabel("В зарплату:", 20, 85, 150)
-	
+
 	Global $ClndrHourSalaryInput = GUICtrlCreateInput ("296", 35, 116, 40, 20, $ES_CENTER)
 	Global $ClndrHourSalaryInputNote = GUICtrlCreateLabel("в час", 80, 119, 30)
 	Global $ClndrHourSalaryBtnOk = GUICtrlCreateButton("ок", 110, 116, 20, 20)
@@ -2657,18 +2657,18 @@ Func SalaryOpen()
 
 	$ClndrHourSalary = IniRead($sPath_ini, "CalendarDATA", "$ClndrHourSalary", "296")
 	GUICtrlSetData($ClndrHourSalaryInput, $ClndrHourSalary)
-	
-	
+
+
 	$ClndrMonthSalaryDirty = int($ClndrHourSalary*11*$ClndrWorkdayCount)
 	$ClndrMonthSalaryClean = int($ClndrHourSalary*11*$ClndrWorkdayCount*0.87)
 	$ClndrMonthSalaryAdvance = int(1200 * $ClndrAdvanceDays * 0.87)
 	$ClndrMonthSalaryRemains = $ClndrMonthSalaryClean - $ClndrMonthSalaryAdvance
-	
+
 	GUICtrlSetData($ClndrMonthSalaryDirtyLabel, "Грязными: " & $ClndrMonthSalaryDirty)
 	GUICtrlSetData($ClndrMonthSalaryCleanLabel, "Чистыми: " & $ClndrMonthSalaryClean)
 	GUICtrlSetData($ClndrMonthSalaryAdvanceLabel, "В аванс: " & $ClndrMonthSalaryAdvance)
 	GUICtrlSetData($ClndrMonthSalaryRemainsLabel, "В зарплату: " & $ClndrMonthSalaryRemains)
-	
+
 	GUICtrlSetFont($ClndrMonthSalaryDirtyLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrMonthSalaryCleanLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
 	GUICtrlSetFont($ClndrMonthSalaryAdvanceLabel, $ClndrTextSize+1, $ClndrTextThickness, 0)
@@ -2766,7 +2766,7 @@ Func SingleScript($iMode = 0)
 	; iMode=1  Wait for completion of predecessor scripts with the same name.
 	; iMode=2  Exit if other scripts with the same name are executing.
 	; iMode=3  Test, if other scripts with the same name are executing.
-	
+
 	; UDF Name:         _SingleScript.au3
 	; Author:       Exit   ( http://www.autoitscript.com/forum/user/45639-exit )
 	; SourceCode:   http://www.autoitscript.com/forum/index.php?showtopic=178681   Version: 2021.04.14
@@ -2824,7 +2824,7 @@ num+ backspace
 
 		$LettersFinded = 0
 		fastlangchangeF2()
-		
+
 		;ControlSend($orbh, "", $orbitext, $orbtext, 1)
 		;Send($orbtext, 1)
 
