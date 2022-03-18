@@ -102,15 +102,6 @@ Func CreateGUI()
 		InitializeGUI()
 	EndIf
 
-	$UpdateRequest = IniRead($sPath_ini, "ProgramDATA", "$UpdateRequest", "0")
-
-	If $UpdateRequest = 1 Then
-		$UpdateRequest = 0
-		IniWrite($sPath_ini, "ProgramDATA", "$UpdateRequest", $UpdateRequest)
-		InitializeGUI()
-		MsgBox(4096, "", $VersionText)
-	EndIf
-
 	$source = "\\zorb-srv\Operators\ORBScan\1\Папка\AutoIT\update channel\updater.exe"
 	$destination = @ScriptDir & "\"
 	If FileExists($source) Then
@@ -121,6 +112,17 @@ Func CreateGUI()
 			Runwait(@ComSpec & " /c " & "xcopy " & '"' & $source & '"' & ' "' & $destination & '"' & " /Y /H /I","",@SW_HIDE)
 		EndIf
 	EndIf
+
+	$UpdateRequest = IniRead($sPath_ini, "ProgramDATA", "$UpdateRequest", "0")
+
+	If $UpdateRequest = 1 Then
+		$UpdateRequest = 0
+		IniWrite($sPath_ini, "ProgramDATA", "$UpdateRequest", $UpdateRequest)
+		InitializeGUI()
+		MsgBox(4096, "", $VersionText)
+	EndIf
+
+
 
 	SingleScript(0)
 
