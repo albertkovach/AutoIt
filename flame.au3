@@ -14,8 +14,8 @@
 
 
 
-Global $VersionText = "ver 5.8"
-Global $VersionNumber = 58
+Global $VersionText = "ver 5.9"
+Global $VersionNumber = 59
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -617,7 +617,8 @@ EndFunc
 
 Func ChatOpen()
     $ChatIsOpen = 1
-	GUISetState(@SW_DISABLE, $mainwindow)
+	;GUISetState(@SW_DISABLE, $mainwindow)
+	GUISetState(@SW_HIDE, $mainwindow)
 	Global $ChatWindow = GUICreate("Chat",300,200)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "ChatClose")
 	GUISetState(@SW_SHOW)
@@ -678,7 +679,8 @@ EndFunc
 
 Func ChatClose()
 	$ChatIsOpen = 0
-   GUISetState(@SW_ENABLE, $mainwindow)
+   ;GUISetState(@SW_ENABLE, $mainwindow)
+   GUISetState(@SW_SHOW, $mainwindow)
    HotKeySet("{ENTER}")
    GUIDelete($ChatWindow)
    $RefreshTimer = TimerInit()
