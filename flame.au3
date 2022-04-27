@@ -691,7 +691,7 @@ EndFunc
 
 Func SETUPset()
    GUISetState(@SW_DISABLE, $mainwindow)
-   Global $INSERTsetwin = GUICreate("Настройки",300,230)
+   Global $INSERTsetwin = GUICreate("Настройки",300,250)
    GUISetOnEvent($GUI_EVENT_CLOSE, "SETUPsetClose")
    GUISetState(@SW_SHOW)
 
@@ -704,28 +704,34 @@ Func SETUPset()
    Global $orbichklabel = GUICtrlCreateLabel("Тут должен быть текст выбранного поля", 85, 110, 120, 50)
    GUICtrlSetOnEvent($orbichkbtn, "SETUPcheck")
 
-   Global $langfastchangechkbx = GUICtrlCreateCheckbox("Включить переключение языка на F1 - F2", 17, 140, 250)
+	Global $orbidtlnglabel = GUICtrlCreateLabel("Принудительный язык:", 15, 110+25, 118, 20)
+	Global $orbidtlngchkbxauto = GUICtrlCreateCheckbox("Auto", 155, 110+20)
+	Global $orbidtlngchkbxeng = GUICtrlCreateCheckbox("Eng", 200, 110+20)
+	Global $orbidtlngchkbxrus = GUICtrlCreateCheckbox("Rus", 245, 110+20)
+
+
+   Global $langfastchangechkbx = GUICtrlCreateCheckbox("Включить переключение языка на F1 - F2", 17, 140+20, 250)
    If $langfastchange = 1 Then
 	  GUICtrlSetState($langfastchangechkbx, $GUI_CHECKED)
    Else
 	  GUICtrlSetState($langfastchangechkbx, $GUI_UNCHECKED)
    EndIf
 
-   Global $clipboardpastechkbx = GUICtrlCreateCheckbox("Включить вставку на F3", 17, 160, 250)
+   Global $clipboardpastechkbx = GUICtrlCreateCheckbox("Включить вставку на F3", 17, 160+20, 250)
    If $clipboardpaste = 1 Then
 	  GUICtrlSetState($clipboardpastechkbx, $GUI_CHECKED)
    Else
 	  GUICtrlSetState($clipboardpastechkbx, $GUI_UNCHECKED)
    EndIf
 
-   Global $minimizetotraychkbx = GUICtrlCreateCheckbox("Сворачивать в трей", 17, 180, 250)
+   Global $minimizetotraychkbx = GUICtrlCreateCheckbox("Сворачивать в трей", 17, 180+20, 250)
    If $minimizetotray = 1 Then
 	  GUICtrlSetState($minimizetotraychkbx, $GUI_CHECKED)
    Else
 	  GUICtrlSetState($minimizetotraychkbx, $GUI_UNCHECKED)
    EndIf
 
-   Global $updatecheckbtn = GUICtrlCreateButton("Проверить обновления", 15, 205, 130, 20)
+   Global $updatecheckbtn = GUICtrlCreateButton("Проверить обновления", 15, 205+20, 130, 20)
    GUICtrlSetOnEvent($updatecheckbtn, "UpdateCheckManual")
 
    $orbtext = ControlGetText($orbh, "", $orbitext)
