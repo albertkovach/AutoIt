@@ -14,13 +14,13 @@
 
 
 
-Global $VersionText = "ver 5.9"
-Global $VersionNumber = 59
+Global $VersionText = "ver 6.1"
+Global $VersionNumber = 61
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
 IniWrite($sPath_ini, "ProgramDATA", "$VersionNumber", $VersionNumber)
-Global $VersionFileLocation = "\\zorb-srv\Operators\ORBScan\1\Папка\AutoIT\update channel\version.txt"
+Global $VersionFileLocation = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\version.txt"
 Global $UpdateCheckInternalDemand = 0
 
 Global $password = 'туктук'
@@ -43,8 +43,8 @@ Else
 	$GUIresizecaption = "+"
 EndIf
 
-Global $ClipFileLocation = "\\zorb-srv\Operators\ORBScan\1\Папка\AutoIT\update channel\clip.txt"
-Global $ChatFileLocation = "\\zorb-srv\Operators\ORBScan\1\Папка\AutoIT\update channel\chat.txt"
+Global $ClipFileLocation = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\clip.txt"
+Global $ChatFileLocation = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\chat.txt"
 Global $RefreshTimer = TimerInit()
 Global $RefreshTime = 700
 Global $ClipIsOpen = 0
@@ -102,7 +102,7 @@ Func CreateGUI()
 		InitializeGUI()
 	EndIf
 
-	$source = "\\zorb-srv\Operators\ORBScan\1\Папка\AutoIT\update channel\updater.exe"
+	$source = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\updater.exe"
 	$destination = @ScriptDir & "\"
 	If FileExists($source) Then
 		If FileExists(@ScriptDir & "/updater.exe") Then
@@ -345,6 +345,7 @@ Func LoadPrefs()
    Global $NumPLUSsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$NumPLUSsetAddBACKSPACE", "0")
    Global $NumPLUSsetDETECT = IniRead($sPath_ini, "EditSET", "$NumPLUSsetDETECT", "0")
 
+   Global $detectlang = IniRead($sPath_ini, "ProgramDATA", "$detectlang", "0")
    Global $langfastchange = IniRead($sPath_ini, "ProgramDATA", "$langfastchange", "0")
    Global $clipboardpaste = IniRead($sPath_ini, "ProgramDATA", "$clipboardpaste", "0")
    Global $minimizetotray = IniRead($sPath_ini, "ProgramDATA", "$minimizetotray", "0")
@@ -455,50 +456,62 @@ Func ApplyStates()
 	If $GUIsize = 1 Then
 		If $ctrl1setENABLE = 1 Then
 			GUICtrlSetStyle($ctrl1edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("^{1}", "ctrl1")
+			;HotKeySet("^{1}", "ctrl1")
+			HotKeySet("{F1}", "ctrl1")
 		Else
 			GUICtrlSetStyle($ctrl1edit, $ES_READONLY)
-			HotKeySet("^{1}")
+			;HotKeySet("^{1}")
+			HotKeySet("{F1}")
 		EndIf
 
 		If $ctrl2setENABLE = 1 Then
 			GUICtrlSetStyle($ctrl2edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("^{2}", "ctrl2")
+			;HotKeySet("^{2}", "ctrl2")
+			HotKeySet("{F2}", "ctrl2")
 		Else
 			GUICtrlSetStyle($ctrl2edit, $ES_READONLY)
-			HotKeySet("^{2}")
+			;HotKeySet("^{2}")
+			HotKeySet("{F2}")
 		EndIf
 
 		If $ctrl3setENABLE = 1 Then
 			GUICtrlSetStyle($ctrl3edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("^{3}", "ctrl3")
+			;HotKeySet("^{3}", "ctrl3")
+			HotKeySet("{F3}", "ctrl3")
 		Else
 			GUICtrlSetStyle($ctrl3edit, $ES_READONLY)
-			HotKeySet("^{3}")
+			;HotKeySet("^{3}")
+			HotKeySet("{F3}")
 		EndIf
 
 		If $ctrl4setENABLE = 1 Then
 			GUICtrlSetStyle($ctrl4edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("^{4}", "ctrl4")
+			;HotKeySet("^{4}", "ctrl4")
+			HotKeySet("{F4}", "ctrl4")
 		Else
 			GUICtrlSetStyle($ctrl4edit, $ES_READONLY)
-			HotKeySet("^{4}")
+			;HotKeySet("^{4}")
+			HotKeySet("{F4}")
 		EndIf
 
 		If $ctrl5setENABLE = 1 Then
 			GUICtrlSetStyle($ctrl5edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("^{5}", "ctrl5")
+			;HotKeySet("^{5}", "ctrl5")
+			HotKeySet("{F5}", "ctrl5")
 		Else
 			GUICtrlSetStyle($ctrl5edit, $ES_READONLY)
-			HotKeySet("^{5}")
+			;HotKeySet("^{5}")
+			HotKeySet("{F5}")
 		EndIf
 
 		If $ctrl6setENABLE = 1 Then
 			GUICtrlSetStyle($ctrl6edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("^{6}", "ctrl6")
+			;HotKeySet("^{6}", "ctrl6")
+			HotKeySet("{F6}", "ctrl6")
 		Else
 			GUICtrlSetStyle($ctrl6edit, $ES_READONLY)
-			HotKeySet("^{6}")
+			;HotKeySet("^{6}")
+			HotKeySet("{F6}")
 		EndIf
 	EndIf
 
@@ -522,12 +535,12 @@ Func HandleAndLangCheck()
 
    If WinGetHandle($orbhfulltext) <> 0 AND $langfastchange = 1 Then
 		GUICtrlSetStyle($LANGlabel, $GUI_HIDE)  ; Инвертировано, нелогично но работает
-		HotKeySet("{F1}", "fastlangchangeF1")
-		HotKeySet("{F2}", "fastlangchangeF2")
+		;HotKeySet("{F1}", "fastlangchangeF1")
+		;HotKeySet("{F2}", "fastlangchangeF2")
 	Else
 		GUICtrlSetStyle($LANGlabel, $GUI_SHOW)
-		HotKeySet("{F1}")
-		HotKeySet("{F2}")
+		;HotKeySet("{F1}")
+		;HotKeySet("{F2}")
 	EndIf
 
 EndFunc
@@ -701,14 +714,30 @@ Func SETUPset()
    Global $orbiinput = GUICtrlCreateInput ( "", 15, 77, 270)
 
    Global $orbichkbtn = GUICtrlCreateButton("Проверка", 15, 105, 60)
-   Global $orbichklabel = GUICtrlCreateLabel("Тут должен быть текст выбранного поля", 85, 110, 120, 50)
+   Global $orbichklabel = GUICtrlCreateLabel("Тут должен быть текст выбранного поля", 85, 110, 120)
    GUICtrlSetOnEvent($orbichkbtn, "SETUPcheck")
 
 	Global $orbidtlnglabel = GUICtrlCreateLabel("Принудительный язык:", 15, 110+25, 118, 20)
 	Global $orbidtlngchkbxauto = GUICtrlCreateCheckbox("Auto", 155, 110+20)
 	Global $orbidtlngchkbxeng = GUICtrlCreateCheckbox("Eng", 200, 110+20)
 	Global $orbidtlngchkbxrus = GUICtrlCreateCheckbox("Rus", 245, 110+20)
-
+	GUICtrlSetOnEvent($orbidtlngchkbxauto, "DetectLngChkAuto")
+	GUICtrlSetOnEvent($orbidtlngchkbxeng, "DetectLngChkEng")
+	GUICtrlSetOnEvent($orbidtlngchkbxrus, "DetectLngChkRus")
+	
+	If $detectlang = 0 Then
+	  GUICtrlSetState($orbidtlngchkbxauto, $GUI_CHECKED)
+	  GUICtrlSetState($orbidtlngchkbxeng, $GUI_UNCHECKED)
+	  GUICtrlSetState($orbidtlngchkbxrus, $GUI_UNCHECKED)
+	ElseIf $detectlang = 1 Then
+	  GUICtrlSetState($orbidtlngchkbxauto, $GUI_UNCHECKED)
+	  GUICtrlSetState($orbidtlngchkbxeng, $GUI_CHECKED)
+	  GUICtrlSetState($orbidtlngchkbxrus, $GUI_UNCHECKED)
+	ElseIf $detectlang = 1 Then
+	  GUICtrlSetState($orbidtlngchkbxauto, $GUI_UNCHECKED)
+	  GUICtrlSetState($orbidtlngchkbxeng, $GUI_UNCHECKED)
+	  GUICtrlSetState($orbidtlngchkbxrus, $GUI_CHECKED)
+	EndIf
 
    Global $langfastchangechkbx = GUICtrlCreateCheckbox("Включить переключение языка на F1 - F2", 17, 140+20, 250)
    If $langfastchange = 1 Then
@@ -744,6 +773,27 @@ Func SETUPset()
    GUICtrlSetData ($orbiinput, $orbitext)
 EndFunc
 
+Func DetectLngChkAuto()
+	If BitAND(GUICtrlRead($orbidtlngchkbxauto), $GUI_CHECKED) = $GUI_CHECKED Then
+		GUICtrlSetState($orbidtlngchkbxeng, $GUI_UNCHECKED)
+		GUICtrlSetState($orbidtlngchkbxrus, $GUI_UNCHECKED)
+	EndIf
+EndFunc
+
+Func DetectLngChkEng()
+	If BitAND(GUICtrlRead($orbidtlngchkbxeng), $GUI_CHECKED) = $GUI_CHECKED Then
+		GUICtrlSetState($orbidtlngchkbxauto, $GUI_UNCHECKED)
+		GUICtrlSetState($orbidtlngchkbxrus, $GUI_UNCHECKED)
+	EndIf
+EndFunc
+
+Func DetectLngChkRus()
+	If BitAND(GUICtrlRead($orbidtlngchkbxrus), $GUI_CHECKED) = $GUI_CHECKED Then
+		GUICtrlSetState($orbidtlngchkbxauto, $GUI_UNCHECKED)
+		GUICtrlSetState($orbidtlngchkbxeng, $GUI_UNCHECKED)
+	EndIf
+EndFunc
+	
 
 Func SETUPsetClose()
    $orbhtext = GUICtrlRead($orbhinput)
@@ -755,6 +805,16 @@ Func SETUPsetClose()
    $orbhfulltext = "[CLASS:" & $orbhtext & "]"
    $orbh = WinGetHandle($orbhfulltext)
    $orbtext = ControlGetText($orbh, "", $orbitext)
+
+   If BitAND(GUICtrlRead($orbidtlngchkbxauto), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $detectlang = 0
+   ElseIf BitAND(GUICtrlRead($orbidtlngchkbxeng), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $detectlang = 1
+   ElseIf BitAND(GUICtrlRead($orbidtlngchkbxrus), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $detectlang = 2
+   EndIf
+   IniWrite($sPath_ini, "ProgramDATA", "$detectlang", $detectlang)
+
 
    If BitAND(GUICtrlRead($langfastchangechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
 	 $langfastchange = 1
@@ -2094,11 +2154,31 @@ Local $LettersFinded = 0
    If WinGetHandle($orbhfulltext) = 0 Then
 		;MsgBox(0, 'Ошибка', "Нет подключения")
    Else
-		$orbtext = ControlGetText($orbh, "", $orbitext)
-		Send("{Enter}")
-		ControlSetText ($orbh, "", $orbitext, $orbtext)
-		Sleep(100)
-		Send("{Enter}")
+		If $detectlang = 0 Then
+			$orbtext = ControlGetText($orbh, "", $orbitext)
+			Send("{Enter}")
+			;ControlSetText ($orbh, "", $orbitext, $orbtext)
+			ControlSend ($orbh, "", $orbitext, $orbtext)
+			Sleep(100)
+			Send("{Enter}")
+		ElseIf $detectlang = 1 Then
+			fastlangchangeF2()
+			$orbtext = ControlGetText($orbh, "", $orbitext)
+			Send("{Enter}")
+			;ControlSetText ($orbh, "", $orbitext, $orbtext)
+			ControlSend ($orbh, "", $orbitext, $orbtext)
+			fastlangchangeF1()
+			Sleep(100)
+			Send("{Enter}")
+		ElseIf $detectlang = 2 Then
+			fastlangchangeF1()
+			$orbtext = ControlGetText($orbh, "", $orbitext)
+			Send("{Enter}")
+			;ControlSetText ($orbh, "", $orbitext, $orbtext)
+			ControlSend ($orbh, "", $orbitext, $orbtext)
+			Sleep(100)
+			Send("{Enter}")
+		EndIf
    EndIf
 EndFunc
 

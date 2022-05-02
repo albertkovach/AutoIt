@@ -3,7 +3,7 @@
 Update()
 
 Func Update()
-	$source = "\\zorb-srv\Operators\ORBScan\1\Папка\AutoIT\update channel\flame.exe"
+	$source = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\flame.exe"
 	$destinationfile = @ScriptDir & "\flame.exe"
 
 	Sleep (1000)
