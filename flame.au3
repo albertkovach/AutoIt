@@ -535,12 +535,12 @@ Func HandleAndLangCheck()
 
    If WinGetHandle($orbhfulltext) <> 0 AND $langfastchange = 1 Then
 		GUICtrlSetStyle($LANGlabel, $GUI_HIDE)  ; Инвертировано, нелогично но работает
-		;HotKeySet("{F1}", "fastlangchangeF1")
-		;HotKeySet("{F2}", "fastlangchangeF2")
+		HotKeySet("{F1}", "fastlangchangeF1")
+		HotKeySet("{F2}", "fastlangchangeF2")
 	Else
 		GUICtrlSetStyle($LANGlabel, $GUI_SHOW)
-		;HotKeySet("{F1}")
-		;HotKeySet("{F2}")
+		HotKeySet("{F1}")
+		HotKeySet("{F2}")
 	EndIf
 
 EndFunc
