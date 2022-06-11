@@ -535,12 +535,12 @@ Func HandleAndLangCheck()
 
    If WinGetHandle($orbhfulltext) <> 0 AND $langfastchange = 1 Then
 		GUICtrlSetStyle($LANGlabel, $GUI_HIDE)  ; Инвертировано, нелогично но работает
-		HotKeySet("{F1}", "fastlangchangeF1")
-		HotKeySet("{F2}", "fastlangchangeF2")
+		;HotKeySet("{F1}", "fastlangchangeF1")
+		;HotKeySet("{F2}", "fastlangchangeF2")
 	Else
 		GUICtrlSetStyle($LANGlabel, $GUI_SHOW)
-		HotKeySet("{F1}")
-		HotKeySet("{F2}")
+		;HotKeySet("{F1}")
+		;HotKeySet("{F2}")
 	EndIf
 
 EndFunc
@@ -2001,22 +2001,28 @@ Func INSERTcopy()
 EndFunc
 
 Func HOME()
-   If $HOMEsetENABLE = 1 Then
-		Send($HOMEtext)
-		If $HOMEsetAddBACKSPACE = 1 Then
-		  Send("{BACKSPACE}")
-		EndIf
-		If $HOMEsetAddENTER = 1 Then
-		  Send("{ENTER}")
-		EndIf
-   EndIf
+	MouseClick("left", 749, 541, 1, 0)
+	MouseClick("left", 526, 566, 1, 0)
+	MouseClick("left", 922, 674, 1, 0)
+   ;If $HOMEsetENABLE = 1 Then
+	;	Send($HOMEtext)
+	;	If $HOMEsetAddBACKSPACE = 1 Then
+	;	  Send("{BACKSPACE}")
+	;	EndIf
+	;	If $HOMEsetAddENTER = 1 Then
+	;	  Send("{ENTER}")
+	;	EndIf
+   ;EndIf
 EndFunc
 
 Func PGUP()
 	If $PGUPsetENABLE = 1 Then
 		If $PGUPsetMouseEnable = 1 Then
-			MouseClick("left", $PGUPsetMouse1x, $PGUPsetMouse1y, 1, 0)
-			MouseClick("left", $PGUPsetMouse2x, $PGUPsetMouse2y, 1, 0)
+			;MouseClick("left", $PGUPsetMouse1x, $PGUPsetMouse1y, 1, 0)
+			;MouseClick("left", $PGUPsetMouse2x, $PGUPsetMouse2y, 1, 0)
+			MouseClick("left", 749, 541, 1, 0)
+			MouseClick("left", 526, 590, 1, 0)
+			MouseClick("left", 922, 674, 1, 0)
 		Else
 			Send($PGUPtext)
 			If $PGUPsetAddBACKSPACE = 1 Then
