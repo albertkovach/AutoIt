@@ -14,8 +14,8 @@
 
 
 
-Global $VersionText = "ver 6.1"
-Global $VersionNumber = 61
+Global $VersionText = "ver 6.2b"
+Global $VersionNumber = 62
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -34,8 +34,8 @@ Global $GUIheight
 Global $GUIctrltoffset
 Global $GUIresizecaption = "-"
 If $GUIsize = 1 Then
-	$GUIheight = 312
-	$GUIctrltoffset = 0
+	$GUIheight = 367
+	$GUIctrltoffset = 55
 	$GUIresizecaption = "-"
 Else
 	$GUIheight = 175
@@ -206,6 +206,18 @@ Func InitializeGUI()
 	   Global $f6labelbtn = GUICtrlCreateButton("F6", 444, 200, 55, 20)
 	   Global $f6edit = GUICtrlCreateInput ( "", 445, 220, 200)
 	   GUICtrlSetOnEvent($f6labelbtn, "f6set")
+	   
+	   Global $f7labelbtn = GUICtrlCreateButton("F7", 14, 255, 55, 20)
+	   Global $f7edit = GUICtrlCreateInput ( "", 15, 275, 200)
+	   GUICtrlSetOnEvent($f7labelbtn, "f7set")
+
+	   Global $f8labelbtn = GUICtrlCreateButton("F8", 229, 255, 55, 20)
+	   Global $f8edit = GUICtrlCreateInput ( "", 230, 275, 200)
+	   GUICtrlSetOnEvent($f8labelbtn, "f8set")
+
+	   Global $f9labelbtn = GUICtrlCreateButton("F9", 444, 255, 55, 20)
+	   Global $f9edit = GUICtrlCreateInput ( "", 445, 275, 200)
+	   GUICtrlSetOnEvent($f9labelbtn, "f9set")
 	EndIf
 
    Global $numpluslabelbtn = GUICtrlCreateButton("NUM +", 84, 255+$GUIctrltoffset, 55, 20)
@@ -252,6 +264,9 @@ Func RefreshAndSave()
 	   $f4text = GUICtrlRead($f4edit)
 	   $f5text = GUICtrlRead($f5edit)
 	   $f6text = GUICtrlRead($f6edit)
+	   $f7text = GUICtrlRead($f7edit)
+	   $f8text = GUICtrlRead($f8edit)
+	   $f9text = GUICtrlRead($f9edit)
 	   $numplustext = GUICtrlRead($numplusedit)
 
 	   IniWrite($sPath_ini, "EditDATA", "$f1text", $f1text)
@@ -260,6 +275,9 @@ Func RefreshAndSave()
 	   IniWrite($sPath_ini, "EditDATA", "$f4text", $f4text)
 	   IniWrite($sPath_ini, "EditDATA", "$f5text", $f5text)
 	   IniWrite($sPath_ini, "EditDATA", "$f6text", $f6text)
+	   IniWrite($sPath_ini, "EditDATA", "$f7text", $f7text)
+	   IniWrite($sPath_ini, "EditDATA", "$f8text", $f8text)
+	   IniWrite($sPath_ini, "EditDATA", "$f9text", $f9text)
    EndIf
 
    If $NumPLUSsetDETECT = 0 Then
@@ -337,6 +355,21 @@ Func LoadPrefs()
 	   Global $f6setENABLE = IniRead($sPath_ini, "EditSET", "$f6setENABLE", "1")
 	   Global $f6setAddENTER = IniRead($sPath_ini, "EditSET", "$f6setAddENTER", "1")
 	   Global $f6setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f6setAddBACKSPACE", "0")
+	   
+	   Global $f7text = IniRead($sPath_ini, "EditDATA", "$f7text", "")
+	   Global $f7setENABLE = IniRead($sPath_ini, "EditSET", "$f7setENABLE", "1")
+	   Global $f7setAddENTER = IniRead($sPath_ini, "EditSET", "$f7setAddENTER", "1")
+	   Global $f7setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f7setAddBACKSPACE", "0")
+	   
+	   Global $f8text = IniRead($sPath_ini, "EditDATA", "$f8text", "")
+	   Global $f8setENABLE = IniRead($sPath_ini, "EditSET", "$f8setENABLE", "1")
+	   Global $f8setAddENTER = IniRead($sPath_ini, "EditSET", "$f8setAddENTER", "1")
+	   Global $f8setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f8setAddBACKSPACE", "0")
+	   
+	   Global $f9text = IniRead($sPath_ini, "EditDATA", "$f9text", "")
+	   Global $f9setENABLE = IniRead($sPath_ini, "EditSET", "$f9setENABLE", "1")
+	   Global $f9setAddENTER = IniRead($sPath_ini, "EditSET", "$f9setAddENTER", "1")
+	   Global $f9setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f9setAddBACKSPACE", "0")
    EndIf
 
    Global $numplustext = IniRead($sPath_ini, "EditDATA", "$numplustext", "")
@@ -367,12 +400,15 @@ Func LoadPrefs()
 	If $GUIsize = 1 Then
 		GUICtrlSetData ($f1edit, $f1text)
 		GUICtrlSetData ($f2edit, $f2text)
-
 		GUICtrlSetData ($f3edit, $f3text)
+		
 		GUICtrlSetData ($f4edit, $f4text)
-
 		GUICtrlSetData ($f5edit, $f5text)
 		GUICtrlSetData ($f6edit, $f6text)
+		
+		GUICtrlSetData ($f7edit, $f7text)
+		GUICtrlSetData ($f8edit, $f8text)
+		GUICtrlSetData ($f9edit, $f9text)
    EndIf
 
    GUICtrlSetData ($numplusedit, $numplustext)
@@ -513,9 +549,33 @@ Func ApplyStates()
 			;HotKeySet("^{6}")
 			HotKeySet("{F6}")
 		EndIf
+		
+		If $f7setENABLE = 1 Then
+			GUICtrlSetStyle($f7edit, $GUI_SS_DEFAULT_INPUT)
+			HotKeySet("{F7}", "f7")
+		Else
+			GUICtrlSetStyle($f7edit, $ES_READONLY)
+			HotKeySet("{F7}")
+		EndIf
+		
+		If $f8setENABLE = 1 Then
+			GUICtrlSetStyle($f8edit, $GUI_SS_DEFAULT_INPUT)
+			HotKeySet("{F8}", "f8")
+		Else
+			GUICtrlSetStyle($f8edit, $ES_READONLY)
+			HotKeySet("{F8}")
+		EndIf
+		
+		If $f9setENABLE = 1 Then
+			GUICtrlSetStyle($f9edit, $GUI_SS_DEFAULT_INPUT)
+			HotKeySet("{F9}", "f9")
+		Else
+			GUICtrlSetStyle($f9edit, $ES_READONLY)
+			HotKeySet("{F9}")
+		EndIf
 	EndIf
 
-   HotKeySet("{F8}", "Test")
+   ;HotKeySet("{F8}", "Test")
 
    DetectCheck()
    HandleAndLangCheck()
@@ -554,8 +614,8 @@ Func ResizeGUI()
 		$GUIresizecaption = "+"
 	Else
 		$GUIsize = 1
-		$GUIheight = 312
-		$GUIctrltoffset = 0
+		$GUIheight = 367
+		$GUIctrltoffset = 55
 		$GUIresizecaption = "-"
 	EndIf
 
@@ -1894,6 +1954,221 @@ Func f6setClose()
 EndFunc
 
 
+Func f7set()
+   GUISetState(@SW_DISABLE, $mainwindow)
+   Global $f7setwin = GUICreate("f7set",300,300)
+   GUISetState(@SW_SHOW)
+   Global $f7setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
+   Global $f7setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
+   Global $f7setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
+   Global $f7setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
+   Global $f7setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
+   Global $f7setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 70, 270, 250, 20)
+   GUICtrlSetData ($f7setEdit, $f7text)
+
+   If $f7setENABLE = 1 Then
+	  GUICtrlSetState($f7setENABLEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f7setENABLEchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   If $f7setAddENTER = 1 Then
+	  GUICtrlSetState($f7setAddENTERchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f7setAddENTERchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   If $f7setAddBACKSPACE = 1 Then
+	  GUICtrlSetState($f7setAddBACKSPACEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f7setAddBACKSPACEchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   GUISetOnEvent($GUI_EVENT_CLOSE, "f7setClose")
+EndFunc
+
+Func f7setClose()
+	$f7text = GUICtrlRead($f7setEdit)
+	GUICtrlSetData ($f7edit, $f7text)
+	IniWrite($sPath_ini, "EditDATA", "$f7text", $f7text)
+
+   If BitAND(GUICtrlRead($f7setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f7setENABLE = 1
+   Else
+	 $f7setENABLE = 0
+   EndIf
+
+   If BitAND(GUICtrlRead($f7setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f7setAddENTER = 1
+   Else
+	 $f7setAddENTER = 0
+   EndIf
+
+   If BitAND(GUICtrlRead($f7setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f7setAddBACKSPACE = 1
+   Else
+	 $f7setAddBACKSPACE = 0
+   EndIf
+
+   IniWrite($sPath_ini, "EditSET", "$f7setENABLE", $f7setENABLE)
+   IniWrite($sPath_ini, "EditSET", "$f7setAddENTER", $f7setAddENTER)
+   IniWrite($sPath_ini, "EditSET", "$f7setAddBACKSPACE", $f7setAddBACKSPACE)
+
+   If $f7setENABLE = 1 Then
+		GUICtrlSetStyle($f7edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("^{7}", "f7")
+   Else
+		GUICtrlSetStyle($f7edit, $ES_READONLY)
+   EndIf
+
+   GUISetState(@SW_ENABLE, $mainwindow)
+   GUIDelete($f7setwin)
+EndFunc
+
+
+Func f8set()
+   GUISetState(@SW_DISABLE, $mainwindow)
+   Global $f8setwin = GUICreate("f8set",300,300)
+   GUISetState(@SW_SHOW)
+   Global $f8setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
+   Global $f8setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
+   Global $f8setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
+   Global $f8setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
+   Global $f8setEdit = GUICtrlCreateEdit("", 15, 110, 280, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
+   Global $f8setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 80, 280, 250, 20)
+   GUICtrlSetData ($f8setEdit, $f8text)
+
+   If $f8setENABLE = 1 Then
+	  GUICtrlSetState($f8setENABLEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f8setENABLEchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   If $f8setAddENTER = 1 Then
+	  GUICtrlSetState($f8setAddENTERchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f8setAddENTERchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   If $f8setAddBACKSPACE = 1 Then
+	  GUICtrlSetState($f8setAddBACKSPACEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f8setAddBACKSPACEchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   GUISetOnEvent($GUI_EVENT_CLOSE, "f8setClose")
+EndFunc
+
+Func f8setClose()
+	$f8text = GUICtrlRead($f8setEdit)
+	GUICtrlSetData ($f8edit, $f8text)
+	IniWrite($sPath_ini, "EditDATA", "$f8text", $f8text)
+
+   If BitAND(GUICtrlRead($f8setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f8setENABLE = 1
+   Else
+	 $f8setENABLE = 0
+   EndIf
+
+   If BitAND(GUICtrlRead($f8setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f8setAddENTER = 1
+   Else
+	 $f8setAddENTER = 0
+   EndIf
+
+   If BitAND(GUICtrlRead($f8setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f8setAddBACKSPACE = 1
+   Else
+	 $f8setAddBACKSPACE = 0
+   EndIf
+
+   IniWrite($sPath_ini, "EditSET", "$f8setENABLE", $f8setENABLE)
+   IniWrite($sPath_ini, "EditSET", "$f8setAddENTER", $f8setAddENTER)
+   IniWrite($sPath_ini, "EditSET", "$f8setAddBACKSPACE", $f8setAddBACKSPACE)
+
+   If $f8setENABLE = 1 Then
+		GUICtrlSetStyle($f8edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("^{8}", "f8")
+   Else
+		GUICtrlSetStyle($f8edit, $ES_READONLY)
+   EndIf
+
+   GUISetState(@SW_ENABLE, $mainwindow)
+   GUIDelete($f8setwin)
+EndFunc
+
+
+Func f9set()
+   GUISetState(@SW_DISABLE, $mainwindow)
+   Global $f9setwin = GUICreate("f9set",300,300)
+   GUISetState(@SW_SHOW)
+   Global $f9setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
+   Global $f9setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
+   Global $f9setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
+   Global $f9setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 90, 90, 250, 20)
+   Global $f9setEdit = GUICtrlCreateEdit("", 15, 110, 290, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
+   Global $f9setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 90, 290, 250, 20)
+   GUICtrlSetData ($f9setEdit, $f9text)
+
+   If $f9setENABLE = 1 Then
+	  GUICtrlSetState($f9setENABLEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f9setENABLEchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   If $f9setAddENTER = 1 Then
+	  GUICtrlSetState($f9setAddENTERchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f9setAddENTERchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   If $f9setAddBACKSPACE = 1 Then
+	  GUICtrlSetState($f9setAddBACKSPACEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($f9setAddBACKSPACEchkbx, $GUI_UNCHECKED)
+   EndIf
+
+   GUISetOnEvent($GUI_EVENT_CLOSE, "f9setClose")
+EndFunc
+
+Func f9setClose()
+	$f9text = GUICtrlRead($f9setEdit)
+	GUICtrlSetData ($f9edit, $f9text)
+	IniWrite($sPath_ini, "EditDATA", "$f9text", $f9text)
+
+   If BitAND(GUICtrlRead($f9setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f9setENABLE = 1
+   Else
+	 $f9setENABLE = 0
+   EndIf
+
+   If BitAND(GUICtrlRead($f9setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f9setAddENTER = 1
+   Else
+	 $f9setAddENTER = 0
+   EndIf
+
+   If BitAND(GUICtrlRead($f9setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $f9setAddBACKSPACE = 1
+   Else
+	 $f9setAddBACKSPACE = 0
+   EndIf
+
+   IniWrite($sPath_ini, "EditSET", "$f9setENABLE", $f9setENABLE)
+   IniWrite($sPath_ini, "EditSET", "$f9setAddENTER", $f9setAddENTER)
+   IniWrite($sPath_ini, "EditSET", "$f9setAddBACKSPACE", $f9setAddBACKSPACE)
+
+   If $f9setENABLE = 1 Then
+		GUICtrlSetStyle($f9edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("^{9}", "f9")
+   Else
+		GUICtrlSetStyle($f9edit, $ES_READONLY)
+   EndIf
+
+   GUISetState(@SW_ENABLE, $mainwindow)
+   GUIDelete($f9setwin)
+EndFunc
+
 
 Func NumPLUSset()
    GUISetState(@SW_DISABLE, $mainwindow)
@@ -2131,6 +2406,42 @@ Func f6()
 		  Send("{BACKSPACE}")
 		EndIf
 		If $f6setAddENTER = 1 Then
+		  Send("{ENTER}")
+		EndIf
+   EndIf
+EndFunc
+
+Func f7()
+   If $f7setENABLE = 1 Then
+		Send($f7text)
+		If $f7setAddBACKSPACE = 1 Then
+		  Send("{BACKSPACE}")
+		EndIf
+		If $f7setAddENTER = 1 Then
+		  Send("{ENTER}")
+		EndIf
+   EndIf
+EndFunc
+
+Func f8()
+   If $f8setENABLE = 1 Then
+		Send($f8text)
+		If $f8setAddBACKSPACE = 1 Then
+		  Send("{BACKSPACE}")
+		EndIf
+		If $f8setAddENTER = 1 Then
+		  Send("{ENTER}")
+		EndIf
+   EndIf
+EndFunc
+
+Func f9()
+   If $f9setENABLE = 1 Then
+		Send($f9text)
+		If $f9setAddBACKSPACE = 1 Then
+		  Send("{BACKSPACE}")
+		EndIf
+		If $f9setAddENTER = 1 Then
 		  Send("{ENTER}")
 		EndIf
    EndIf
