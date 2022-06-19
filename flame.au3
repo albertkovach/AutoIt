@@ -386,7 +386,8 @@ Func LoadPrefs()
    $orbhtext = IniRead($sPath_ini, "DetectDATA", "$orbhtext", "WindowsForms10.Window.8.app.0.21093c0_r6_ad1")
    $orbitext = IniRead($sPath_ini, "DetectDATA", "$orbitext", "WindowsForms10.EDIT.app.0.21093c0_r6_ad11")
    ;$orbhtext = "WindowsForms10.Window.8.app.0.21093c0_r6_ad1"
-   $orbhfulltext = "[CLASS:" & $orbhtext & "]"
+   ;$orbhfulltext = "[CLASS:" & $orbhtext & "]"
+   $orbhfulltext = "[HANDLE:" & $orbhtext & "]"
    $orbh = WinGetHandle($orbhfulltext)
 
    GUICtrlSetData ($INSERTedit, $INSERTtext)
@@ -862,9 +863,11 @@ Func SETUPsetClose()
    IniWrite($sPath_ini, "DetectDATA", "$orbhtext", $orbhtext)
    IniWrite($sPath_ini, "DetectDATA", "$orbitext", $orbitext)
 
-   $orbhfulltext = "[CLASS:" & $orbhtext & "]"
+   ;$orbhfulltext = "[CLASS:" & $orbhtext & "]"
+   $orbhfulltext = "[HANDLE:" & $orbhtext & "]"
    $orbh = WinGetHandle($orbhfulltext)
-   $orbtext = ControlGetText($orbh, "", $orbitext)
+   ;$orbtext = ControlGetText($orbh, "", $orbitext)
+   $orbtext = ControlGetText($orbh, "", "[HANDLE:" & $orbitext & "]")
 
    If BitAND(GUICtrlRead($orbidtlngchkbxauto), $GUI_CHECKED) = $GUI_CHECKED Then
 	 $detectlang = 0
@@ -921,7 +924,8 @@ Func SETUPcheck()
    IniWrite($sPath_ini, "DetectDATA", "$orbhtext", $orbhtext)
    IniWrite($sPath_ini, "DetectDATA", "$orbitext", $orbitext)
 
-   $orbhfulltext = "[CLASS:" & $orbhtext & "]"
+   ;$orbhfulltext = "[CLASS:" & $orbhtext & "]"
+   $orbhfulltext = "[HANDLE:" & $orbhtext & "]"
    $orbh = WinGetHandle($orbhfulltext)
    $orbtext = ControlGetText($orbh, "", $orbitext)
 
