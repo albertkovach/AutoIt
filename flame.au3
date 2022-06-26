@@ -769,7 +769,7 @@ Func SETUPset()
    GUISetOnEvent($GUI_EVENT_CLOSE, "SETUPsetClose")
    GUISetState(@SW_SHOW)
 
-   Global $orbhlabel = GUICtrlCreateLabel("ORBita window class:", 15, 15, 120, 20)
+   Global $orbhlabel = GUICtrlCreateLabel("ORBita window Handle:", 15, 15, 120, 20)
    Global $orbhinput = GUICtrlCreateInput ( "", 15, 32, 270) 						; y + 17
    Global $orbilabel = GUICtrlCreateLabel("Control ClassnameNN:", 15, 60, 120, 20)  ; y + 28
    Global $orbiinput = GUICtrlCreateInput ( "", 15, 77, 270)
@@ -3216,7 +3216,20 @@ EndFunc
 
 #comments-start
 
+Обработчик строки памяти
+	служебные символы и команды для мыши
+	класс для отработки блоков текста и команд
+	убрать конфигуратор мыши на PGUP PGDW
+Добавить F9-F12
+База .ini файлов с pop-up window для быстрого выбора (возможно, на F12)
+Универсальные классы для окон настроек
+
+
 Интеллектуальная обработка в Detect - автопереключение языка при нахождении русских или англ. символов
+
+
+
+
 
 	;MsgBox(4096, "", "Записано")
 num+ backspace
