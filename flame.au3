@@ -220,7 +220,7 @@ Func InitializeGUI()
 	   GUICtrlSetOnEvent($f9labelbtn, "f9set")
 	EndIf
 
-   Global $numpluslabelbtn = GUICtrlCreateButton("NUM +", 84, 255+$GUIctrltoffset, 55, 20)
+   Global $numpluslabelbtn = GUICtrlCreateButton("Test", 84, 255+$GUIctrltoffset, 55, 20)
    Global $numplusedit = GUICtrlCreateInput ( "", 85, 275+$GUIctrltoffset, 200)
    GUICtrlSetOnEvent($NumPLUSlabelbtn, "NumPLUSset")
 
