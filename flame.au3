@@ -5,6 +5,7 @@
 #include <Timers.au3>
 #include <File.au3>
 #include <Misc.au3>
+#include <Array.au3>
 
 #include <Date.au3>
 #include <StaticConstants.au3>
@@ -14,8 +15,8 @@
 
 
 
-Global $VersionText = "ver 6.2b"
-Global $VersionNumber = 62
+Global $VersionText = "ver 6.5"
+Global $VersionNumber = 65
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -98,9 +99,6 @@ Func CreateGUI()
 	Global $passwordbtn = GUICtrlCreateButton("Запомнить", 70, 60, 90)
 	GUICtrlSetOnEvent($passwordbtn, "Unlocker")
 
-	If $NoPassword = 1 Then
-		InitializeGUI()
-	EndIf
 
 	$source = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\updater.exe"
 	$destination = @ScriptDir & "\"
@@ -111,6 +109,10 @@ Func CreateGUI()
 			Sleep (500)
 			Runwait(@ComSpec & " /c " & "xcopy " & '"' & $source & '"' & ' "' & $destination & '"' & " /Y /H /I","",@SW_HIDE)
 		EndIf
+	EndIf
+	
+	If $NoPassword = 1 Then
+		InitializeGUI()
 	EndIf
 
 	$UpdateRequest = IniRead($sPath_ini, "ProgramDATA", "$UpdateRequest", "0")
@@ -304,11 +306,6 @@ Func LoadPrefs()
    Global $PGUPsetENABLE = IniRead($sPath_ini, "EditSET", "$PGUPsetENABLE", "1")
    Global $PGUPsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGUPsetAddENTER", "1")
    Global $PGUPsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", "0")
-   Global $PGUPsetMouseEnable = IniRead($sPath_ini, "EditSET", "$PGUPsetMouseEnable", "0")
-   Global $PGUPsetMouse1x = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse1x", "")
-   Global $PGUPsetMouse1y = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse1y", "")
-   Global $PGUPsetMouse2x = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse2x", "")
-   Global $PGUPsetMouse2y = IniRead($sPath_ini, "EditSET", "$PGUPsetMouse2y", "")
 
    Global $ENDtext = IniRead($sPath_ini, "EditDATA", "$ENDtext", "")
    Global $ENDsetENABLE = IniRead($sPath_ini, "EditSET", "$ENDsetENABLE", "1")
@@ -319,11 +316,6 @@ Func LoadPrefs()
    Global $PGDNsetENABLE = IniRead($sPath_ini, "EditSET", "$PGDNsetENABLE", "1")
    Global $PGDNsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGDNsetAddENTER", "1")
    Global $PGDNsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", "0")
-   Global $PGDNsetMouseEnable = IniRead($sPath_ini, "EditSET", "$PGDNsetMouseEnable", "0")
-   Global $PGDNsetMouse1x = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse1x", "")
-   Global $PGDNsetMouse1y = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse1y", "")
-   Global $PGDNsetMouse2x = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse2x", "")
-   Global $PGDNsetMouse2y = IniRead($sPath_ini, "EditSET", "$PGDNsetMouse2y", "")
 
    If $GUIsize = 1 Then
 	   Global $f1text = IniRead($sPath_ini, "EditDATA", "$f1text", "")
@@ -445,21 +437,13 @@ Func ApplyStates()
 
 
 
-	If $PGUPsetENABLE = 1 Then
-		If $PGUPsetMouseEnable = 1 Then
-			GUICtrlSetStyle($PGUPedit, $ES_READONLY)
-			GUICtrlSetData ($PGUPedit, "using mouse clicks")
-		Else
-			GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetData ($PGUPedit, $PGUPtext)
-		EndIf
-
-		HotKeySet("{PGUP}", "PGUP")
-	Else
+   If $PGUPsetENABLE = 1 Then
+		GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
+		   HotKeySet("{PGUP}", "PGUP")
+   Else
 		GUICtrlSetStyle($PGUPedit, $ES_READONLY)
-		GUICtrlSetData ($PGUPedit, $PGUPtext)
 		HotKeySet("{PGUP}")
-	EndIf
+   EndIf
 
 
 
@@ -473,21 +457,13 @@ Func ApplyStates()
 
 
 
-	If $PGDNsetENABLE = 1 Then
-		If $PGDNsetMouseEnable = 1 Then
-			GUICtrlSetStyle($PGDNedit, $ES_READONLY)
-			GUICtrlSetData ($PGDNedit, "using mouse clicks")
-		Else
-			GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetData ($PGDNedit, $PGDNtext)
-		EndIf
-
-		HotKeySet("{PGDN}", "PGDN")
-	Else
+   If $PGDNsetENABLE = 1 Then
+		GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
+		   HotKeySet("{PGDN}", "PGDN")
+   Else
 		GUICtrlSetStyle($PGDNedit, $ES_READONLY)
-		GUICtrlSetData ($PGDNedit, $PGDNtext)
 		HotKeySet("{PGDN}")
-	EndIf
+   EndIf
 
 
 	If $GUIsize = 1 Then
@@ -596,12 +572,12 @@ Func HandleAndLangCheck()
 
    If WinGetHandle($orbhfulltext) <> 0 AND $langfastchange = 1 Then
 		GUICtrlSetStyle($LANGlabel, $GUI_HIDE)  ; Инвертировано, нелогично но работает
-		;HotKeySet("{F1}", "fastlangchangeF1")
-		;HotKeySet("{F2}", "fastlangchangeF2")
+		HotKeySet("{F1}", "fastlangchangeF1")
+		HotKeySet("{F2}", "fastlangchangeF2")
 	Else
 		GUICtrlSetStyle($LANGlabel, $GUI_SHOW)
-		;HotKeySet("{F1}")
-		;HotKeySet("{F2}")
+		HotKeySet("{F1}")
+		HotKeySet("{F2}")
 	EndIf
 
 EndFunc
@@ -943,7 +919,8 @@ Func INSERTset()
    Global $INSERTsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $INSERTsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $INSERTsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $INSERTsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $INSERTsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($INSERTsetHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($INSERTsetEdit, $INSERTtext)
 
    If $INSERTsetENABLE = 1 Then
@@ -1010,7 +987,8 @@ Func HOMEset()
    Global $HOMEsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $HOMEsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $HOMEsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $HOMEsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $HOMEsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($HOMEsetHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($HOMEsetEdit, $HOMEtext)
 
    If $HOMEsetENABLE = 1 Then
@@ -1070,195 +1048,70 @@ EndFunc
 
 Func PGUPset()
    GUISetState(@SW_DISABLE, $mainwindow)
-   Global $PGUPsetwin = GUICreate("PGUPset",400,300)
+   Global $PGUPsetwin = GUICreate("PGUPset",300,300)
    GUISetState(@SW_SHOW)
    Global $PGUPsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
    Global $PGUPsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
    Global $PGUPsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $PGUPsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $PGUPsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $PGUPsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $PGUPsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($PGUPsetHTbtn, "CommandInterpreterHowTo")
+   GUICtrlSetData ($PGUPsetEdit, $PGUPtext)
 
+   If $PGUPsetENABLE = 1 Then
+	  GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_UNCHECKED)
+   EndIf
 
-	Local $yadd = -70
+   If $PGUPsetAddENTER = 1 Then
+	  GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_UNCHECKED)
+   EndIf
 
-	Global $PGUPsetMouseMainLabel = GUICtrlCreateLabel("Нажатия по координатам", 290, 20, 100, 40, $SS_CENTER)
-	Global $PGUPsetMouseEnablechkbx = GUICtrlCreateCheckbox("Включить", 300, 55)
+   If $PGUPsetAddBACKSPACE = 1 Then
+	  GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
+   EndIf
 
-	Global $PGUPsetMouse1Label = GUICtrlCreateLabel("Первое нажатие", 300, 85, 140, 20)
-	Global $PGUPsetMouse1xLabel = GUICtrlCreateLabel("X :", 320, 110, 20, 20)
-	Global $PGUPsetMouse1yLabel = GUICtrlCreateLabel("Y :", 320, 135, 20, 20)
-	Global $PGUPsetMouse1xEdit = GUICtrlCreateInput ( "", 340, 105, 40, 20)
-	Global $PGUPsetMouse1yEdit = GUICtrlCreateInput ( "", 340, 130, 40, 20)
-	Global $PGUPsetMouse2Label = GUICtrlCreateLabel("Второе нажатие", 300, 155, 140, 20)
-	Global $PGUPsetMouse2xLabel = GUICtrlCreateLabel("X :", 320, 180, 20, 20)
-	Global $PGUPsetMouse2yLabel = GUICtrlCreateLabel("Y :", 320, 205, 20, 20)
-	Global $PGUPsetMouse2xEdit = GUICtrlCreateInput ( "", 340, 175, 40, 20)
-	Global $PGUPsetMouse2yEdit = GUICtrlCreateInput ( "", 340, 200, 40, 20)
-
-	Global $PGUPsetMouse1btn = GUICtrlCreateButton("Сканирование -> Сканировать", 298, 230, 84, 30, $BS_MULTILINE + $BS_VCENTER)
-	Global $PGUPsetMouse2btn = GUICtrlCreateButton("Ввод данных -> Новая папка", 298, 265, 84, 30, $BS_MULTILINE + $BS_VCENTER)
-
-	GUICtrlSetOnEvent($PGUPsetENABLEchkbx, "PGUPsetStates")
-	GUICtrlSetOnEvent($PGUPsetMouseEnablechkbx, "PGUPsetStates")
-	GUICtrlSetOnEvent($PGUPsetMouse1btn, "PGUPsetMouseScan")
-	GUICtrlSetOnEvent($PGUPsetMouse2btn, "PGUPsetMouseIndex")
-
-	GUICtrlSetData ($PGUPsetMouse1xEdit, $PGUPsetMouse1x)
-	GUICtrlSetData ($PGUPsetMouse1yEdit, $PGUPsetMouse1y)
-	GUICtrlSetData ($PGUPsetMouse2xEdit, $PGUPsetMouse2x)
-	GUICtrlSetData ($PGUPsetMouse2yEdit, $PGUPsetMouse2y)
-
-	GUICtrlSetData ($PGUPsetEdit, $PGUPtext)
-
-	If $PGUPsetENABLE = 1 Then
-		GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_UNCHECKED)
-	EndIf
-
-	If $PGUPsetAddENTER = 1 Then
-		GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_UNCHECKED)
-	EndIf
-
-	If $PGUPsetAddBACKSPACE = 1 Then
-		GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-	EndIf
-
-	If $PGUPsetMouseEnable = 1 Then
-		GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_UNCHECKED)
-	EndIf
-
-
-	PGUPsetStates()
-
-	GUISetOnEvent($GUI_EVENT_CLOSE, "PGUPsetClose")
+   GUISetOnEvent($GUI_EVENT_CLOSE, "PGUPsetClose")
 EndFunc
 
-
-Func PGUPsetStates()
-	If BitAND(GUICtrlRead($PGUPsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGUPsetMouseEnable = 1
-	Else
-		$PGUPsetMouseEnable = 0
-	EndIf
-
-	If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGUPsetENABLE = 1
-	Else
-		$PGUPsetENABLE = 0
-	EndIf
-
-	If $PGUPsetENABLE = 1 Then
-		If $PGUPsetMouseEnable = 1 Then
-			GUICtrlSetStyle($PGUPedit, $ES_READONLY)
-			GUICtrlSetStyle($PGUPsetEdit, $ES_READONLY)
-
-			GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_ENABLE)
-			GUICtrlSetState($PGUPsetMouse1btn, $GUI_SHOW)
-			GUICtrlSetState($PGUPsetMouse2btn, $GUI_SHOW)
-			GUICtrlSetStyle($PGUPsetMouse1xEdit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGUPsetMouse1yEdit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGUPsetMouse2xEdit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGUPsetMouse2yEdit, $GUI_SS_DEFAULT_INPUT)
-		Else
-			GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGUPsetEdit, $GUI_SS_DEFAULT_INPUT)
-
-			GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_ENABLE)
-			GUICtrlSetState($PGUPsetMouse1btn, $GUI_HIDE)
-			GUICtrlSetState($PGUPsetMouse2btn, $GUI_HIDE)
-			GUICtrlSetStyle($PGUPsetMouse1xEdit, $ES_READONLY)
-			GUICtrlSetStyle($PGUPsetMouse1yEdit, $ES_READONLY)
-			GUICtrlSetStyle($PGUPsetMouse2xEdit, $ES_READONLY)
-			GUICtrlSetStyle($PGUPsetMouse2yEdit, $ES_READONLY)
-
-		EndIf
-	Else
-		GUICtrlSetStyle($PGUPedit, $ES_READONLY)
-		GUICtrlSetStyle($PGUPsetEdit, $ES_READONLY)
-
-		GUICtrlSetState($PGUPsetMouseEnablechkbx, $GUI_DISABLE)
-		GUICtrlSetState($PGUPsetMouse1btn, $GUI_HIDE)
-		GUICtrlSetState($PGUPsetMouse2btn, $GUI_HIDE)
-
-		GUICtrlSetStyle($PGUPsetMouse1xEdit, $ES_READONLY)
-		GUICtrlSetStyle($PGUPsetMouse1yEdit, $ES_READONLY)
-		GUICtrlSetStyle($PGUPsetMouse2xEdit, $ES_READONLY)
-		GUICtrlSetStyle($PGUPsetMouse2yEdit, $ES_READONLY)
-	EndIf
-
-EndFunc
-
-
-Func PGUPsetMouseScan()
-	GUICtrlSetData ($PGUPsetMouse1xEdit, 167)
-	GUICtrlSetData ($PGUPsetMouse1yEdit, 161)
-	GUICtrlSetData ($PGUPsetMouse2xEdit, 120)
-	GUICtrlSetData ($PGUPsetMouse2yEdit, 88)
-EndFunc
-
-Func PGUPsetMouseIndex()
-	GUICtrlSetData ($PGUPsetMouse1xEdit, 58)
-	GUICtrlSetData ($PGUPsetMouse1yEdit, 158)
-	GUICtrlSetData ($PGUPsetMouse2xEdit, 518)
-	GUICtrlSetData ($PGUPsetMouse2yEdit, 199)
-EndFunc
 
 Func PGUPsetClose()
 	$PGUPtext = GUICtrlRead($PGUPsetEdit)
 	GUICtrlSetData ($PGUPedit, $PGUPtext)
 	IniWrite($sPath_ini, "EditDATA", "$PGUPtext", $PGUPtext)
 
-	If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGUPsetENABLE = 1
-	Else
-		$PGUPsetENABLE = 0
-	EndIf
+   If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $PGUPsetENABLE = 1
+   Else
+	 $PGUPsetENABLE = 0
+   EndIf
 
-	If BitAND(GUICtrlRead($PGUPsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGUPsetAddENTER = 1
-	Else
-		$PGUPsetAddENTER = 0
-	EndIf
+   If BitAND(GUICtrlRead($PGUPsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $PGUPsetAddENTER = 1
+   Else
+	 $PGUPsetAddENTER = 0
+   EndIf
 
-	If BitAND(GUICtrlRead($PGUPsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGUPsetAddBACKSPACE = 1
-	Else
-		$PGUPsetAddBACKSPACE = 0
-	EndIf
+   If BitAND(GUICtrlRead($PGUPsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $PGUPsetAddBACKSPACE = 1
+   Else
+	 $PGUPsetAddBACKSPACE = 0
+   EndIf
 
-	If BitAND(GUICtrlRead($PGUPsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGUPsetMouseEnable = 1
-	Else
-		$PGUPsetMouseEnable = 0
-	EndIf
+   IniWrite($sPath_ini, "EditSET", "$PGUPsetENABLE", $PGUPsetENABLE)
+   IniWrite($sPath_ini, "EditSET", "$PGUPsetAddENTER", $PGUPsetAddENTER)
+   IniWrite($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", $PGUPsetAddBACKSPACE)
 
-	$PGUPsetMouse1x = GUICtrlRead($PGUPsetMouse1xEdit)
-	$PGUPsetMouse1y = GUICtrlRead($PGUPsetMouse1yEdit)
-	$PGUPsetMouse2x = GUICtrlRead($PGUPsetMouse2xEdit)
-	$PGUPsetMouse2y = GUICtrlRead($PGUPsetMouse2yEdit)
+   ApplyStates()
 
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetENABLE", $PGUPsetENABLE)
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetAddENTER", $PGUPsetAddENTER)
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", $PGUPsetAddBACKSPACE)
-
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouseEnable", $PGUPsetMouseEnable)
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse1x", $PGUPsetMouse1x)
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse1y", $PGUPsetMouse1y)
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse2x", $PGUPsetMouse2x)
-	IniWrite($sPath_ini, "EditSET", "$PGUPsetMouse2y", $PGUPsetMouse2y)
-
-	ApplyStates()
-
-	GUISetState(@SW_ENABLE, $mainwindow)
-	GUIDelete($PGUPsetwin)
+   GUISetState(@SW_ENABLE, $mainwindow)
+   GUIDelete($PGUPsetwin)
 EndFunc
 
 
@@ -1271,7 +1124,8 @@ Func ENDset()
    Global $ENDsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $ENDsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $ENDsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $ENDsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $ENDsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($ENDsetHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($ENDsetEdit, $ENDtext)
 
    If $ENDsetENABLE = 1 Then
@@ -1329,148 +1183,38 @@ Func ENDsetClose()
 EndFunc
 
 
-
 Func PGDNset()
    GUISetState(@SW_DISABLE, $mainwindow)
-   Global $PGDNsetwin = GUICreate("PGDNset",400,300)
+   Global $PGDNsetwin = GUICreate("PGDNset",300,300)
    GUISetState(@SW_SHOW)
    Global $PGDNsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
    Global $PGDNsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
    Global $PGDNsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $PGDNsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $PGDNsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $PGDNsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $PGDNsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($PGDNsetHTbtn, "CommandInterpreterHowTo")
+   GUICtrlSetData ($PGDNsetEdit, $PGDNtext)
 
+   If $PGDNsetENABLE = 1 Then
+	  GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_UNCHECKED)
+   EndIf
 
-	Local $yadd = -70
+   If $PGDNsetAddENTER = 1 Then
+	  GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_UNCHECKED)
+   EndIf
 
-	Global $PGDNsetMouseMainLabel = GUICtrlCreateLabel("Нажатия по координатам", 290, 20, 100, 40, $SS_CENTER)
-	Global $PGDNsetMouseEnablechkbx = GUICtrlCreateCheckbox("Включить", 300, 55)
+   If $PGDNsetAddBACKSPACE = 1 Then
+	  GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_CHECKED)
+   Else
+	  GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
+   EndIf
 
-	Global $PGDNsetMouse1Label = GUICtrlCreateLabel("Первое нажатие", 300, 85, 140, 20)
-	Global $PGDNsetMouse1xLabel = GUICtrlCreateLabel("X :", 320, 110, 20, 20)
-	Global $PGDNsetMouse1yLabel = GUICtrlCreateLabel("Y :", 320, 135, 20, 20)
-	Global $PGDNsetMouse1xEdit = GUICtrlCreateInput ( "", 340, 105, 40, 20)
-	Global $PGDNsetMouse1yEdit = GUICtrlCreateInput ( "", 340, 130, 40, 20)
-	Global $PGDNsetMouse2Label = GUICtrlCreateLabel("Второе нажатие", 300, 155, 140, 20)
-	Global $PGDNsetMouse2xLabel = GUICtrlCreateLabel("X :", 320, 180, 20, 20)
-	Global $PGDNsetMouse2yLabel = GUICtrlCreateLabel("Y :", 320, 205, 20, 20)
-	Global $PGDNsetMouse2xEdit = GUICtrlCreateInput ( "", 340, 175, 40, 20)
-	Global $PGDNsetMouse2yEdit = GUICtrlCreateInput ( "", 340, 200, 40, 20)
-
-	Global $PGDNsetMouse1btn = GUICtrlCreateButton("Сканирование -> Сканировать", 298, 230, 84, 30, $BS_MULTILINE + $BS_VCENTER)
-	Global $PGDNsetMouse2btn = GUICtrlCreateButton("Ввод данных -> Новая папка", 298, 265, 84, 30, $BS_MULTILINE + $BS_VCENTER)
-
-	GUICtrlSetOnEvent($PGDNsetENABLEchkbx, "PGDNsetStates")
-	GUICtrlSetOnEvent($PGDNsetMouseEnablechkbx, "PGDNsetStates")
-	GUICtrlSetOnEvent($PGDNsetMouse1btn, "PGDNsetMouseScan")
-	GUICtrlSetOnEvent($PGDNsetMouse2btn, "PGDNsetMouseIndex")
-
-	GUICtrlSetData ($PGDNsetMouse1xEdit, $PGDNsetMouse1x)
-	GUICtrlSetData ($PGDNsetMouse1yEdit, $PGDNsetMouse1y)
-	GUICtrlSetData ($PGDNsetMouse2xEdit, $PGDNsetMouse2x)
-	GUICtrlSetData ($PGDNsetMouse2yEdit, $PGDNsetMouse2y)
-
-	GUICtrlSetData ($PGDNsetEdit, $PGDNtext)
-
-	If $PGDNsetENABLE = 1 Then
-		GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_UNCHECKED)
-	EndIf
-
-	If $PGDNsetAddENTER = 1 Then
-		GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_UNCHECKED)
-	EndIf
-
-	If $PGDNsetAddBACKSPACE = 1 Then
-		GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-	EndIf
-
-	If $PGDNsetMouseEnable = 1 Then
-		GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_UNCHECKED)
-	EndIf
-
-
-	PGDNsetStates()
-
-	GUISetOnEvent($GUI_EVENT_CLOSE, "PGDNsetClose")
-EndFunc
-
-
-Func PGDNsetStates()
-	If BitAND(GUICtrlRead($PGDNsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGDNsetMouseEnable = 1
-	Else
-		$PGDNsetMouseEnable = 0
-	EndIf
-
-	If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGDNsetENABLE = 1
-	Else
-		$PGDNsetENABLE = 0
-	EndIf
-
-	If $PGDNsetENABLE = 1 Then
-		If $PGDNsetMouseEnable = 1 Then
-			GUICtrlSetStyle($PGDNedit, $ES_READONLY)
-			GUICtrlSetStyle($PGDNsetEdit, $ES_READONLY)
-
-			GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_ENABLE)
-			GUICtrlSetState($PGDNsetMouse1btn, $GUI_SHOW)
-			GUICtrlSetState($PGDNsetMouse2btn, $GUI_SHOW)
-			GUICtrlSetStyle($PGDNsetMouse1xEdit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGDNsetMouse1yEdit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGDNsetMouse2xEdit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGDNsetMouse2yEdit, $GUI_SS_DEFAULT_INPUT)
-		Else
-			GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
-			GUICtrlSetStyle($PGDNsetEdit, $GUI_SS_DEFAULT_INPUT)
-
-			GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_ENABLE)
-			GUICtrlSetState($PGDNsetMouse1btn, $GUI_HIDE)
-			GUICtrlSetState($PGDNsetMouse2btn, $GUI_HIDE)
-			GUICtrlSetStyle($PGDNsetMouse1xEdit, $ES_READONLY)
-			GUICtrlSetStyle($PGDNsetMouse1yEdit, $ES_READONLY)
-			GUICtrlSetStyle($PGDNsetMouse2xEdit, $ES_READONLY)
-			GUICtrlSetStyle($PGDNsetMouse2yEdit, $ES_READONLY)
-
-		EndIf
-	Else
-		GUICtrlSetStyle($PGDNedit, $ES_READONLY)
-		GUICtrlSetStyle($PGDNsetEdit, $ES_READONLY)
-
-		GUICtrlSetState($PGDNsetMouseEnablechkbx, $GUI_DISABLE)
-		GUICtrlSetState($PGDNsetMouse1btn, $GUI_HIDE)
-		GUICtrlSetState($PGDNsetMouse2btn, $GUI_HIDE)
-
-		GUICtrlSetStyle($PGDNsetMouse1xEdit, $ES_READONLY)
-		GUICtrlSetStyle($PGDNsetMouse1yEdit, $ES_READONLY)
-		GUICtrlSetStyle($PGDNsetMouse2xEdit, $ES_READONLY)
-		GUICtrlSetStyle($PGDNsetMouse2yEdit, $ES_READONLY)
-	EndIf
-
-EndFunc
-
-
-Func PGDNsetMouseScan()
-	GUICtrlSetData ($PGDNsetMouse1xEdit, 167)
-	GUICtrlSetData ($PGDNsetMouse1yEdit, 161)
-	GUICtrlSetData ($PGDNsetMouse2xEdit, 120)
-	GUICtrlSetData ($PGDNsetMouse2yEdit, 88)
-EndFunc
-
-Func PGDNsetMouseIndex()
-	GUICtrlSetData ($PGDNsetMouse1xEdit, 58)
-	GUICtrlSetData ($PGDNsetMouse1yEdit, 158)
-	GUICtrlSetData ($PGDNsetMouse2xEdit, 518)
-	GUICtrlSetData ($PGDNsetMouse2yEdit, 199)
+   GUISetOnEvent($GUI_EVENT_CLOSE, "PGDNsetClose")
 EndFunc
 
 Func PGDNsetClose()
@@ -1478,49 +1222,32 @@ Func PGDNsetClose()
 	GUICtrlSetData ($PGDNedit, $PGDNtext)
 	IniWrite($sPath_ini, "EditDATA", "$PGDNtext", $PGDNtext)
 
-	If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGDNsetENABLE = 1
-	Else
-		$PGDNsetENABLE = 0
-	EndIf
+   If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $PGDNsetENABLE = 1
+   Else
+	 $PGDNsetENABLE = 0
+   EndIf
 
-	If BitAND(GUICtrlRead($PGDNsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGDNsetAddENTER = 1
-	Else
-		$PGDNsetAddENTER = 0
-	EndIf
+   If BitAND(GUICtrlRead($PGDNsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $PGDNsetAddENTER = 1
+   Else
+	 $PGDNsetAddENTER = 0
+   EndIf
 
-	If BitAND(GUICtrlRead($PGDNsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGDNsetAddBACKSPACE = 1
-	Else
-		$PGDNsetAddBACKSPACE = 0
-	EndIf
+   If BitAND(GUICtrlRead($PGDNsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+	 $PGDNsetAddBACKSPACE = 1
+   Else
+	 $PGDNsetAddBACKSPACE = 0
+   EndIf
 
-	If BitAND(GUICtrlRead($PGDNsetMouseEnablechkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-		$PGDNsetMouseEnable = 1
-	Else
-		$PGDNsetMouseEnable = 0
-	EndIf
+   IniWrite($sPath_ini, "EditSET", "$PGDNsetENABLE", $PGDNsetENABLE)
+   IniWrite($sPath_ini, "EditSET", "$PGDNsetAddENTER", $PGDNsetAddENTER)
+   IniWrite($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", $PGDNsetAddBACKSPACE)
 
-	$PGDNsetMouse1x = GUICtrlRead($PGDNsetMouse1xEdit)
-	$PGDNsetMouse1y = GUICtrlRead($PGDNsetMouse1yEdit)
-	$PGDNsetMouse2x = GUICtrlRead($PGDNsetMouse2xEdit)
-	$PGDNsetMouse2y = GUICtrlRead($PGDNsetMouse2yEdit)
+   ApplyStates()
 
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetENABLE", $PGDNsetENABLE)
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetAddENTER", $PGDNsetAddENTER)
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", $PGDNsetAddBACKSPACE)
-
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouseEnable", $PGDNsetMouseEnable)
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse1x", $PGDNsetMouse1x)
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse1y", $PGDNsetMouse1y)
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse2x", $PGDNsetMouse2x)
-	IniWrite($sPath_ini, "EditSET", "$PGDNsetMouse2y", $PGDNsetMouse2y)
-
-	ApplyStates()
-
-	GUISetState(@SW_ENABLE, $mainwindow)
-	GUIDelete($PGDNsetwin)
+   GUISetState(@SW_ENABLE, $mainwindow)
+   GUIDelete($PGDNsetwin)
 EndFunc
 
 
@@ -1535,7 +1262,8 @@ Func f1set()
    Global $f1setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f1setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $f1setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f1setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $f1setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f1setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f1setEdit, $f1text)
 
    If $f1setENABLE = 1 Then
@@ -1607,7 +1335,8 @@ Func f2set()
    Global $f2setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f2setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $f2setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f2setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $f2setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f2setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f2setEdit, $f2text)
 
    If $f2setENABLE = 1 Then
@@ -1679,7 +1408,8 @@ Func f3set()
    Global $f3setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f3setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $f3setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f3setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $f3setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f3setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f3setEdit, $f3text)
 
    If $f3setENABLE = 1 Then
@@ -1751,7 +1481,8 @@ Func f4set()
    Global $f4setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f4setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $f4setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f4setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $f4setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f4setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f4setEdit, $f4text)
 
    If $f4setENABLE = 1 Then
@@ -1823,7 +1554,8 @@ Func f5set()
    Global $f5setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f5setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $f5setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f5setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $f5setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f5setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f5setEdit, $f5text)
 
    If $f5setENABLE = 1 Then
@@ -1895,7 +1627,8 @@ Func f6set()
    Global $f6setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f6setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $f6setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f6setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 270, 250, 20)
+   Global $f6setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f6setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f6setEdit, $f6text)
 
    If $f6setENABLE = 1 Then
@@ -1967,7 +1700,8 @@ Func f7set()
    Global $f7setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f7setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
    Global $f7setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f7setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 70, 270, 250, 20)
+   Global $f7setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f7setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f7setEdit, $f7text)
 
    If $f7setENABLE = 1 Then
@@ -2038,8 +1772,9 @@ Func f8set()
    Global $f8setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
    Global $f8setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
    Global $f8setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f8setEdit = GUICtrlCreateEdit("", 15, 110, 280, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f8setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 80, 280, 250, 20)
+   Global $f8setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
+   Global $f8setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f8setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f8setEdit, $f8text)
 
    If $f8setENABLE = 1 Then
@@ -2109,9 +1844,10 @@ Func f9set()
    Global $f9setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
    Global $f9setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
    Global $f9setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f9setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 90, 90, 250, 20)
-   Global $f9setEdit = GUICtrlCreateEdit("", 15, 110, 290, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f9setEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 90, 290, 250, 20)
+   Global $f9setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
+   Global $f9setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
+   Global $f9setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
+   GUICtrlSetOnEvent($f9setHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($f9setEdit, $f9text)
 
    If $f9setENABLE = 1 Then
@@ -2184,7 +1920,8 @@ Func NumPLUSset()
 
    Global $NumPLUSsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 100, 250, 20)
    Global $NumPLUSsetEdit = GUICtrlCreateEdit("", 15, 120, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $NumPLUSsetEditLabel = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 60, 280, 250, 20)
+   Global $NumPLUSsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 280, 200, 20)
+   GUICtrlSetOnEvent($NumPLUSsetHTbtn, "CommandInterpreterHowTo")
    GUICtrlSetData ($NumPLUSsetEdit, $NumPLUStext)
 
    Global $NumPLUSsetDETECTchkbx = GUICtrlCreateCheckbox("Detect", 15, 75)
@@ -2262,7 +1999,7 @@ EndFunc
 
 Func INSERT()
    If $INSERTsetENABLE = 1 Then
-		Send($INSERTtext)
+		CommandInterpreter($INSERTtext)
 		If $INSERTsetAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2280,43 +2017,32 @@ Func INSERTcopy()
 EndFunc
 
 Func HOME()
-	MouseClick("left", 749, 541, 1, 0)
-	MouseClick("left", 526, 566, 1, 0)
-	MouseClick("left", 922, 674, 1, 0)
-   ;If $HOMEsetENABLE = 1 Then
-	;	Send($HOMEtext)
-	;	If $HOMEsetAddBACKSPACE = 1 Then
-	;	  Send("{BACKSPACE}")
-	;	EndIf
-	;	If $HOMEsetAddENTER = 1 Then
-	;	  Send("{ENTER}")
-	;	EndIf
-   ;EndIf
+   If $HOMEsetENABLE = 1 Then
+		CommandInterpreter($HOMEtext)
+		If $HOMEsetAddBACKSPACE = 1 Then
+		  Send("{BACKSPACE}")
+		EndIf
+		If $HOMEsetAddENTER = 1 Then
+		  Send("{ENTER}")
+		EndIf
+   EndIf
 EndFunc
 
 Func PGUP()
 	If $PGUPsetENABLE = 1 Then
-		If $PGUPsetMouseEnable = 1 Then
-			;MouseClick("left", $PGUPsetMouse1x, $PGUPsetMouse1y, 1, 0)
-			;MouseClick("left", $PGUPsetMouse2x, $PGUPsetMouse2y, 1, 0)
-			MouseClick("left", 749, 541, 1, 0)
-			MouseClick("left", 526, 590, 1, 0)
-			MouseClick("left", 922, 674, 1, 0)
-		Else
-			Send($PGUPtext)
-			If $PGUPsetAddBACKSPACE = 1 Then
-				Send("{BACKSPACE}")
-			EndIf
-			If $PGUPsetAddENTER = 1 Then
-				Send("{ENTER}")
-			EndIf
+		CommandInterpreter($PGUPtext)
+		If $PGUPsetAddBACKSPACE = 1 Then
+			Send("{BACKSPACE}")
+		EndIf
+		If $PGUPsetAddENTER = 1 Then
+			Send("{ENTER}")
 		EndIf
 	EndIf
 EndFunc
 
 Func END()
    If $ENDsetENABLE = 1 Then
-		Send($ENDtext)
+		CommandInterpreter($ENDtext)
 		If $ENDsetAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2328,24 +2054,19 @@ EndFunc
 
 Func PGDN()
 	If $PGDNsetENABLE = 1 Then
-		If $PGDNsetMouseEnable = 1 Then
-			MouseClick("left", $PGDNsetMouse1x, $PGDNsetMouse1y, 1, 0)
-			MouseClick("left", $PGDNsetMouse2x, $PGDNsetMouse2y, 1, 0)
-		Else
-			Send($PGDNtext)
-			If $PGDNsetAddBACKSPACE = 1 Then
-				Send("{BACKSPACE}")
-			EndIf
-			If $PGDNsetAddENTER = 1 Then
-				Send("{ENTER}")
-			EndIf
+		CommandInterpreter($PGDNtext)
+		If $PGDNsetAddBACKSPACE = 1 Then
+			Send("{BACKSPACE}")
+		EndIf
+		If $PGDNsetAddENTER = 1 Then
+			Send("{ENTER}")
 		EndIf
 	EndIf
 EndFunc
 
 Func f1()
    If $f1setENABLE = 1 Then
-		Send($f1text)
+		CommandInterpreter($f1text)
 		If $f1setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2357,7 +2078,7 @@ EndFunc
 
 Func f2()
    If $f2setENABLE = 1 Then
-		Send($f2text)
+		CommandInterpreter($f2text)
 		If $f2setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2369,7 +2090,7 @@ EndFunc
 
 Func f3()
    If $f3setENABLE = 1 Then
-		Send($f3text)
+		CommandInterpreter($f3text)
 		If $f3setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2381,7 +2102,7 @@ EndFunc
 
 Func f4()
    If $f4setENABLE = 1 Then
-		Send($f4text)
+		CommandInterpreter($f4text)
 		If $f4setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2393,7 +2114,7 @@ EndFunc
 
 Func f5()
    If $f5setENABLE = 1 Then
-		Send($f5text)
+		CommandInterpreter($f5text)
 		If $f5setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2405,7 +2126,7 @@ EndFunc
 
 Func f6()
    If $f6setENABLE = 1 Then
-		Send($f6text)
+		CommandInterpreter($f6text)
 		If $f6setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2417,7 +2138,7 @@ EndFunc
 
 Func f7()
    If $f7setENABLE = 1 Then
-		Send($f7text)
+		CommandInterpreter($f7text)
 		If $f7setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2429,7 +2150,7 @@ EndFunc
 
 Func f8()
    If $f8setENABLE = 1 Then
-		Send($f8text)
+		CommandInterpreter($f8text)
 		If $f8setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2441,7 +2162,7 @@ EndFunc
 
 Func f9()
    If $f9setENABLE = 1 Then
-		Send($f9text)
+		CommandInterpreter($f9text)
 		If $f9setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
 		EndIf
@@ -2456,7 +2177,8 @@ Func NumPLUS()
 		Detect()
    Else
 	   If $NumPLUSsetENABLE = 1 Then
-			Send($NumPLUStext)
+			CommandInterpreter($NumPLUStext)
+			;Send($NumPLUStext)
 			If $NumPLUSsetAddBACKSPACE = 1 Then
 			  Send("{BACKSPACE}")
 			EndIf
@@ -2467,10 +2189,174 @@ Func NumPLUS()
    EndIf
 EndFunc
 
+
+
+Func CommandInterpreter($Command)
+	Local $CommandArray[1]
+	Local $CommandTypeArray[1]
+
+	Local $CommandLenght = StringLen($Command)
+	
+	Local $CommStart = 0
+	Local $CommEnd = 0
+	Local $CommType = 0 ; 0 for legacy, 1 for command
+	
+	Local $LastCommEnd = 1
+	
+	
+	While $LastCommEnd <> $CommandLenght
+		If $LastCommEnd <> $CommandLenght - 2 Then
+		
+			$checksymb1 = StringMid($Command, $LastCommEnd, 1)
+			$checksymb2 = StringMid($Command, $LastCommEnd+1, 1)
+		
+			If $checksymb1 == "<" AND $checksymb2 == "[" Then
+				$CommStart = $LastCommEnd + 2
+				For $c = $LastCommEnd to $CommandLenght
+					$checksymb1 = StringMid($Command, $c, 1)
+					$checksymb2 = StringMid($Command, $c+1, 1)
+					If $checksymb1 == "]" AND $checksymb2 == ">" Then
+						$CommEnd = $c - 1
+						ExitLoop
+					EndIf
+				Next
+				If $CommEnd == 0 OR $CommEnd <= $CommStart Then
+					$CommStart = $LastCommEnd
+					$CommEnd = $CommandLenght
+					$CommType = 0
+					;'Legacy'
+				Else
+					$CommType = 1
+					;'Command'
+				EndIf
+				
+			Else
+				;'Legacy'
+				$CommType = 0
+				$CommStart = $LastCommEnd
+				For $c = $LastCommEnd to $CommandLenght
+					$checksymb1 = StringMid($Command, $c, 1)
+					$checksymb2 = StringMid($Command, $c+1, 1)
+					If $checksymb1 == "<" AND $checksymb2 == "[" Then
+						$CommEnd = $c - 1
+						ExitLoop
+					EndIf
+				Next
+				If $CommEnd == 0 Then
+					$CommEnd = $CommandLenght
+				EndIf
+			EndIf
+			
+			
+			
+			$ExecCommand =  StringMid($Command, $CommStart, $CommEnd - $CommStart + 1)
+			_ArrayAdd($CommandArray, $ExecCommand)
+			
+			If $CommType == 1 Then
+				$LastCommEnd = $CommEnd + 3
+				If $LastCommEnd > $CommandLenght Then
+					$LastCommEnd = $CommandLenght
+				EndIf
+				_ArrayAdd($CommandTypeArray, '1')
+			Else
+				$LastCommEnd = $CommEnd + 1
+				If $LastCommEnd > $CommandLenght Then
+					$LastCommEnd = $CommandLenght
+				EndIf
+				_ArrayAdd($CommandTypeArray, '0')
+			EndIf
+			
+			;MsgBox(0, 'Debug', $CommType & @CRLF & $CommStart & ' - ' & $CommEnd & @CRLF & 'LastCommEnd ' & $LastCommEnd & ', len ' & $CommandLenght & @CRLF & $ExecCommand)
+			$CommStart = 0
+			$CommEnd = 0
+			
+		Else
+			ExitLoop
+		EndIf
+		
+	WEnd
+	
+	
+	_ArrayDelete($CommandArray, 0)
+	_ArrayDelete($CommandTypeArray, 0)
+	
+	;_ArrayDisplay($CommandArray)
+	;_ArrayDisplay($CommandTypeArray)
+	
+	Local $CommandArrayLen = UBound($CommandArray, $UBOUND_ROWS)
+	
+	For $c = 0 to $CommandArrayLen - 1
+		If $CommandTypeArray[$c] == 0 Then
+			Send($CommandArray[$c])
+		Else
+			MouseManager($CommandArray[$c])
+		EndIf
+	Next
+	
+EndFunc
+
+
+Func MouseManager($MouseCommand)
+
+	If StringLen($MouseCommand) > 6 Then
+		$ClickType = StringMid($MouseCommand, 1, 3)
+		$ClickX = 0
+		$ClickY = 0
+		
+		For $c = 5 To StringLen($MouseCommand)
+			$sym = StringMid($MouseCommand, $c, 1)
+			
+			If $sym == '-' Then
+				$ClickX = StringMid($MouseCommand, 5, $c-5)
+				ExitLoop
+			EndIf
+		Next
+		
+		$ClickX = StringMid($MouseCommand, 5, $c-5)
+		$ClickX = Number($ClickX)
+		$ClickY = StringMid($MouseCommand, $c+1, StringLen($MouseCommand))
+		$ClickY = Number($ClickY)
+		
+		;MsgBox(0, 'Debug', 'type ' & $ClickType & @CRLF & 'clx ' & $ClickX & @CRLF & 'cly ' & $ClickY)
+	Else
+		MsgBox(0, 'Debug', 'Incorrect command')
+	EndIf
+	
+	
+	If $ClickType == 'McL' Then
+		MouseClick($MOUSE_CLICK_LEFT, $ClickX, $ClickY, 1, 0)
+	ElseIf $ClickType == 'McR' Then
+		MouseClick($MOUSE_CLICK_RIGHT, $ClickX, $ClickY, 1, 0)
+	EndIf
+	
+EndFunc
+
+
+
+
+Func CommandInterpreterHowTo()
+   Global $cihowtowin = GUICreate("Справка комманд",310,130)
+   GUISetState(@SW_SHOW)
+   Global $cihowto1 = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 20, 20, 250, 20)
+   Global $cihowto2 = GUICtrlCreateLabel("Клики мыши: <[тип.клика-коорд.X-коорд.Y]>.", 20, 50, 250, 20)
+   Global $cihowto3 = GUICtrlCreateLabel("  Типы кликов McL - левый, McR - правый", 20, 70, 250, 20)
+   Global $cihowto4 = GUICtrlCreateLabel("  Пример <[McL-50-100]> Клик левой по X=50, Y=100", 20, 90, 300, 20)
+
+   GUISetOnEvent($GUI_EVENT_CLOSE, "CommandInterpreterHowToClose")
+EndFunc
+
+
+Func CommandInterpreterHowToClose()
+   GUIDelete($cihowtowin)
+EndFunc
+
+
+
+
 Func Detect()
 
-Local $SearchResult
-Local $LettersFinded = 0
+	Local $SearchResult
+	Local $LettersFinded = 0
 
    If WinGetHandle($orbhfulltext) = 0 Then
 		;MsgBox(0, 'Ошибка', "Нет подключения")

@@ -6,7 +6,7 @@ Func Update()
 	$source = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\flame.exe"
 	$destinationfile = @ScriptDir & "\flame.exe"
 
-	Sleep (1000)
+	Sleep (1500)
 	If FileExists($destinationfile) Then
 		Runwait(@ComSpec & " /c " & "xcopy " & '"' & $source & '"' & ' "' & $destinationfile & '"' & " /Y /H /I","",@SW_HIDE)
 	Else
