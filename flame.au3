@@ -2,6 +2,7 @@
 #include <WindowsConstants.au3>
 #include <EditConstants.au3>
 #include <ButtonConstants.au3>
+#include <Constants.au3>
 #include <Timers.au3>
 #include <File.au3>
 #include <Misc.au3>
@@ -13,10 +14,12 @@
 #Include <GUIEdit.au3>
 #Include <ScrollBarConstants.au3>
 
+#include "OnEventFunc.au3"
 
 
-Global $VersionText = "ver 6.5"
-Global $VersionNumber = 65
+
+Global $VersionText = "ver 7.2"
+Global $VersionNumber = 72
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -33,16 +36,22 @@ Global $Eng = '00000409'; Раскладка английского языка
 Global $GUIsize = IniRead($sPath_ini, "ProgramDATA", "$GUIsize", "0")
 Global $GUIheight
 Global $GUIctrltoffset
-Global $GUIresizecaption = "-"
+Global $GUIctrlhideoffset
+Global $GUIresizecaption
 If $GUIsize = 1 Then
-	$GUIheight = 367
-	$GUIctrltoffset = 55
-	$GUIresizecaption = "-"
-Else
+	$GUIsize = 0
 	$GUIheight = 175
 	$GUIctrltoffset = -135
+	$GUIctrlhideoffset = 150
 	$GUIresizecaption = "+"
+Else
+	$GUIsize = 1
+	$GUIheight = 367
+	$GUIctrltoffset = 55
+	$GUIctrlhideoffset = 0
+	$GUIresizecaption = "-"
 EndIf
+
 
 Global $ClipFileLocation = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\clip.txt"
 Global $ChatFileLocation = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\chat.txt"
@@ -75,12 +84,13 @@ Global $orbtext
 Global $orbh
 
 
-
 CreateGUI()
 
 
 
 Func CreateGUI()
+	Sleep(100)
+	
 	Global $mainwindow = GUICreate("FLAME.exe", 665, $GUIheight)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "CLOSEClicked")
 
@@ -125,19 +135,9 @@ Func CreateGUI()
 	EndIf
 
 
-
-	SingleScript(0)
+	_SingleScript(0)
 
 EndFunc
-
-
-
-
-
-
-
-
-
 
 
 
@@ -149,437 +149,356 @@ Func Unlocker()
 EndFunc
 
 
-Func InitializeGUI()
-   GUICtrlSetState($passwordbtn,$GUI_HIDE)
-   GUICtrlSetOnEvent($INSERTlabelbtn, "INSERTset")
+Func InitializeGUI()	; Создание все элементов GUI
 
-   Global $HOMElabelbtn = GUICtrlCreateButton("HOME", 229, 10, 55, 20)
-   Global $HOMEedit = GUICtrlCreateInput ( "", 230, 30, 200)
-   GUICtrlSetOnEvent($HOMElabelbtn, "HOMEset")
 
-   Global $PGUPlabelbtn = GUICtrlCreateButton("PGUP", 444, 10, 55, 20)
-   Global $PGUPedit = GUICtrlCreateInput ( "", 445, 30, 200)
-   GUICtrlSetOnEvent($PGUPlabelbtn, "PGUPset")
+	Global $REFRESHbtn = GUICtrlCreateButton("Запомнить", 70, 60, 90)
+	GUICtrlSetOnEvent($REFRESHbtn, "RefreshAndSave")
 
-   Global $MinimizeWindowButton = GUICtrlCreateButton("\/", 626, 9, 18, 18)
-   GUICtrlSetOnEvent($MinimizeWindowButton, "MINIMIZEtoTrayClicked")
+	Global $RestartButton = GUICtrlCreateButton("⇆", 603, 9, 18, 18)
+	GUICtrlSetFont ( $RestartButton, 13 )
+	GUICtrlSetOnEvent($RestartButton, "RestartProgram")
+	
+	Global $MinimizeWindowButton = GUICtrlCreateButton("\/", 626, 9, 18, 18)
+	GUICtrlSetOnEvent($MinimizeWindowButton, "MINIMIZEtoTrayClicked")
 
-   Global $ENDlabelbtn = GUICtrlCreateButton("END", 229, 70, 55, 20)
-   Global $ENDedit = GUICtrlCreateInput ( "", 230, 90, 200)
-   GUICtrlSetOnEvent($ENDlabelbtn, "ENDset")
+	Global $ResizeGUIButton = GUICtrlCreateButton($GUIresizecaption, 15, 97, 20, 20) ; y = 91
+	GUICtrlSetOnEvent($ResizeGUIButton, "ResizeGUI")
 
-   Global $PGDNlabelbtn = GUICtrlCreateButton("PGDN", 444, 70, 55, 20)
-   Global $PGDNedit = GUICtrlCreateInput ( "", 445, 90, 200)
-   GUICtrlSetOnEvent($PGDNlabelbtn, "PGDNset")
+	Global $ChatButton = GUICtrlCreateButton("ch", 45, 97, 20, 20)
+	GUICtrlSetOnEvent($ChatButton, "ChatOpen")
 
-   Global $REFRESHbtn = GUICtrlCreateButton("Запомнить", 70, 60, 90)
-   GUICtrlSetOnEvent($REFRESHbtn, "RefreshAndSave")
+	Global $SETUPbtn = GUICtrlCreateButton("", 15, 276+$GUIctrltoffset, 20, 20)
+	Global $STATUSlabel = GUICtrlCreateLabel("ОК", 18, 279+$GUIctrltoffset-21, 20, 18)
+	GUICtrlSetState($STATUSlabel,$GUI_HIDE)
+	GUICtrlSetOnEvent($SETUPbtn, "SETUPset")
 
-   Global $ResizeGUIButton = GUICtrlCreateButton($GUIresizecaption, 15, 97, 20, 20) ; y = 91
-   GUICtrlSetOnEvent($ResizeGUIButton, "ResizeGUI")
+	Global $Calendarbtn = GUICtrlCreateButton("K", 45, 276+$GUIctrltoffset, 20, 20)
+	GUICtrlSetOnEvent($Calendarbtn, "CalendarOpen")
 
-   ;Global $ClipButton = GUICtrlCreateButton("bf", 45, 97, 20, 20)
-   ;GUICtrlSetOnEvent($ClipButton, "ClipOpen")
+	Global $LANGlabel = GUICtrlCreateLabel("Смена языка в Орбите: F1 - русский, F2 - английский", 360, 260+$GUIctrltoffset, 350, 20)
+	Global $INSERTcopyHowTo = GUICtrlCreateLabel("Вставить скопированное на клавишу Insert - F3", 360, 280+$GUIctrltoffset, 350, 25)
+	Global $VersionLabel = GUICtrlCreateLabel("ver 2.5 d", 300, 280+$GUIctrltoffset, 45, 15)
+	GUICtrlSetData ($VersionLabel, $VersionText)
+	
+	
+	GUICtrlSetState($passwordbtn,$GUI_HIDE)
+	SetOnEventA($INSERTlabelbtn, "KeySetup", $paramByVal, "$INSERTtext", $paramByVal, "$INSERTsetENABLE", $paramByVal, "$INSERTsetAddENTER", $paramByVal, "$INSERTsetAddBACKSPACE")
+	
+	Global $HOMElabelbtn = GUICtrlCreateButton("HOME", 229, 10, 55, 20)
+	Global $HOMEedit = GUICtrlCreateInput ( "", 230, 30, 200)
+	SetOnEventA($HOMElabelbtn, "KeySetup", $paramByVal, "$HOMEtext", $paramByVal, "$HOMEsetENABLE",	$paramByVal, "$HOMEsetAddENTER", $paramByVal, "$HOMEsetAddBACKSPACE")
+	
+	Global $PGUPlabelbtn = GUICtrlCreateButton("PGUP", 444, 10, 55, 20)
+	Global $PGUPedit = GUICtrlCreateInput ( "", 445, 30, 200)
+	SetOnEventA($PGUPlabelbtn, "KeySetup", $paramByVal, "$PGUPtext", $paramByVal, "$PGUPsetENABLE",	$paramByVal, "$PGUPsetAddENTER", $paramByVal, "$PGUPsetAddBACKSPACE")
+	
+	Global $ENDlabelbtn = GUICtrlCreateButton("END", 229, 70, 55, 20)
+	Global $ENDedit = GUICtrlCreateInput ( "", 230, 90, 200)
+	SetOnEventA($ENDlabelbtn, "KeySetup", $paramByVal, "$ENDtext", $paramByVal, "$ENDsetENABLE", $paramByVal, "$ENDsetAddENTER", $paramByVal, "$ENDsetAddBACKSPACE")
+	
+	Global $PGDNlabelbtn = GUICtrlCreateButton("PGDN", 444, 70, 55, 20)
+	Global $PGDNedit = GUICtrlCreateInput ( "", 445, 90, 200)
+	SetOnEventA($PGDNlabelbtn, "KeySetup", $paramByVal, "$PGDNtext", $paramByVal, "$PGDNsetENABLE",	$paramByVal, "$PGDNsetAddENTER", $paramByVal, "$PGDNsetAddBACKSPACE")
+	
+	Global $f1labelbtn = GUICtrlCreateButton("F1", 14, 145+$GUIctrlhideoffset, 55, 20)
+	Global $f1edit = GUICtrlCreateInput ( "", 15, 165+$GUIctrlhideoffset, 200)
+	SetOnEventA($f1labelbtn, "KeySetup", $paramByVal, "$f1text", $paramByVal, "$f1setENABLE", $paramByVal, "$f1setAddENTER", $paramByVal, "$f1setAddBACKSPACE")
+	
+	Global $f2labelbtn = GUICtrlCreateButton("F2", 229, 145+$GUIctrlhideoffset, 55, 20)
+	Global $f2edit = GUICtrlCreateInput ( "", 230, 165+$GUIctrlhideoffset, 200)
+	SetOnEventA($f2labelbtn, "KeySetup", $paramByVal, "$f2text", $paramByVal, "$f2setENABLE", $paramByVal, "$f2setAddENTER", $paramByVal, "$f2setAddBACKSPACE")
+	
+	Global $f3labelbtn = GUICtrlCreateButton("F3", 444, 145+$GUIctrlhideoffset, 55, 20)
+	Global $f3edit = GUICtrlCreateInput ( "", 445, 165+$GUIctrlhideoffset, 200)
+	SetOnEventA($f3labelbtn, "KeySetup", $paramByVal, "$f3text", $paramByVal, "$f3setENABLE", $paramByVal, "$f3setAddENTER", $paramByVal, "$f3setAddBACKSPACE")
+	
+	Global $f4labelbtn = GUICtrlCreateButton("F4", 14, 200+$GUIctrlhideoffset, 55, 20)
+	Global $f4edit = GUICtrlCreateInput ( "", 15, 220+$GUIctrlhideoffset, 200)
+	SetOnEventA($f4labelbtn, "KeySetup", $paramByVal, "$f4text", $paramByVal, "$f4setENABLE", $paramByVal, "$f4setAddENTER", $paramByVal, "$f4setAddBACKSPACE")
 
-   Global $ChatButton = GUICtrlCreateButton("ch", 45, 97, 20, 20)
-   GUICtrlSetOnEvent($ChatButton, "ChatOpen")
+	Global $f5labelbtn = GUICtrlCreateButton("F5", 229, 200+$GUIctrlhideoffset, 55, 20)
+	Global $f5edit = GUICtrlCreateInput ( "", 230, 220+$GUIctrlhideoffset, 200)
+	SetOnEventA($f5labelbtn, "KeySetup", $paramByVal, "$f5text", $paramByVal, "$f5setENABLE", $paramByVal, "$f5setAddENTER", $paramByVal, "$f5setAddBACKSPACE")
+	
+	Global $f6labelbtn = GUICtrlCreateButton("F6", 444, 200+$GUIctrlhideoffset, 55, 20)
+	Global $f6edit = GUICtrlCreateInput ( "", 445, 220+$GUIctrlhideoffset, 200)
+	SetOnEventA($f6labelbtn, "KeySetup", $paramByVal, "$f6text", $paramByVal, "$f6setENABLE", $paramByVal, "$f6setAddENTER", $paramByVal, "$f6setAddBACKSPACE")
+	
+	Global $f7labelbtn = GUICtrlCreateButton("F7", 14, 255+$GUIctrlhideoffset, 55, 20)
+	Global $f7edit = GUICtrlCreateInput ( "", 15, 275+$GUIctrlhideoffset, 200)
+	SetOnEventA($f7labelbtn, "KeySetup", $paramByVal, "$f7text", $paramByVal, "$f7setENABLE", $paramByVal, "$f7setAddENTER", $paramByVal, "$f7setAddBACKSPACE")
+	
+	Global $f8labelbtn = GUICtrlCreateButton("F8", 229, 255+$GUIctrlhideoffset, 55, 20)
+	Global $f8edit = GUICtrlCreateInput ( "", 230, 275+$GUIctrlhideoffset, 200)
+	SetOnEventA($f8labelbtn, "KeySetup", $paramByVal, "$f8text", $paramByVal, "$f8setENABLE", $paramByVal, "$f8setAddENTER", $paramByVal, "$f8setAddBACKSPACE")
+	
+	Global $f9labelbtn = GUICtrlCreateButton("F9", 444, 255+$GUIctrlhideoffset, 55, 20)
+	Global $f9edit = GUICtrlCreateInput ( "", 445, 275+$GUIctrlhideoffset, 200)
+	SetOnEventA($f9labelbtn, "KeySetup", $paramByVal, "$f9text", $paramByVal, "$f9setENABLE", $paramByVal, "$f9setAddENTER", $paramByVal, "$f9setAddBACKSPACE")
+	
+	Global $numpluslabelbtn = GUICtrlCreateButton("NUM +", 84, 255+$GUIctrltoffset, 55, 20)
+	Global $numplusedit = GUICtrlCreateInput ( "", 85, 275+$GUIctrltoffset, 200)
+	;GUICtrlSetOnEvent($numpluslabelbtn, "RestartProgram")
+	SetOnEventA($numpluslabelbtn, "KeySetup", $paramByVal, "$numplustext", $paramByVal, "$numplussetENABLE", $paramByVal, "$numplussetAddENTER", $paramByVal, "$numplussetAddBACKSPACE")
 
-	If $GUIsize = 1 Then
-	   Global $f1labelbtn = GUICtrlCreateButton("F1", 14, 145, 55, 20)
-	   Global $f1edit = GUICtrlCreateInput ( "", 15, 165, 200)
-	   GUICtrlSetOnEvent($f1labelbtn, "f1set")
-
-	   Global $f2labelbtn = GUICtrlCreateButton("F2", 229, 145, 55, 20)
-	   Global $f2edit = GUICtrlCreateInput ( "", 230, 165, 200)
-	   GUICtrlSetOnEvent($f2labelbtn, "f2set")
-
-	   Global $f3labelbtn = GUICtrlCreateButton("F3", 444, 145, 55, 20)
-	   Global $f3edit = GUICtrlCreateInput ( "", 445, 165, 200)
-	   GUICtrlSetOnEvent($f3labelbtn, "f3set")
-
-	   Global $f4labelbtn = GUICtrlCreateButton("F4", 14, 200, 55, 20)
-	   Global $f4edit = GUICtrlCreateInput ( "", 15, 220, 200)
-	   GUICtrlSetOnEvent($f4labelbtn, "f4set")
-
-	   Global $f5labelbtn = GUICtrlCreateButton("F5", 229, 200, 55, 20)
-	   Global $f5edit = GUICtrlCreateInput ( "", 230, 220, 200)
-	   GUICtrlSetOnEvent($f5labelbtn, "f5set")
-
-	   Global $f6labelbtn = GUICtrlCreateButton("F6", 444, 200, 55, 20)
-	   Global $f6edit = GUICtrlCreateInput ( "", 445, 220, 200)
-	   GUICtrlSetOnEvent($f6labelbtn, "f6set")
-	   
-	   Global $f7labelbtn = GUICtrlCreateButton("F7", 14, 255, 55, 20)
-	   Global $f7edit = GUICtrlCreateInput ( "", 15, 275, 200)
-	   GUICtrlSetOnEvent($f7labelbtn, "f7set")
-
-	   Global $f8labelbtn = GUICtrlCreateButton("F8", 229, 255, 55, 20)
-	   Global $f8edit = GUICtrlCreateInput ( "", 230, 275, 200)
-	   GUICtrlSetOnEvent($f8labelbtn, "f8set")
-
-	   Global $f9labelbtn = GUICtrlCreateButton("F9", 444, 255, 55, 20)
-	   Global $f9edit = GUICtrlCreateInput ( "", 445, 275, 200)
-	   GUICtrlSetOnEvent($f9labelbtn, "f9set")
-	EndIf
-
-   Global $numpluslabelbtn = GUICtrlCreateButton("NUM +", 84, 255+$GUIctrltoffset, 55, 20)
-   Global $numplusedit = GUICtrlCreateInput ( "", 85, 275+$GUIctrltoffset, 200)
-   GUICtrlSetOnEvent($NumPLUSlabelbtn, "NumPLUSset")
-
-   Global $SETUPbtn = GUICtrlCreateButton("", 15, 276+$GUIctrltoffset, 20, 20)
-   Global $STATUSlabel = GUICtrlCreateLabel("ОК", 18, 279+$GUIctrltoffset-21, 20, 18)
-   GUICtrlSetOnEvent($SETUPbtn, "SETUPset")
-
-   Global $Calendarbtn = GUICtrlCreateButton("K", 45, 276+$GUIctrltoffset, 20, 20)
-   GUICtrlSetOnEvent($Calendarbtn, "CalendarOpen")
-
-   Global $LANGlabel = GUICtrlCreateLabel("Смена языка в Орбите: F1 - русский, F2 - английский", 360, 260+$GUIctrltoffset, 350, 20)
-   Global $INSERTcopyHowTo = GUICtrlCreateLabel("Вставить скопированное на клавишу Insert - F3", 393, 280+$GUIctrltoffset, 350, 25)
-   Global $VersionLabel = GUICtrlCreateLabel("ver 2.5 d", 300, 280+$GUIctrltoffset, 45, 15)
-   GUICtrlSetData ($VersionLabel, $VersionText)
 
 	If $minimizetotray = 1 Then
 		GUICtrlSetState($MinimizeWindowButton,$GUI_HIDE)
 	EndIf
 
-   LoadPrefs()
+	ReloadPrefs()
 EndFunc
 
 
-Func RefreshAndSave()
-   $INSERTtext = GUICtrlRead($INSERTedit)
-   $ENDtext = GUICtrlRead($ENDedit)
-   $PGDNtext = GUICtrlRead($PGDNedit)
-   $HOMEtext = GUICtrlRead($HOMEedit)
-   $PGUPtext = GUICtrlRead($PGUPedit)
+Func RefreshAndSave()	; Чтение всех полей и запись в INI
+	$INSERTtext = GUICtrlRead($INSERTedit)
+	$ENDtext = GUICtrlRead($ENDedit)
+	$PGDNtext = GUICtrlRead($PGDNedit)
+	$HOMEtext = GUICtrlRead($HOMEedit)
+	$PGUPtext = GUICtrlRead($PGUPedit)
+	$f1text = GUICtrlRead($f1edit)
+	$f2text = GUICtrlRead($f2edit)
+	$f3text = GUICtrlRead($f3edit)
+	$f4text = GUICtrlRead($f4edit)
+	$f5text = GUICtrlRead($f5edit)
+	$f6text = GUICtrlRead($f6edit)
+	$f7text = GUICtrlRead($f7edit)
+	$f8text = GUICtrlRead($f8edit)
+	$f9text = GUICtrlRead($f9edit)
+	$numplustext = GUICtrlRead($numplusedit)
 
-   IniWrite($sPath_ini, "EditDATA", "$INSERTtext", $INSERTtext)
-   IniWrite($sPath_ini, "EditDATA", "$ENDtext", $ENDtext)
-   IniWrite($sPath_ini, "EditDATA", "$PGDNtext", $PGDNtext)
-   IniWrite($sPath_ini, "EditDATA", "$HOMEtext", $HOMEtext)
-   IniWrite($sPath_ini, "EditDATA", "$PGUPtext", $PGUPtext)
+	IniWrite($sPath_ini, "EditDATA", "$INSERTtext", $INSERTtext)
+	IniWrite($sPath_ini, "EditDATA", "$ENDtext", $ENDtext)
+	IniWrite($sPath_ini, "EditDATA", "$PGDNtext", $PGDNtext)
+	IniWrite($sPath_ini, "EditDATA", "$HOMEtext", $HOMEtext)
+	IniWrite($sPath_ini, "EditDATA", "$PGUPtext", $PGUPtext)
 
-   If $GUIsize = 1 Then
-	   $f1text = GUICtrlRead($f1edit)
-	   $f2text = GUICtrlRead($f2edit)
-	   $f3text = GUICtrlRead($f3edit)
-	   $f4text = GUICtrlRead($f4edit)
-	   $f5text = GUICtrlRead($f5edit)
-	   $f6text = GUICtrlRead($f6edit)
-	   $f7text = GUICtrlRead($f7edit)
-	   $f8text = GUICtrlRead($f8edit)
-	   $f9text = GUICtrlRead($f9edit)
-	   $numplustext = GUICtrlRead($numplusedit)
+	IniWrite($sPath_ini, "EditDATA", "$f1text", $f1text)
+	IniWrite($sPath_ini, "EditDATA", "$f2text", $f2text)
+	IniWrite($sPath_ini, "EditDATA", "$f3text", $f3text)
+	IniWrite($sPath_ini, "EditDATA", "$f4text", $f4text)
+	IniWrite($sPath_ini, "EditDATA", "$f5text", $f5text)
+	IniWrite($sPath_ini, "EditDATA", "$f6text", $f6text)
+	IniWrite($sPath_ini, "EditDATA", "$f7text", $f7text)
+	IniWrite($sPath_ini, "EditDATA", "$f8text", $f8text)
+	IniWrite($sPath_ini, "EditDATA", "$f9text", $f9text)
 
-	   IniWrite($sPath_ini, "EditDATA", "$f1text", $f1text)
-	   IniWrite($sPath_ini, "EditDATA", "$f2text", $f2text)
-	   IniWrite($sPath_ini, "EditDATA", "$f3text", $f3text)
-	   IniWrite($sPath_ini, "EditDATA", "$f4text", $f4text)
-	   IniWrite($sPath_ini, "EditDATA", "$f5text", $f5text)
-	   IniWrite($sPath_ini, "EditDATA", "$f6text", $f6text)
-	   IniWrite($sPath_ini, "EditDATA", "$f7text", $f7text)
-	   IniWrite($sPath_ini, "EditDATA", "$f8text", $f8text)
-	   IniWrite($sPath_ini, "EditDATA", "$f9text", $f9text)
-   EndIf
-
-   If $NumPLUSsetDETECT = 0 Then
+	If $NumPLUSsetDETECT = 0 Then
 		IniWrite($sPath_ini, "EditDATA", "$numplustext", $numplustext)
-   EndIf
+	EndIf
 
-   IniWrite($sPath_ini, "DetectDATA", "$orbhtext", $orbhtext)
-   IniWrite($sPath_ini, "DetectDATA", "$orbitext", $orbitext)
+	IniWrite($sPath_ini, "DetectDATA", "$orbhtext", $orbhtext)
+	IniWrite($sPath_ini, "DetectDATA", "$orbitext", $orbitext)
 EndFunc
 
 
-Func LoadPrefs()
-   Global $INSERTtext = IniRead($sPath_ini, "EditDATA", "$INSERTtext", "")
-   Global $INSERTsetENABLE = IniRead($sPath_ini, "EditSET", "$INSERTsetENABLE", "1")
-   Global $INSERTsetAddENTER = IniRead($sPath_ini, "EditSET", "$INSERTsetAddENTER", "1")
-   Global $INSERTsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$INSERTsetAddBACKSPACE", "0")
+Func ReloadPrefs()		; Чтение INI и запись в поля, сцеплен с ApplyStates()
+	Global $INSERTtext = IniRead($sPath_ini, "EditDATA", "$INSERTtext", "")
+	Global $INSERTsetENABLE = IniRead($sPath_ini, "EditSET", "$INSERTsetENABLE", "1")
+	Global $INSERTsetAddENTER = IniRead($sPath_ini, "EditSET", "$INSERTsetAddENTER", "1")
+	Global $INSERTsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$INSERTsetAddBACKSPACE", "0")
 
-   Global $HOMEtext = IniRead($sPath_ini, "EditDATA", "$HOMEtext", "")
-   Global $HOMEsetENABLE = IniRead($sPath_ini, "EditSET", "$HOMEsetENABLE", "1")
-   Global $HOMEsetAddENTER = IniRead($sPath_ini, "EditSET", "$HOMEsetAddENTER", "1")
-   Global $HOMEsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$HOMEsetAddBACKSPACE", "0")
+	Global $HOMEtext = IniRead($sPath_ini, "EditDATA", "$HOMEtext", "")
+	Global $HOMEsetENABLE = IniRead($sPath_ini, "EditSET", "$HOMEsetENABLE", "1")
+	Global $HOMEsetAddENTER = IniRead($sPath_ini, "EditSET", "$HOMEsetAddENTER", "1")
+	Global $HOMEsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$HOMEsetAddBACKSPACE", "0")
 
-   Global $PGUPtext = IniRead($sPath_ini, "EditDATA", "$PGUPtext", "")
-   Global $PGUPsetENABLE = IniRead($sPath_ini, "EditSET", "$PGUPsetENABLE", "1")
-   Global $PGUPsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGUPsetAddENTER", "1")
-   Global $PGUPsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", "0")
+	Global $PGUPtext = IniRead($sPath_ini, "EditDATA", "$PGUPtext", "")
+	Global $PGUPsetENABLE = IniRead($sPath_ini, "EditSET", "$PGUPsetENABLE", "1")
+	Global $PGUPsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGUPsetAddENTER", "1")
+	Global $PGUPsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", "0")
 
-   Global $ENDtext = IniRead($sPath_ini, "EditDATA", "$ENDtext", "")
-   Global $ENDsetENABLE = IniRead($sPath_ini, "EditSET", "$ENDsetENABLE", "1")
-   Global $ENDsetAddENTER = IniRead($sPath_ini, "EditSET", "$ENDsetAddENTER", "1")
-   Global $ENDsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$ENDsetAddBACKSPACE", "0")
+	Global $ENDtext = IniRead($sPath_ini, "EditDATA", "$ENDtext", "")
+	Global $ENDsetENABLE = IniRead($sPath_ini, "EditSET", "$ENDsetENABLE", "1")
+	Global $ENDsetAddENTER = IniRead($sPath_ini, "EditSET", "$ENDsetAddENTER", "1")
+	Global $ENDsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$ENDsetAddBACKSPACE", "0")
 
-   Global $PGDNtext = IniRead($sPath_ini, "EditDATA", "$PGDNtext", "")
-   Global $PGDNsetENABLE = IniRead($sPath_ini, "EditSET", "$PGDNsetENABLE", "1")
-   Global $PGDNsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGDNsetAddENTER", "1")
-   Global $PGDNsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", "0")
+	Global $PGDNtext = IniRead($sPath_ini, "EditDATA", "$PGDNtext", "")
+	Global $PGDNsetENABLE = IniRead($sPath_ini, "EditSET", "$PGDNsetENABLE", "1")
+	Global $PGDNsetAddENTER = IniRead($sPath_ini, "EditSET", "$PGDNsetAddENTER", "1")
+	Global $PGDNsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", "0")
 
-   If $GUIsize = 1 Then
-	   Global $f1text = IniRead($sPath_ini, "EditDATA", "$f1text", "")
-	   Global $f1setENABLE = IniRead($sPath_ini, "EditSET", "$f1setENABLE", "1")
-	   Global $f1setAddENTER = IniRead($sPath_ini, "EditSET", "$f1setAddENTER", "1")
-	   Global $f1setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f1setAddBACKSPACE", "0")
+	Global $f1text = IniRead($sPath_ini, "EditDATA", "$f1text", "")
+	Global $f1setENABLE = IniRead($sPath_ini, "EditSET", "$f1setENABLE", "0")
+	Global $f1setAddENTER = IniRead($sPath_ini, "EditSET", "$f1setAddENTER", "1")
+	Global $f1setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f1setAddBACKSPACE", "0")
 
-	   Global $f2text = IniRead($sPath_ini, "EditDATA", "$f2text", "")
-	   Global $f2setENABLE = IniRead($sPath_ini, "EditSET", "$f2setENABLE", "1")
-	   Global $f2setAddENTER = IniRead($sPath_ini, "EditSET", "$f2setAddENTER", "1")
-	   Global $f2setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f2setAddBACKSPACE", "0")
+	Global $f2text = IniRead($sPath_ini, "EditDATA", "$f2text", "")
+	Global $f2setENABLE = IniRead($sPath_ini, "EditSET", "$f2setENABLE", "0")
+	Global $f2setAddENTER = IniRead($sPath_ini, "EditSET", "$f2setAddENTER", "1")
+	Global $f2setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f2setAddBACKSPACE", "0")
 
-	   Global $f3text = IniRead($sPath_ini, "EditDATA", "$f3text", "")
-	   Global $f3setENABLE = IniRead($sPath_ini, "EditSET", "$f3setENABLE", "1")
-	   Global $f3setAddENTER = IniRead($sPath_ini, "EditSET", "$f3setAddENTER", "1")
-	   Global $f3setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f3setAddBACKSPACE", "0")
+	Global $f3text = IniRead($sPath_ini, "EditDATA", "$f3text", "")
+	Global $f3setENABLE = IniRead($sPath_ini, "EditSET", "$f3setENABLE", "0")
+	Global $f3setAddENTER = IniRead($sPath_ini, "EditSET", "$f3setAddENTER", "1")
+	Global $f3setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f3setAddBACKSPACE", "0")
 
-	   Global $f4text = IniRead($sPath_ini, "EditDATA", "$f4text", "")
-	   Global $f4setENABLE = IniRead($sPath_ini, "EditSET", "$f4setENABLE", "1")
-	   Global $f4setAddENTER = IniRead($sPath_ini, "EditSET", "$f4setAddENTER", "1")
-	   Global $f4setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f4setAddBACKSPACE", "0")
+	Global $f4text = IniRead($sPath_ini, "EditDATA", "$f4text", "")
+	Global $f4setENABLE = IniRead($sPath_ini, "EditSET", "$f4setENABLE", "0")
+	Global $f4setAddENTER = IniRead($sPath_ini, "EditSET", "$f4setAddENTER", "1")
+	Global $f4setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f4setAddBACKSPACE", "0")
 
-	   Global $f5text = IniRead($sPath_ini, "EditDATA", "$f5text", "")
-	   Global $f5setENABLE = IniRead($sPath_ini, "EditSET", "$f5setENABLE", "1")
-	   Global $f5setAddENTER = IniRead($sPath_ini, "EditSET", "$f5setAddENTER", "1")
-	   Global $f5setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f5setAddBACKSPACE", "0")
+	Global $f5text = IniRead($sPath_ini, "EditDATA", "$f5text", "")
+	Global $f5setENABLE = IniRead($sPath_ini, "EditSET", "$f5setENABLE", "0")
+	Global $f5setAddENTER = IniRead($sPath_ini, "EditSET", "$f5setAddENTER", "1")
+	Global $f5setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f5setAddBACKSPACE", "0")
 
-	   Global $f6text = IniRead($sPath_ini, "EditDATA", "$f6text", "")
-	   Global $f6setENABLE = IniRead($sPath_ini, "EditSET", "$f6setENABLE", "1")
-	   Global $f6setAddENTER = IniRead($sPath_ini, "EditSET", "$f6setAddENTER", "1")
-	   Global $f6setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f6setAddBACKSPACE", "0")
-	   
-	   Global $f7text = IniRead($sPath_ini, "EditDATA", "$f7text", "")
-	   Global $f7setENABLE = IniRead($sPath_ini, "EditSET", "$f7setENABLE", "1")
-	   Global $f7setAddENTER = IniRead($sPath_ini, "EditSET", "$f7setAddENTER", "1")
-	   Global $f7setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f7setAddBACKSPACE", "0")
-	   
-	   Global $f8text = IniRead($sPath_ini, "EditDATA", "$f8text", "")
-	   Global $f8setENABLE = IniRead($sPath_ini, "EditSET", "$f8setENABLE", "1")
-	   Global $f8setAddENTER = IniRead($sPath_ini, "EditSET", "$f8setAddENTER", "1")
-	   Global $f8setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f8setAddBACKSPACE", "0")
-	   
-	   Global $f9text = IniRead($sPath_ini, "EditDATA", "$f9text", "")
-	   Global $f9setENABLE = IniRead($sPath_ini, "EditSET", "$f9setENABLE", "1")
-	   Global $f9setAddENTER = IniRead($sPath_ini, "EditSET", "$f9setAddENTER", "1")
-	   Global $f9setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f9setAddBACKSPACE", "0")
-   EndIf
+	Global $f6text = IniRead($sPath_ini, "EditDATA", "$f6text", "")
+	Global $f6setENABLE = IniRead($sPath_ini, "EditSET", "$f6setENABLE", "0")
+	Global $f6setAddENTER = IniRead($sPath_ini, "EditSET", "$f6setAddENTER", "1")
+	Global $f6setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f6setAddBACKSPACE", "0")
 
-   Global $numplustext = IniRead($sPath_ini, "EditDATA", "$numplustext", "")
-   Global $NumPLUSsetENABLE = IniRead($sPath_ini, "EditSET", "$NumPLUSsetENABLE", "0")
-   Global $NumPLUSsetAddENTER = IniRead($sPath_ini, "EditSET", "$NumPLUSsetAddENTER", "1")
-   Global $NumPLUSsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$NumPLUSsetAddBACKSPACE", "0")
-   Global $NumPLUSsetDETECT = IniRead($sPath_ini, "EditSET", "$NumPLUSsetDETECT", "0")
+	Global $f7text = IniRead($sPath_ini, "EditDATA", "$f7text", "")
+	Global $f7setENABLE = IniRead($sPath_ini, "EditSET", "$f7setENABLE", "0")
+	Global $f7setAddENTER = IniRead($sPath_ini, "EditSET", "$f7setAddENTER", "1")
+	Global $f7setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f7setAddBACKSPACE", "0")
 
-   Global $detectlang = IniRead($sPath_ini, "ProgramDATA", "$detectlang", "0")
-   Global $langfastchange = IniRead($sPath_ini, "ProgramDATA", "$langfastchange", "0")
-   Global $clipboardpaste = IniRead($sPath_ini, "ProgramDATA", "$clipboardpaste", "0")
-   Global $minimizetotray = IniRead($sPath_ini, "ProgramDATA", "$minimizetotray", "0")
+	Global $f8text = IniRead($sPath_ini, "EditDATA", "$f8text", "")
+	Global $f8setENABLE = IniRead($sPath_ini, "EditSET", "$f8setENABLE", "0")
+	Global $f8setAddENTER = IniRead($sPath_ini, "EditSET", "$f8setAddENTER", "1")
+	Global $f8setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f8setAddBACKSPACE", "0")
 
-   $orbhtext = IniRead($sPath_ini, "DetectDATA", "$orbhtext", "WindowsForms10.Window.8.app.0.21093c0_r6_ad1")
-   $orbitext = IniRead($sPath_ini, "DetectDATA", "$orbitext", "WindowsForms10.EDIT.app.0.21093c0_r6_ad11")
-   ;$orbhtext = "WindowsForms10.Window.8.app.0.21093c0_r6_ad1"
-   ;$orbhfulltext = "[CLASS:" & $orbhtext & "]"
-   $orbhfulltext = "[HANDLE:" & $orbhtext & "]"
-   $orbh = WinGetHandle($orbhfulltext)
+	Global $f9text = IniRead($sPath_ini, "EditDATA", "$f9text", "")
+	Global $f9setENABLE = IniRead($sPath_ini, "EditSET", "$f9setENABLE", "0")
+	Global $f9setAddENTER = IniRead($sPath_ini, "EditSET", "$f9setAddENTER", "1")
+	Global $f9setAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$f9setAddBACKSPACE", "0")
 
-   GUICtrlSetData ($INSERTedit, $INSERTtext)
+	Global $numplustext = IniRead($sPath_ini, "EditDATA", "$numplustext", "")
+	Global $NumPLUSsetENABLE = IniRead($sPath_ini, "EditSET", "$NumPLUSsetENABLE", "0")
+	Global $NumPLUSsetAddENTER = IniRead($sPath_ini, "EditSET", "$NumPLUSsetAddENTER", "1")
+	Global $NumPLUSsetAddBACKSPACE = IniRead($sPath_ini, "EditSET", "$NumPLUSsetAddBACKSPACE", "0")
+	Global $NumPLUSsetDETECT = IniRead($sPath_ini, "EditSET", "$NumPLUSsetDETECT", "0")
 
-   GUICtrlSetData ($ENDedit, $ENDtext)
-   GUICtrlSetData ($PGDNedit, $PGDNtext)
+	Global $detectlang = IniRead($sPath_ini, "ProgramDATA", "$detectlang", "0")
+	Global $langfastchange = IniRead($sPath_ini, "ProgramDATA", "$langfastchange", "0")
+	Global $clipboardpaste = IniRead($sPath_ini, "ProgramDATA", "$clipboardpaste", "0")
+	Global $minimizetotray = IniRead($sPath_ini, "ProgramDATA", "$minimizetotray", "0")
 
-   GUICtrlSetData ($HOMEedit, $HOMEtext)
-   GUICtrlSetData ($PGUPedit, $PGUPtext)
+	$orbhtext = IniRead($sPath_ini, "DetectDATA", "$orbhtext", "")
+	$orbitext = IniRead($sPath_ini, "DetectDATA", "$orbitext", "")
+	;$orbhfulltext = "[CLASS:" & $orbhtext & "]"
+	$orbhfulltext = "[HANDLE:" & $orbhtext & "]"
+	$orbh = WinGetHandle($orbhfulltext)
 
-	If $GUIsize = 1 Then
-		GUICtrlSetData ($f1edit, $f1text)
-		GUICtrlSetData ($f2edit, $f2text)
-		GUICtrlSetData ($f3edit, $f3text)
-		
-		GUICtrlSetData ($f4edit, $f4text)
-		GUICtrlSetData ($f5edit, $f5text)
-		GUICtrlSetData ($f6edit, $f6text)
-		
-		GUICtrlSetData ($f7edit, $f7text)
-		GUICtrlSetData ($f8edit, $f8text)
-		GUICtrlSetData ($f9edit, $f9text)
-   EndIf
+	GUICtrlSetData ($INSERTedit, $INSERTtext)
+	GUICtrlSetData ($ENDedit, $ENDtext)
+	GUICtrlSetData ($PGDNedit, $PGDNtext)
+	GUICtrlSetData ($HOMEedit, $HOMEtext)
+	GUICtrlSetData ($PGUPedit, $PGUPtext)
 
-   GUICtrlSetData ($numplusedit, $numplustext)
+	GUICtrlSetData ($f1edit, $f1text)
+	GUICtrlSetData ($f2edit, $f2text)
+	GUICtrlSetData ($f3edit, $f3text)
+	GUICtrlSetData ($f4edit, $f4text)
+	GUICtrlSetData ($f5edit, $f5text)
+	GUICtrlSetData ($f6edit, $f6text)
+	GUICtrlSetData ($f7edit, $f7text)
+	GUICtrlSetData ($f8edit, $f8text)
+	GUICtrlSetData ($f9edit, $f9text)
+	GUICtrlSetData ($numplusedit, $numplustext)
 
-   ApplyStates()
+	ApplyStates()
 EndFunc
 
 
-Func ApplyStates()
-   If $INSERTsetENABLE = 1 Then
+Func ApplyStates()		; Применение стилей полей и HotKeySet
+	If $INSERTsetENABLE = 1 Then
 		GUICtrlSetStyle($INSERTedit, $GUI_SS_DEFAULT_INPUT)
 		HotKeySet("{INSERT}", "INSERT")
-   Else
+	Else
 		GUICtrlSetStyle($INSERTedit, $ES_READONLY)
 		HotKeySet("{INSERT}")
-   EndIf
-
-	If $INSERTsetENABLE = 1 AND $clipboardpaste = 1 then
-		HotKeySet("{F3}", "INSERTcopy")
-		GUICtrlSetState($INSERTcopyHowTo, $GUI_SHOW)
-	Else
-		HotKeySet("{F3}")
-		GUICtrlSetState($INSERTcopyHowTo, $GUI_HIDE)
 	EndIf
 
-   If $HOMEsetENABLE = 1 Then
+	If $HOMEsetENABLE = 1 Then
 		GUICtrlSetStyle($HOMEedit, $GUI_SS_DEFAULT_INPUT)
 		HotKeySet("{HOME}", "HOME")
-   Else
+	Else
 		GUICtrlSetStyle($HOMEedit, $ES_READONLY)
 		HotKeySet("{HOME}")
-   EndIf
+	EndIf
 
-
-
-   If $PGUPsetENABLE = 1 Then
+	If $PGUPsetENABLE = 1 Then
 		GUICtrlSetStyle($PGUPedit, $GUI_SS_DEFAULT_INPUT)
 		   HotKeySet("{PGUP}", "PGUP")
-   Else
+	Else
 		GUICtrlSetStyle($PGUPedit, $ES_READONLY)
 		HotKeySet("{PGUP}")
-   EndIf
+	EndIf
 
-
-
-   If $ENDsetENABLE = 1 Then
+	If $ENDsetENABLE = 1 Then
 		GUICtrlSetStyle($ENDedit, $GUI_SS_DEFAULT_INPUT)
 		   HotKeySet("{END}", "END")
-   Else
+	Else
 		GUICtrlSetStyle($ENDedit, $ES_READONLY)
 		HotKeySet("{END}")
-   EndIf
+	EndIf
 
-
-
-   If $PGDNsetENABLE = 1 Then
+	If $PGDNsetENABLE = 1 Then
 		GUICtrlSetStyle($PGDNedit, $GUI_SS_DEFAULT_INPUT)
 		   HotKeySet("{PGDN}", "PGDN")
-   Else
+	Else
 		GUICtrlSetStyle($PGDNedit, $ES_READONLY)
 		HotKeySet("{PGDN}")
-   EndIf
-
-
-	If $GUIsize = 1 Then
-		If $f1setENABLE = 1 Then
-			GUICtrlSetStyle($f1edit, $GUI_SS_DEFAULT_INPUT)
-			;HotKeySet("^{1}", "f1")
-			HotKeySet("{F1}", "f1")
-		Else
-			GUICtrlSetStyle($f1edit, $ES_READONLY)
-			;HotKeySet("^{1}")
-			HotKeySet("{F1}")
-		EndIf
-
-		If $f2setENABLE = 1 Then
-			GUICtrlSetStyle($f2edit, $GUI_SS_DEFAULT_INPUT)
-			;HotKeySet("^{2}", "f2")
-			HotKeySet("{F2}", "f2")
-		Else
-			GUICtrlSetStyle($f2edit, $ES_READONLY)
-			;HotKeySet("^{2}")
-			HotKeySet("{F2}")
-		EndIf
-
-		If $f3setENABLE = 1 Then
-			GUICtrlSetStyle($f3edit, $GUI_SS_DEFAULT_INPUT)
-			;HotKeySet("^{3}", "f3")
-			HotKeySet("{F3}", "f3")
-		Else
-			GUICtrlSetStyle($f3edit, $ES_READONLY)
-			;HotKeySet("^{3}")
-			HotKeySet("{F3}")
-		EndIf
-
-		If $f4setENABLE = 1 Then
-			GUICtrlSetStyle($f4edit, $GUI_SS_DEFAULT_INPUT)
-			;HotKeySet("^{4}", "f4")
-			HotKeySet("{F4}", "f4")
-		Else
-			GUICtrlSetStyle($f4edit, $ES_READONLY)
-			;HotKeySet("^{4}")
-			HotKeySet("{F4}")
-		EndIf
-
-		If $f5setENABLE = 1 Then
-			GUICtrlSetStyle($f5edit, $GUI_SS_DEFAULT_INPUT)
-			;HotKeySet("^{5}", "f5")
-			HotKeySet("{F5}", "f5")
-		Else
-			GUICtrlSetStyle($f5edit, $ES_READONLY)
-			;HotKeySet("^{5}")
-			HotKeySet("{F5}")
-		EndIf
-
-		If $f6setENABLE = 1 Then
-			GUICtrlSetStyle($f6edit, $GUI_SS_DEFAULT_INPUT)
-			;HotKeySet("^{6}", "f6")
-			HotKeySet("{F6}", "f6")
-		Else
-			GUICtrlSetStyle($f6edit, $ES_READONLY)
-			;HotKeySet("^{6}")
-			HotKeySet("{F6}")
-		EndIf
-		
-		If $f7setENABLE = 1 Then
-			GUICtrlSetStyle($f7edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("{F7}", "f7")
-		Else
-			GUICtrlSetStyle($f7edit, $ES_READONLY)
-			HotKeySet("{F7}")
-		EndIf
-		
-		If $f8setENABLE = 1 Then
-			GUICtrlSetStyle($f8edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("{F8}", "f8")
-		Else
-			GUICtrlSetStyle($f8edit, $ES_READONLY)
-			HotKeySet("{F8}")
-		EndIf
-		
-		If $f9setENABLE = 1 Then
-			GUICtrlSetStyle($f9edit, $GUI_SS_DEFAULT_INPUT)
-			HotKeySet("{F9}", "f9")
-		Else
-			GUICtrlSetStyle($f9edit, $ES_READONLY)
-			HotKeySet("{F9}")
-		EndIf
 	EndIf
 
-   ;HotKeySet("{F8}", "Test")
 
-   DetectCheck()
-   HandleAndLangCheck()
-
-   UpdateCheck()
-EndFunc
-
-
-Func HandleAndLangCheck()
-
-   If WinGetHandle($orbhfulltext) = 0 Then
-		GUICtrlSetState($STATUSlabel,$GUI_HIDE)
-   Else
-		GUICtrlSetState($STATUSlabel,$GUI_SHOW)
-   EndIf
-
-
-   If WinGetHandle($orbhfulltext) <> 0 AND $langfastchange = 1 Then
-		GUICtrlSetStyle($LANGlabel, $GUI_HIDE)  ; Инвертировано, нелогично но работает
-		HotKeySet("{F1}", "fastlangchangeF1")
-		HotKeySet("{F2}", "fastlangchangeF2")
+	If $f4setENABLE = 1 Then
+		GUICtrlSetStyle($f4edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("{F4}", "f4")
 	Else
-		GUICtrlSetStyle($LANGlabel, $GUI_SHOW)
-		HotKeySet("{F1}")
-		HotKeySet("{F2}")
+		GUICtrlSetStyle($f4edit, $ES_READONLY)
+		HotKeySet("{F4}")
 	EndIf
 
+	If $f5setENABLE = 1 Then
+		GUICtrlSetStyle($f5edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("{F5}", "f5")
+	Else
+		GUICtrlSetStyle($f5edit, $ES_READONLY)
+		HotKeySet("{F5}")
+	EndIf
+
+	If $f6setENABLE = 1 Then
+		GUICtrlSetStyle($f6edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("{F6}", "f6")
+	Else
+		GUICtrlSetStyle($f6edit, $ES_READONLY)
+		HotKeySet("{F6}")
+	EndIf
+	
+	If $f7setENABLE = 1 Then
+		GUICtrlSetStyle($f7edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("{F7}", "f7")
+	Else
+		GUICtrlSetStyle($f7edit, $ES_READONLY)
+		HotKeySet("{F7}")
+	EndIf
+	
+	If $f8setENABLE = 1 Then
+		GUICtrlSetStyle($f8edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("{F8}", "f8")
+	Else
+		GUICtrlSetStyle($f8edit, $ES_READONLY)
+		HotKeySet("{F8}")
+	EndIf
+	
+	If $f9setENABLE = 1 Then
+		GUICtrlSetStyle($f9edit, $GUI_SS_DEFAULT_INPUT)
+		HotKeySet("{F9}", "f9")
+	Else
+		GUICtrlSetStyle($f9edit, $ES_READONLY)
+		HotKeySet("{F9}")
+	EndIf
+
+	;HotKeySet("{F8}", "Test")
+
+	DetectCheck()
+	FastLangCheck()
+	FastClipPasteCheck()
+
+	UpdateCheck()
 EndFunc
 
 
@@ -588,21 +507,108 @@ Func ResizeGUI()
 		$GUIsize = 0
 		$GUIheight = 175
 		$GUIctrltoffset = -135
+		$GUIctrlhideoffset = 150
 		$GUIresizecaption = "+"
 	Else
 		$GUIsize = 1
 		$GUIheight = 367
 		$GUIctrltoffset = 55
+		$GUIctrlhideoffset = 0
 		$GUIresizecaption = "-"
 	EndIf
 
 	IniWrite($sPath_ini, "ProgramDATA", "$GUIsize", $GUIsize)
-
+	
 	GUIDelete($mainwindow)
 
 	CreateGUI()
-	InitializeGUI()
 EndFunc
+
+
+
+
+
+Func FastLangCheck()
+	If $f1setENABLE == 1 OR $f2setENABLE == 1 Then
+		If $f1setENABLE == 0 Then 
+			GUICtrlSetStyle($f1edit, $ES_READONLY)
+			HotKeySet("{F1}", "")
+		Else
+			GUICtrlSetStyle($f1edit, $GUI_SHOW)
+			HotKeySet("{F1}", "f1")
+		EndIf
+
+		If $f2setENABLE == 0 Then 
+			GUICtrlSetStyle($f2edit, $ES_READONLY)
+			HotKeySet("{F2}", "")
+		Else
+			GUICtrlSetStyle($f2edit, $GUI_SHOW)
+			HotKeySet("{F2}", "f2")
+		EndIf
+		
+		
+		If $langfastchange == 1 Then
+			GUICtrlSetState($LANGlabel, $GUI_SHOW)
+			GUICtrlSetData($LANGlabel, "Отключите клавиши F1 и F2 для быстрой смены языка !")
+		EndIf
+	Else
+		GUICtrlSetStyle($f1edit, $ES_READONLY)
+		GUICtrlSetStyle($f2edit, $ES_READONLY)
+
+		If $langfastchange == 1 Then
+			GUICtrlSetState($LANGlabel, $GUI_SHOW)
+			
+			If WinGetHandle($orbhfulltext) = 0 Then
+				GUICtrlSetData($LANGlabel, "Для быстрой смены языка настройте Handle Орбиты !")
+			Else
+				GUICtrlSetData($LANGlabel, "Смена языка в Орбите: F1 - русский, F2 - английский")
+				HotKeySet("{F1}", "fastlangchangeF1")
+				HotKeySet("{F2}", "fastlangchangeF2")
+			EndIf
+		EndIf
+	EndIf
+	
+	
+	If $langfastchange == 0 Then
+		GUICtrlSetState($LANGlabel, $GUI_HIDE)
+		
+		If $f1setENABLE == 0 OR $f2setENABLE == 0 Then
+			HotKeySet("{F1}", "")
+			HotKeySet("{F2}", "")
+		EndIf
+	EndIf
+	
+EndFunc
+
+
+Func FastClipPasteCheck()
+	If $f3setENABLE == 0 Then
+		GUICtrlSetStyle($f3edit, $ES_READONLY)
+		
+		If $clipboardpaste == 1 Then
+			HotKeySet("{F3}", "INSERTcopy")
+			GUICtrlSetState($INSERTcopyHowTo, $GUI_SHOW)
+			GUICtrlSetData($INSERTcopyHowTo, "Нажмите F3 для вставки буфера на клавишу INSERT")
+		Else
+			HotKeySet("{F3}")
+			GUICtrlSetState($INSERTcopyHowTo, $GUI_HIDE)
+		EndIf
+			
+	Else
+		HotKeySet("{F3}", "f3")
+		GUICtrlSetStyle($f3edit, $GUI_SS_DEFAULT_INPUT)
+		
+		If $clipboardpaste == 1 Then
+			GUICtrlSetState($INSERTcopyHowTo, $GUI_SHOW)
+			GUICtrlSetData($INSERTcopyHowTo, "Отключите клавишу F3 для работы с быстрым буфером !")
+		Else
+			GUICtrlSetState($INSERTcopyHowTo, $GUI_HIDE)
+		EndIf
+	EndIf
+
+EndFunc
+
+
 
 
 
@@ -621,6 +627,7 @@ Func ClipOpen()
 
 	ClipRefreshEdit()
 EndFunc
+
 
 Func ClipRefresh()
 	$ClipFile = FileOpen($ClipFileLocation, 0)
@@ -665,6 +672,7 @@ EndFunc
 
 
 
+
 Func ChatOpen()
     $ChatIsOpen = 1
 	;GUISetState(@SW_DISABLE, $mainwindow)
@@ -686,6 +694,7 @@ Func ChatOpen()
 
 	GUICtrlSetData ($ChatHistoryEdit, $ChatFileContent)
 EndFunc
+
 
 Func ChatRefresh()
 	$ChatFile = FileOpen($ChatFileLocation, 0)
@@ -710,22 +719,25 @@ EndFunc
 
 Func ChatWrite()
 	$ChatFile = FileOpen($ChatFileLocation, 1)
-		$ChatFileContent = GUICtrlRead($ChatEdit)
-		FileWrite($ChatFile, $ChatFileContent & @CRLF)
+	$ChatFileContent = GUICtrlRead($ChatEdit)
+	FileWrite($ChatFile, $ChatFileContent & @CRLF)
 	FileClose($ChatFile)
 	GUICtrlSetData ($ChatEdit, "")
 EndFunc
 
+
 Func ChatWipe()
 	$ChatFile = FileOpen($ChatFileLocation, 2)
-		;MsgBox(4096, "", FileGetPos($ChatFile) & "   " & @error)
+	;MsgBox(4096, "", FileGetPos($ChatFile) & "   " & @error)
 	FileClose($ChatFile)
 EndFunc
+
 
 Func ChatClipOpen()
 	ChatClose()
 	ClipOpen()
 EndFunc
+
 
 Func ChatClose()
 	$ChatIsOpen = 0
@@ -740,27 +752,30 @@ EndFunc
 
 
 Func SETUPset()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $INSERTsetwin = GUICreate("Настройки",300,250)
-   GUISetOnEvent($GUI_EVENT_CLOSE, "SETUPsetClose")
-   GUISetState(@SW_SHOW)
+	GUISetState(@SW_DISABLE, $mainwindow)
+	Global $SETUPsetwin = GUICreate("Настройки",300,250+40)
+	GUISetOnEvent($GUI_EVENT_CLOSE, "SETUPsetClose")
+	GUISetState(@SW_SHOW)
 
-   Global $orbhlabel = GUICtrlCreateLabel("ORBita window Handle:", 15, 15, 120, 20)
-   Global $orbhinput = GUICtrlCreateInput ( "", 15, 32, 270) 						; y + 17
-   Global $orbilabel = GUICtrlCreateLabel("Control ClassnameNN:", 15, 60, 120, 20)  ; y + 28
-   Global $orbiinput = GUICtrlCreateInput ( "", 15, 77, 270)
+	Global $autotunebtn = GUICtrlCreateButton("Автопоиск настроек Detect", 15, 15, 200)
+	GUICtrlSetOnEvent($autotunebtn, "AutotuneSet")
 
-   Global $orbichkbtn = GUICtrlCreateButton("Проверка", 15, 105, 60)
-   Global $orbichklabel = GUICtrlCreateLabel("Тут должен быть текст выбранного поля", 85, 110, 120)
-   GUICtrlSetOnEvent($orbichkbtn, "SETUPcheck")
+	Global $orbhlabel = GUICtrlCreateLabel("ORBita Window Handle:", 15+10, 15+35, 120, 20)
+	Global $orbhinput = GUICtrlCreateInput ( "", 15+10, 32+35, 270-10) 						; y + 17
+	Global $orbilabel = GUICtrlCreateLabel("Control ClassnameNN:", 15+10, 60+35, 120, 20)  ; y + 28
+	Global $orbiinput = GUICtrlCreateInput ( "", 15+10, 77+35, 270-10)
 
-	Global $orbidtlnglabel = GUICtrlCreateLabel("Принудительный язык:", 15, 110+25, 118, 20)
-	Global $orbidtlngchkbxauto = GUICtrlCreateCheckbox("Auto", 155, 110+20)
-	Global $orbidtlngchkbxeng = GUICtrlCreateCheckbox("Eng", 200, 110+20)
-	Global $orbidtlngchkbxrus = GUICtrlCreateCheckbox("Rus", 245, 110+20)
-	GUICtrlSetOnEvent($orbidtlngchkbxauto, "DetectLngChkAuto")
-	GUICtrlSetOnEvent($orbidtlngchkbxeng, "DetectLngChkEng")
-	GUICtrlSetOnEvent($orbidtlngchkbxrus, "DetectLngChkRus")
+	Global $orbichkbtn = GUICtrlCreateButton("Проверка", 15, 105+35, 60)
+	Global $orbichklabel = GUICtrlCreateLabel("Тут должен быть текст выбранного поля", 85, 110+35, 120)
+	GUICtrlSetOnEvent($orbichkbtn, "SETUPcheck")
+
+	Global $orbidtlnglabel = GUICtrlCreateLabel("Принудительный язык:", 15, 110+25+35, 118, 20)
+	Global $orbidtlngchkbxauto = GUICtrlCreateCheckbox("Auto", 155, 110+20+35)
+	Global $orbidtlngchkbxeng = GUICtrlCreateCheckbox("Eng", 200, 110+20+35)
+	Global $orbidtlngchkbxrus = GUICtrlCreateCheckbox("Rus", 245, 110+20+35)
+	GUICtrlSetOnEvent($orbidtlngchkbxauto, "SETUPdetectLngChkAuto")
+	GUICtrlSetOnEvent($orbidtlngchkbxeng, "SETUPdetectLngChkEng")
+	GUICtrlSetOnEvent($orbidtlngchkbxrus, "SETUPdetectLngChkRus")
 	
 	If $detectlang = 0 Then
 	  GUICtrlSetState($orbidtlngchkbxauto, $GUI_CHECKED)
@@ -776,28 +791,28 @@ Func SETUPset()
 	  GUICtrlSetState($orbidtlngchkbxrus, $GUI_CHECKED)
 	EndIf
 
-   Global $langfastchangechkbx = GUICtrlCreateCheckbox("Включить переключение языка на F1 - F2", 17, 140+20, 250)
+   Global $langfastchangechkbx = GUICtrlCreateCheckbox("Включить переключение языка на F1 - F2", 17, 140+20+35, 250)
    If $langfastchange = 1 Then
 	  GUICtrlSetState($langfastchangechkbx, $GUI_CHECKED)
    Else
 	  GUICtrlSetState($langfastchangechkbx, $GUI_UNCHECKED)
    EndIf
 
-   Global $clipboardpastechkbx = GUICtrlCreateCheckbox("Включить вставку на F3", 17, 160+20, 250)
+   Global $clipboardpastechkbx = GUICtrlCreateCheckbox("Включить вставку на F3", 17, 160+20+35, 250)
    If $clipboardpaste = 1 Then
 	  GUICtrlSetState($clipboardpastechkbx, $GUI_CHECKED)
    Else
 	  GUICtrlSetState($clipboardpastechkbx, $GUI_UNCHECKED)
    EndIf
 
-   Global $minimizetotraychkbx = GUICtrlCreateCheckbox("Сворачивать в трей", 17, 180+20, 250)
+   Global $minimizetotraychkbx = GUICtrlCreateCheckbox("Сворачивать в трей", 17, 180+20+35, 250)
    If $minimizetotray = 1 Then
 	  GUICtrlSetState($minimizetotraychkbx, $GUI_CHECKED)
    Else
 	  GUICtrlSetState($minimizetotraychkbx, $GUI_UNCHECKED)
    EndIf
 
-   Global $updatecheckbtn = GUICtrlCreateButton("Проверить обновления", 15, 205+20, 130, 20)
+   Global $updatecheckbtn = GUICtrlCreateButton("Проверить обновления", 15, 205+20+35, 130, 20)
    GUICtrlSetOnEvent($updatecheckbtn, "UpdateCheckManual")
 
    $orbtext = ControlGetText($orbh, "", $orbitext)
@@ -810,27 +825,44 @@ Func SETUPset()
    GUICtrlSetData ($orbiinput, $orbitext)
 EndFunc
 
-Func DetectLngChkAuto()
+
+Func SETUPdetectLngChkAuto()
 	If BitAND(GUICtrlRead($orbidtlngchkbxauto), $GUI_CHECKED) = $GUI_CHECKED Then
 		GUICtrlSetState($orbidtlngchkbxeng, $GUI_UNCHECKED)
 		GUICtrlSetState($orbidtlngchkbxrus, $GUI_UNCHECKED)
 	EndIf
 EndFunc
 
-Func DetectLngChkEng()
+Func SETUPdetectLngChkEng()
 	If BitAND(GUICtrlRead($orbidtlngchkbxeng), $GUI_CHECKED) = $GUI_CHECKED Then
 		GUICtrlSetState($orbidtlngchkbxauto, $GUI_UNCHECKED)
 		GUICtrlSetState($orbidtlngchkbxrus, $GUI_UNCHECKED)
 	EndIf
 EndFunc
 
-Func DetectLngChkRus()
+Func SETUPdetectLngChkRus()
 	If BitAND(GUICtrlRead($orbidtlngchkbxrus), $GUI_CHECKED) = $GUI_CHECKED Then
 		GUICtrlSetState($orbidtlngchkbxauto, $GUI_UNCHECKED)
 		GUICtrlSetState($orbidtlngchkbxeng, $GUI_UNCHECKED)
 	EndIf
 EndFunc
-	
+
+
+Func SETUPcheck()
+   $orbhtext = GUICtrlRead($orbhinput)
+   $orbitext = GUICtrlRead($orbiinput)
+
+   IniWrite($sPath_ini, "DetectDATA", "$orbhtext", $orbhtext)
+   IniWrite($sPath_ini, "DetectDATA", "$orbitext", $orbitext)
+
+   ;$orbhfulltext = "[CLASS:" & $orbhtext & "]"
+   $orbhfulltext = "[HANDLE:" & $orbhtext & "]"
+   $orbh = WinGetHandle($orbhfulltext)
+   $orbtext = ControlGetText($orbh, "", $orbitext)
+
+   GUICtrlSetData ($orbichklabel, $orbtext)
+EndFunc
+
 
 Func SETUPsetClose()
    $orbhtext = GUICtrlRead($orbhinput)
@@ -879,7 +911,7 @@ Func SETUPsetClose()
    DetectCheck()
 
    GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($INSERTsetwin)
+   GUIDelete($SETUPsetwin)
 
 	If $minimizetotray = 1 Then
 		GUICtrlSetState($MinimizeWindowButton,$GUI_HIDE)
@@ -890,1107 +922,387 @@ Func SETUPsetClose()
 	EndIf
 
 	ApplyStates()
-EndFunc
-
-
-Func SETUPcheck()
-   $orbhtext = GUICtrlRead($orbhinput)
-   $orbitext = GUICtrlRead($orbiinput)
-
-   IniWrite($sPath_ini, "DetectDATA", "$orbhtext", $orbhtext)
-   IniWrite($sPath_ini, "DetectDATA", "$orbitext", $orbitext)
-
-   ;$orbhfulltext = "[CLASS:" & $orbhtext & "]"
-   $orbhfulltext = "[HANDLE:" & $orbhtext & "]"
-   $orbh = WinGetHandle($orbhfulltext)
-   $orbtext = ControlGetText($orbh, "", $orbitext)
-
-   GUICtrlSetData ($orbichklabel, $orbtext)
-EndFunc
-
-
-
-Func INSERTset()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $INSERTsetwin = GUICreate("INSERTset",300,300)
-   GUISetState(@SW_SHOW)
-   Global $INSERTsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $INSERTsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $INSERTsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $INSERTsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $INSERTsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $INSERTsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($INSERTsetHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($INSERTsetEdit, $INSERTtext)
-
-   If $INSERTsetENABLE = 1 Then
-	  GUICtrlSetState($INSERTsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($INSERTsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $INSERTsetAddENTER = 1 Then
-	  GUICtrlSetState($INSERTsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($INSERTsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $INSERTsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($INSERTsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($INSERTsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "INSERTsetClose")
-EndFunc
-
-Func INSERTsetClose()
-	$INSERTtext = GUICtrlRead($INSERTsetEdit)
-	GUICtrlSetData ($INSERTedit, $INSERTtext)
-	IniWrite($sPath_ini, "EditDATA", "$INSERTtext", $INSERTtext)
-
-   If BitAND(GUICtrlRead($INSERTsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $INSERTsetENABLE = 1
-   Else
-	 $INSERTsetENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($INSERTsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $INSERTsetAddENTER = 1
-   Else
-	 $INSERTsetAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($INSERTsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $INSERTsetAddBACKSPACE = 1
-   Else
-	 $INSERTsetAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$INSERTsetENABLE", $INSERTsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$INSERTsetAddENTER", $INSERTsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$INSERTsetAddBACKSPACE", $INSERTsetAddBACKSPACE)
-
-   ApplyStates()
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($INSERTsetwin)
-EndFunc
-
-
-Func HOMEset()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $HOMEsetwin = GUICreate("HOMEset",300,300)
-   GUISetState(@SW_SHOW)
-   Global $HOMEsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $HOMEsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $HOMEsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $HOMEsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $HOMEsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $HOMEsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($HOMEsetHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($HOMEsetEdit, $HOMEtext)
-
-   If $HOMEsetENABLE = 1 Then
-	  GUICtrlSetState($HOMEsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($HOMEsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $HOMEsetAddENTER = 1 Then
-	  GUICtrlSetState($HOMEsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($HOMEsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $HOMEsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($HOMEsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($HOMEsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "HOMEsetClose")
-EndFunc
-
-Func HOMEsetClose()
-	$HOMEtext = GUICtrlRead($HOMEsetEdit)
-	GUICtrlSetData ($HOMEedit, $HOMEtext)
-	IniWrite($sPath_ini, "EditDATA", "$HOMEtext", $HOMEtext)
-
-   If BitAND(GUICtrlRead($HOMEsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $HOMEsetENABLE = 1
-   Else
-	 $HOMEsetENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($HOMEsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $HOMEsetAddENTER = 1
-   Else
-	 $HOMEsetAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($HOMEsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $HOMEsetAddBACKSPACE = 1
-   Else
-	 $HOMEsetAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$HOMEsetENABLE", $HOMEsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$HOMEsetAddENTER", $HOMEsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$HOMEsetAddBACKSPACE", $HOMEsetAddBACKSPACE)
-
-   ApplyStates()
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($HOMEsetwin)
-EndFunc
-
-
-Func PGUPset()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $PGUPsetwin = GUICreate("PGUPset",300,300)
-   GUISetState(@SW_SHOW)
-   Global $PGUPsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $PGUPsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $PGUPsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $PGUPsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $PGUPsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $PGUPsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($PGUPsetHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($PGUPsetEdit, $PGUPtext)
-
-   If $PGUPsetENABLE = 1 Then
-	  GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGUPsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $PGUPsetAddENTER = 1 Then
-	  GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGUPsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $PGUPsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGUPsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "PGUPsetClose")
-EndFunc
-
-
-Func PGUPsetClose()
-	$PGUPtext = GUICtrlRead($PGUPsetEdit)
-	GUICtrlSetData ($PGUPedit, $PGUPtext)
-	IniWrite($sPath_ini, "EditDATA", "$PGUPtext", $PGUPtext)
-
-   If BitAND(GUICtrlRead($PGUPsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGUPsetENABLE = 1
-   Else
-	 $PGUPsetENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($PGUPsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGUPsetAddENTER = 1
-   Else
-	 $PGUPsetAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($PGUPsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGUPsetAddBACKSPACE = 1
-   Else
-	 $PGUPsetAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$PGUPsetENABLE", $PGUPsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$PGUPsetAddENTER", $PGUPsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$PGUPsetAddBACKSPACE", $PGUPsetAddBACKSPACE)
-
-   ApplyStates()
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($PGUPsetwin)
-EndFunc
-
-
-Func ENDset()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $ENDsetwin = GUICreate("ENDset",300,300)
-   GUISetState(@SW_SHOW)
-   Global $ENDsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $ENDsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $ENDsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $ENDsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $ENDsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $ENDsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($ENDsetHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($ENDsetEdit, $ENDtext)
-
-   If $ENDsetENABLE = 1 Then
-	  GUICtrlSetState($ENDsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($ENDsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $ENDsetAddENTER = 1 Then
-	  GUICtrlSetState($ENDsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($ENDsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $ENDsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($ENDsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($ENDsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "ENDsetClose")
-EndFunc
-
-Func ENDsetClose()
-	$ENDtext = GUICtrlRead($ENDsetEdit)
-	GUICtrlSetData ($ENDedit, $ENDtext)
-	IniWrite($sPath_ini, "EditDATA", "$ENDtext", $ENDtext)
-
-   If BitAND(GUICtrlRead($ENDsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $ENDsetENABLE = 1
-   Else
-	 $ENDsetENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($ENDsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $ENDsetAddENTER = 1
-   Else
-	 $ENDsetAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($ENDsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $ENDsetAddBACKSPACE = 1
-   Else
-	 $ENDsetAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$ENDsetENABLE", $ENDsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$ENDsetAddENTER", $ENDsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$ENDsetAddBACKSPACE", $ENDsetAddBACKSPACE)
-
-   ApplyStates()
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($ENDsetwin)
-EndFunc
-
-
-Func PGDNset()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $PGDNsetwin = GUICreate("PGDNset",300,300)
-   GUISetState(@SW_SHOW)
-   Global $PGDNsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $PGDNsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $PGDNsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $PGDNsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $PGDNsetEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $PGDNsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($PGDNsetHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($PGDNsetEdit, $PGDNtext)
-
-   If $PGDNsetENABLE = 1 Then
-	  GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGDNsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $PGDNsetAddENTER = 1 Then
-	  GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGDNsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $PGDNsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($PGDNsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "PGDNsetClose")
-EndFunc
-
-Func PGDNsetClose()
-	$PGDNtext = GUICtrlRead($PGDNsetEdit)
-	GUICtrlSetData ($PGDNedit, $PGDNtext)
-	IniWrite($sPath_ini, "EditDATA", "$PGDNtext", $PGDNtext)
-
-   If BitAND(GUICtrlRead($PGDNsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGDNsetENABLE = 1
-   Else
-	 $PGDNsetENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($PGDNsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGDNsetAddENTER = 1
-   Else
-	 $PGDNsetAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($PGDNsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $PGDNsetAddBACKSPACE = 1
-   Else
-	 $PGDNsetAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$PGDNsetENABLE", $PGDNsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$PGDNsetAddENTER", $PGDNsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$PGDNsetAddBACKSPACE", $PGDNsetAddBACKSPACE)
-
-   ApplyStates()
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($PGDNsetwin)
+	FastLangCheck()
+	FastClipPasteCheck()
 EndFunc
 
 
 
 
-Func f1set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f1setwin = GUICreate("f1set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f1setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f1setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f1setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f1setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f1setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f1setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f1setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f1setEdit, $f1text)
 
-   If $f1setENABLE = 1 Then
-	  GUICtrlSetState($f1setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f1setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
+Func AutotuneSet()
+	$autotwinh = WinGetHandle("[REGEXPCLASS:(?i)WindowsForms10.Window.8.app.0.21*]")
+	
+	If @error Then
+		MsgBox($MB_SYSTEMMODAL, "", "Невозможно найти Handle Орбиты !" & @CRLF & "Проверьте, запущена ли она или введите вручную !")
+		;Exit
+	Else
+		GUISetState(@SW_DISABLE, $SETUPsetwin)
+		Global $autotunewin = GUICreate("Автопоиск",240,150)
+		GUISetOnEvent($GUI_EVENT_CLOSE, "AutotuneSetClose")
+		GUISetState(@SW_SHOW)
 
-   If $f1setAddENTER = 1 Then
-	  GUICtrlSetState($f1setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f1setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
+		Global $autotconnstatus = GUICtrlCreateLabel("Найден ORBita Window Handle !", 15, 15)
+		Global $autotconnh = GUICtrlCreateInput("0x00000000000C024C", 15, 32)
+		GUICtrlSetStyle($autotconnh, $ES_READONLY)
 
-   If $f1setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f1setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f1setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
+		Global $orbtlabel = GUICtrlCreateLabel("Введите текущий текст искомого поля:", 15, 15+45, 210, 20)  ; y + 28
+		Global $orbtinput = GUICtrlCreateInput ( "", 15, 32+45, 210)
 
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f1setClose")
-EndFunc
+		Global $autotcontrbtn = GUICtrlCreateButton("Поиск", 14, 57+45, 60, 22)
+		GUICtrlSetOnEvent($autotcontrbtn, "AutotuneCtrlFind")
 
-Func f1setClose()
-	$f1text = GUICtrlRead($f1setEdit)
-	GUICtrlSetData ($f1edit, $f1text)
-	IniWrite($sPath_ini, "EditDATA", "$f1text", $f1text)
+		GUICtrlSetData ($orbhinput, $autotwinh)
+	EndIf
 
-   If BitAND(GUICtrlRead($f1setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f1setENABLE = 1
-   Else
-	 $f1setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f1setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f1setAddENTER = 1
-   Else
-	 $f1setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f1setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f1setAddBACKSPACE = 1
-   Else
-	 $f1setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f1setENABLE", $f1setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f1setAddENTER", $f1setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f1setAddBACKSPACE", $f1setAddBACKSPACE)
-
-   If $f1setENABLE = 1 Then
-		GUICtrlSetStyle($f1edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{1}", "f1")
-   Else
-		GUICtrlSetStyle($f1edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f1setwin)
 EndFunc
 
 
-Func f2set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f2setwin = GUICreate("f2set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f2setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f2setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f2setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f2setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f2setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f2setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f2setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f2setEdit, $f2text)
+Func AutotuneCtrlFind()
+	$autotctrh = WinGetHandle("[REGEXPCLASS:(?i)WindowsForms10.Window.8.app.0.21*]")
+	
+	$orbttext = GUICtrlRead($orbtinput)
+	
+	$ControlClNN = _FindControlHandleByText($autotctrh, $orbttext)
+	
+	If $ControlClNN == "0" Then
+		MsgBox($MB_SYSTEMMODAL, "Автопоиск", "Невозможно найти этот текст в окне программы !")
+	Else
+		MsgBox($MB_SYSTEMMODAL, "Автопоиск", "Найден ClassnameNN !" & @CRLF & $ControlClNN)
+		GUICtrlSetData ($orbiinput, $ControlClNN)
+		AutotuneSetClose()
+	EndIf
 
-   If $f2setENABLE = 1 Then
-	  GUICtrlSetState($f2setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f2setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f2setAddENTER = 1 Then
-	  GUICtrlSetState($f2setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f2setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f2setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f2setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f2setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f2setClose")
-EndFunc
-
-Func f2setClose()
-	$f2text = GUICtrlRead($f2setEdit)
-	GUICtrlSetData ($f2edit, $f2text)
-	IniWrite($sPath_ini, "EditDATA", "$f2text", $f2text)
-
-   If BitAND(GUICtrlRead($f2setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f2setENABLE = 1
-   Else
-	 $f2setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f2setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f2setAddENTER = 1
-   Else
-	 $f2setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f2setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f2setAddBACKSPACE = 1
-   Else
-	 $f2setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f2setENABLE", $f2setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f2setAddENTER", $f2setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f2setAddBACKSPACE", $f2setAddBACKSPACE)
-
-   If $f2setENABLE = 1 Then
-		GUICtrlSetStyle($f2edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{2}", "f2")
-   Else
-		GUICtrlSetStyle($f2edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f2setwin)
 EndFunc
 
 
-Func f3set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f3setwin = GUICreate("f3set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f3setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f3setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f3setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f3setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f3setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f3setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f3setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f3setEdit, $f3text)
-
-   If $f3setENABLE = 1 Then
-	  GUICtrlSetState($f3setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f3setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f3setAddENTER = 1 Then
-	  GUICtrlSetState($f3setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f3setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f3setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f3setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f3setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f3setClose")
-EndFunc
-
-Func f3setClose()
-	$f3text = GUICtrlRead($f3setEdit)
-	GUICtrlSetData ($f3edit, $f3text)
-	IniWrite($sPath_ini, "EditDATA", "$f3text", $f3text)
-
-   If BitAND(GUICtrlRead($f3setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f3setENABLE = 1
-   Else
-	 $f3setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f3setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f3setAddENTER = 1
-   Else
-	 $f3setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f3setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f3setAddBACKSPACE = 1
-   Else
-	 $f3setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f3setENABLE", $f3setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f3setAddENTER", $f3setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f3setAddBACKSPACE", $f3setAddBACKSPACE)
-
-   If $f3setENABLE = 1 Then
-		GUICtrlSetStyle($f3edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{3}", "f3")
-   Else
-		GUICtrlSetStyle($f3edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f3setwin)
+Func AutotuneSetClose()
+   GUISetState(@SW_ENABLE, $SETUPsetwin)
+   GUIDelete($autotunewin)
+   SETUPcheck()
 EndFunc
 
 
-Func f4set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f4setwin = GUICreate("f4set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f4setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f4setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f4setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f4setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f4setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f4setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f4setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f4setEdit, $f4text)
-
-   If $f4setENABLE = 1 Then
-	  GUICtrlSetState($f4setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f4setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f4setAddENTER = 1 Then
-	  GUICtrlSetState($f4setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f4setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f4setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f4setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f4setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f4setClose")
-EndFunc
-
-Func f4setClose()
-	$f4text = GUICtrlRead($f4setEdit)
-	GUICtrlSetData ($f4edit, $f4text)
-	IniWrite($sPath_ini, "EditDATA", "$f4text", $f4text)
-
-   If BitAND(GUICtrlRead($f4setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f4setENABLE = 1
-   Else
-	 $f4setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f4setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f4setAddENTER = 1
-   Else
-	 $f4setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f4setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f4setAddBACKSPACE = 1
-   Else
-	 $f4setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f4setENABLE", $f4setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f4setAddENTER", $f4setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f4setAddBACKSPACE", $f4setAddBACKSPACE)
-
-   If $f4setENABLE = 1 Then
-		GUICtrlSetStyle($f4edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{4}", "f4")
-   Else
-		GUICtrlSetStyle($f4edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f4setwin)
-EndFunc
 
 
-Func f5set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f5setwin = GUICreate("f5set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f5setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f5setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f5setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f5setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f5setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f5setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f5setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f5setEdit, $f5text)
 
-   If $f5setENABLE = 1 Then
-	  GUICtrlSetState($f5setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f5setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
 
-   If $f5setAddENTER = 1 Then
-	  GUICtrlSetState($f5setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f5setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
+Func KeySetup($KeyTextIni, $KeyEnabledIni, $KeyAddEnterIni, $KeyAddBackspaceIni)
+	Global $KeyTextIniToF = $KeyTextIni
+	Global $KeyEnabledIniToF = $KeyEnabledIni
+	Global $KeyAddEnterIniToF = $KeyAddEnterIni
+	Global $KeyAddBackspaceIniToF = $KeyAddBackspaceIni
+	
+	Global $KeyText = IniRead($sPath_ini, "EditDATA", $KeyTextIniToF, "")
+	Global $KeyENABLE = IniRead($sPath_ini, "EditSET", $KeyEnabledIniToF, "1")
+	Global $KeyAddENTER = IniRead($sPath_ini, "EditSET", $KeyAddEnterIniToF, "1")
+	Global $KeyAddBACKSPACE = IniRead($sPath_ini, "EditSET", $KeyAddBackspaceIniToF, "0")
 
-   If $f5setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f5setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f5setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
+	Local $guimargin
 
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f5setClose")
-EndFunc
-
-Func f5setClose()
-	$f5text = GUICtrlRead($f5setEdit)
-	GUICtrlSetData ($f5edit, $f5text)
-	IniWrite($sPath_ini, "EditDATA", "$f5text", $f5text)
-
-   If BitAND(GUICtrlRead($f5setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f5setENABLE = 1
-   Else
-	 $f5setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f5setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f5setAddENTER = 1
-   Else
-	 $f5setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f5setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f5setAddBACKSPACE = 1
-   Else
-	 $f5setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f5setENABLE", $f5setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f5setAddENTER", $f5setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f5setAddBACKSPACE", $f5setAddBACKSPACE)
-
-   If $f5setENABLE = 1 Then
-		GUICtrlSetStyle($f5edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{5}", "f5")
-   Else
-		GUICtrlSetStyle($f5edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f5setwin)
+	GUISetState(@SW_DISABLE, $mainwindow)
+	If KeySetupNameDetect($KeyTextIni) == "Клавиша NUM +" Then
+		$guimargin = 10
+		Global $keysetupwin = GUICreate(KeySetupNameDetect($KeyTextIni),300, 335)
+		GUISetState(@SW_SHOW)
+		
+		Global $KeySetupDETECTchkbx = GUICtrlCreateCheckbox("Detect", 15, 75)
+		If $NumPLUSsetDETECT = 1 Then
+			GUICtrlSetState($KeySetupDETECTchkbx, $GUI_CHECKED)
+		Else
+			GUICtrlSetState($KeySetupDETECTchkbx, $GUI_UNCHECKED)
+		EndIf
+	Else
+		$guimargin = 0
+		Global $keysetupwin = GUICreate(KeySetupNameDetect($KeyTextIni),300, 300+$guimargin+25)
+		GUISetState(@SW_SHOW)
+	EndIf
+	
+	
+	Global $KeySetupENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
+	If $KeyENABLE = 1 Then
+		GUICtrlSetState($KeySetupENABLEchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($KeySetupENABLEchkbx, $GUI_UNCHECKED)
+	EndIf
+	
+	Global $KeySetupAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
+	If $KeyAddENTER = 1 Then
+		GUICtrlSetState($KeySetupAddENTERchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($KeySetupAddENTERchkbx, $GUI_UNCHECKED)
+	EndIf
+	
+	Global $KeySetupAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
+	If $KeyAddBACKSPACE = 1 Then
+		GUICtrlSetState($KeySetupAddBACKSPACEchkbx, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($KeySetupAddBACKSPACEchkbx, $GUI_UNCHECKED)
+	EndIf
+	
+	Local $KeySetupEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90+$guimargin, 160, 20)
+	Global $KeySetupEdit = GUICtrlCreateEdit("", 15, 110+$guimargin, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
+	GUICtrlSetData ($KeySetupEdit, $KeyText)
+	
+	Global $KeySetupHelpbtn = GUICtrlCreateButton("？", 267, 87+$guimargin, 18, 18)
+	GUICtrlSetFont ( $RestartButton, 13 )
+	GUICtrlSetOnEvent($KeySetupHelpbtn, "CommandInterpreterHowTo")
+	
+	Global $KeySetupResetbtn = GUICtrlCreateButton("⌧", 244, 87+$guimargin, 18, 18)
+	GUICtrlSetFont ( $KeySetupResetbtn, 11 )
+	GUICtrlSetOnEvent($KeySetupResetbtn, "KeySetupResetEdit")
+	
+	Global $StartMouseLearn = GUICtrlCreateButton("Добавить клик мыши", 14, 270+$guimargin, 140, 20)
+	GUICtrlSetOnEvent($StartMouseLearn, "SetMouseClickInitialize")
+	
+	
+	Global $AddEnterBtn = GUICtrlCreateButton("Добавить ENTER", 161, 270+$guimargin, 125, 20)
+	SetOnEventA($AddEnterBtn, "KeySetupAdd", $paramByVal, "e")
+	
+	Global $AddBackspaceBtn = GUICtrlCreateButton("Добавить BACKSPACE", 14, 270+$guimargin+25, 140, 20)
+	SetOnEventA($AddBackspaceBtn, "KeySetupAdd", $paramByVal, "b")
+	
+	Global $AddSleepBtn = GUICtrlCreateButton("Добавить задержку", 161, 270+$guimargin+25, 125, 20)
+	SetOnEventA($AddSleepBtn, "KeySetupAdd", $paramByVal, "s")
+	
+	;Local $KeySetupHTbtn = GUICtrlCreateButton("Справка комманд", 166, 270+$guimargin, 120, 20)
+	
+	SetOnEventA($GUI_EVENT_CLOSE, "KeySetupClose", $paramByVal, $KeyTextIniToF, $paramByVal, $KeyEnabledIniToF, $paramByVal, $KeyAddEnterIniToF, $paramByVal, $KeyAddBackspaceIniToF)
 EndFunc
 
 
-Func f6set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f6setwin = GUICreate("f6set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f6setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f6setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f6setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f6setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f6setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f6setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f6setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f6setEdit, $f6text)
-
-   If $f6setENABLE = 1 Then
-	  GUICtrlSetState($f6setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f6setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f6setAddENTER = 1 Then
-	  GUICtrlSetState($f6setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f6setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f6setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f6setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f6setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f6setClose")
-EndFunc
-
-Func f6setClose()
-	$f6text = GUICtrlRead($f6setEdit)
-	GUICtrlSetData ($f6edit, $f6text)
-	IniWrite($sPath_ini, "EditDATA", "$f6text", $f6text)
-
-   If BitAND(GUICtrlRead($f6setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f6setENABLE = 1
-   Else
-	 $f6setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f6setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f6setAddENTER = 1
-   Else
-	 $f6setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f6setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f6setAddBACKSPACE = 1
-   Else
-	 $f6setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f6setENABLE", $f6setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f6setAddENTER", $f6setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f6setAddBACKSPACE", $f6setAddBACKSPACE)
-
-   If $f6setENABLE = 1 Then
-		GUICtrlSetStyle($f6edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{6}", "f6")
-   Else
-		GUICtrlSetStyle($f6edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f6setwin)
+Func KeySetupResetEdit()
+	$KeyText = ""
+	IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+	GUICtrlSetData ($KeySetupEdit, $KeyText)
 EndFunc
 
 
-Func f7set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f7setwin = GUICreate("f7set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f7setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f7setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f7setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f7setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f7setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f7setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f7setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f7setEdit, $f7text)
+Func KeySetupAdd($type)
+	GUISetState(@SW_DISABLE, $keysetupwin)
+	Global $KeySetupAddType = $type
 
-   If $f7setENABLE = 1 Then
-	  GUICtrlSetState($f7setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f7setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f7setAddENTER = 1 Then
-	  GUICtrlSetState($f7setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f7setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f7setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f7setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f7setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f7setClose")
-EndFunc
-
-Func f7setClose()
-	$f7text = GUICtrlRead($f7setEdit)
-	GUICtrlSetData ($f7edit, $f7text)
-	IniWrite($sPath_ini, "EditDATA", "$f7text", $f7text)
-
-   If BitAND(GUICtrlRead($f7setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f7setENABLE = 1
-   Else
-	 $f7setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f7setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f7setAddENTER = 1
-   Else
-	 $f7setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f7setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f7setAddBACKSPACE = 1
-   Else
-	 $f7setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f7setENABLE", $f7setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f7setAddENTER", $f7setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f7setAddBACKSPACE", $f7setAddBACKSPACE)
-
-   If $f7setENABLE = 1 Then
-		GUICtrlSetStyle($f7edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{7}", "f7")
-   Else
-		GUICtrlSetStyle($f7edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f7setwin)
+	If $KeySetupAddType == "e" Then
+		Global $keysetupaddenterwin = GUICreate("ENTER", 240, 50)
+		GUISetState(@SW_SHOW)
+		GUISetOnEvent($GUI_EVENT_CLOSE, "KeySetupAddClose")
+		
+		Local $label = GUICtrlCreateLabel("Количество нажатий:", 10, 18, 115, 20)
+		Global $KeySetupAddEdit = GUICtrlCreateInput("1", 125, 14, 25)
+		
+		Local $btn = GUICtrlCreateButton("Добавить", 160, 13, 70, 22)
+		SetOnEventA($btn, "KeySetupAddOk", $paramByVal, "e")
+		
+	ElseIf $KeySetupAddType == "b" Then
+		Global $keysetupaddenterwin = GUICreate("BACKSPACE", 240, 50)
+		GUISetState(@SW_SHOW)
+		GUISetOnEvent($GUI_EVENT_CLOSE, "KeySetupAddClose")
+		
+		Local $label = GUICtrlCreateLabel("Количество нажатий:", 10, 18, 115, 20)
+		Global $KeySetupAddEdit = GUICtrlCreateInput("1", 125, 14, 25)
+		
+		Local $btn = GUICtrlCreateButton("Добавить", 160, 13, 70, 22)
+		SetOnEventA($btn, "KeySetupAddOk", $paramByVal, "b")
+		
+	ElseIf $KeySetupAddType == "s" Then
+		Global $keysetupaddenterwin = GUICreate("Задержка", 240+5, 65)
+		GUISetState(@SW_SHOW)
+		GUISetOnEvent($GUI_EVENT_CLOSE, "KeySetupAddClose")
+		
+		Local $label1 = GUICtrlCreateLabel("Введите задержку:", 10, 18, 115, 20)
+		Global $KeySetupAddEdit = GUICtrlCreateInput("50", 125-5, 14, 30)
+		Local $label2 = GUICtrlCreateLabel("Примеры: 50 - 0.5сек, 100 - 1сек и тд", 20, 40, 200, 20)
+		
+		Local $btn = GUICtrlCreateButton("Добавить", 160+5, 13, 70, 22)
+		SetOnEventA($btn, "KeySetupAddOk", $paramByVal, "s")
+		
+	EndIf
 EndFunc
 
 
-Func f8set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f8setwin = GUICreate("f8set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f8setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f8setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f8setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f8setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f8setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f8setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f8setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f8setEdit, $f8text)
-
-   If $f8setENABLE = 1 Then
-	  GUICtrlSetState($f8setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f8setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f8setAddENTER = 1 Then
-	  GUICtrlSetState($f8setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f8setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f8setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f8setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f8setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f8setClose")
-EndFunc
-
-Func f8setClose()
-	$f8text = GUICtrlRead($f8setEdit)
-	GUICtrlSetData ($f8edit, $f8text)
-	IniWrite($sPath_ini, "EditDATA", "$f8text", $f8text)
-
-   If BitAND(GUICtrlRead($f8setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f8setENABLE = 1
-   Else
-	 $f8setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f8setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f8setAddENTER = 1
-   Else
-	 $f8setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f8setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f8setAddBACKSPACE = 1
-   Else
-	 $f8setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f8setENABLE", $f8setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f8setAddENTER", $f8setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f8setAddBACKSPACE", $f8setAddBACKSPACE)
-
-   If $f8setENABLE = 1 Then
-		GUICtrlSetStyle($f8edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{8}", "f8")
-   Else
-		GUICtrlSetStyle($f8edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f8setwin)
+Func KeySetupAddOk($type)
+	If StringIsDigit(GUICtrlRead($KeySetupAddEdit)) == "1" Then
+		If $type == "e" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{ENTER}"
+			Else
+				$KeyText = $KeyText & "{ENTER " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+				
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+		ElseIf $type == "b" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{ENTER}"
+			Else
+				$KeyText = $KeyText & "{BACKSPACE " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+				
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+		ElseIf $type == "s" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{ENTER}"
+			Else
+				$KeyText = $KeyText & "{Sleep " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+				
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+		EndIf
+		
+		KeySetupAddClose()
+	Else
+		MsgBox ($MB_ICONERROR, "Ошибка !", "Введите число !")
+	EndIf
 EndFunc
 
 
-Func f9set()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $f9setwin = GUICreate("f9set",300,300)
-   GUISetState(@SW_SHOW)
-   Global $f9setENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $f9setAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $f9setAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
-   Global $f9setEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 90, 250, 20)
-   Global $f9setEdit = GUICtrlCreateEdit("", 15, 110, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $f9setHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 270, 200, 20)
-   GUICtrlSetOnEvent($f9setHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($f9setEdit, $f9text)
-
-   If $f9setENABLE = 1 Then
-	  GUICtrlSetState($f9setENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f9setENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f9setAddENTER = 1 Then
-	  GUICtrlSetState($f9setAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f9setAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $f9setAddBACKSPACE = 1 Then
-	  GUICtrlSetState($f9setAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($f9setAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "f9setClose")
-EndFunc
-
-Func f9setClose()
-	$f9text = GUICtrlRead($f9setEdit)
-	GUICtrlSetData ($f9edit, $f9text)
-	IniWrite($sPath_ini, "EditDATA", "$f9text", $f9text)
-
-   If BitAND(GUICtrlRead($f9setENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f9setENABLE = 1
-   Else
-	 $f9setENABLE = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f9setAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f9setAddENTER = 1
-   Else
-	 $f9setAddENTER = 0
-   EndIf
-
-   If BitAND(GUICtrlRead($f9setAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $f9setAddBACKSPACE = 1
-   Else
-	 $f9setAddBACKSPACE = 0
-   EndIf
-
-   IniWrite($sPath_ini, "EditSET", "$f9setENABLE", $f9setENABLE)
-   IniWrite($sPath_ini, "EditSET", "$f9setAddENTER", $f9setAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$f9setAddBACKSPACE", $f9setAddBACKSPACE)
-
-   If $f9setENABLE = 1 Then
-		GUICtrlSetStyle($f9edit, $GUI_SS_DEFAULT_INPUT)
-		HotKeySet("^{9}", "f9")
-   Else
-		GUICtrlSetStyle($f9edit, $ES_READONLY)
-   EndIf
-
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($f9setwin)
+Func KeySetupAddClose()
+	GUIDelete($keysetupaddenterwin)
+	GUISetState(@SW_ENABLE, $keysetupwin)
 EndFunc
 
 
-Func NumPLUSset()
-   GUISetState(@SW_DISABLE, $mainwindow)
-   Global $NumPLUSsetwin = GUICreate("NumPLUSset",300,310)
-   GUISetState(@SW_SHOW)
-   Global $NumPLUSsetENABLEchkbx = GUICtrlCreateCheckbox("Включить", 15, 15)
-   Global $NumPLUSsetAddENTERchkbx = GUICtrlCreateCheckbox("Добавлять ENTER", 15, 35)
-   Global $NumPLUSsetAddBACKSPACEchkbx = GUICtrlCreateCheckbox("Добавлять BACKSPACE", 15, 55)  ; y + 20
+Func KeySetupClose($KeyTextIni, $KeyEnabledIni, $KeyAddEnterIni, $KeyAddBackspaceIni)
+	$KeyText = GUICtrlRead($KeySetupEdit)
+	IniWrite($sPath_ini, "EditDATA", $KeyTextIni, $KeyText)
 
-   Global $NumPLUSsetEditName = GUICtrlCreateLabel("Увеличенное поле данных", 80, 100, 250, 20)
-   Global $NumPLUSsetEdit = GUICtrlCreateEdit("", 15, 120, 270, 150, BitOR($ES_WANTRETURN, $WS_VSCROLL, $ES_AUTOVSCROLL))  ; y + 20
-   Global $NumPLUSsetHTbtn = GUICtrlCreateButton("Справка расширенных комманд", 85, 280, 200, 20)
-   GUICtrlSetOnEvent($NumPLUSsetHTbtn, "CommandInterpreterHowTo")
-   GUICtrlSetData ($NumPLUSsetEdit, $NumPLUStext)
+	If BitAND(GUICtrlRead($KeySetupENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$KeyENABLE = 1
+	Else
+		$KeyENABLE = 0
+	EndIf
+	IniWrite($sPath_ini, "EditSET", $KeyEnabledIni, $KeyENABLE)
 
-   Global $NumPLUSsetDETECTchkbx = GUICtrlCreateCheckbox("Detect", 15, 75)
+	If BitAND(GUICtrlRead($KeySetupAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$KeyAddENTER = 1
+	Else
+		$KeyAddENTER = 0
+	EndIf
+	IniWrite($sPath_ini, "EditSET", $KeyAddEnterIni, $KeyAddENTER)
 
-   If $NumPLUSsetENABLE = 1 Then
-	  GUICtrlSetState($NumPLUSsetENABLEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($NumPLUSsetENABLEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $NumPLUSsetAddENTER = 1 Then
-	  GUICtrlSetState($NumPLUSsetAddENTERchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($NumPLUSsetAddENTERchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $NumPLUSsetAddBACKSPACE = 1 Then
-	  GUICtrlSetState($NumPLUSsetAddBACKSPACEchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($NumPLUSsetAddBACKSPACEchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   If $NumPLUSsetDETECT = 1 Then
-	  GUICtrlSetState($NumPLUSsetDETECTchkbx, $GUI_CHECKED)
-   Else
-	  GUICtrlSetState($NumPLUSsetDETECTchkbx, $GUI_UNCHECKED)
-   EndIf
-
-   GUISetOnEvent($GUI_EVENT_CLOSE, "NumPLUSsetClose")
+	If BitAND(GUICtrlRead($KeySetupAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+		$KeyAddBACKSPACE = 1
+	Else
+		$KeyAddBACKSPACE = 0
+	EndIf
+	IniWrite($sPath_ini, "EditSET", $KeyAddBackspaceIni, $KeyAddBACKSPACE)
+	
+	
+	If KeySetupNameDetect($KeyTextIni) == "Клавиша NUM +" Then
+		If BitAND(GUICtrlRead($KeySetupDETECTchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
+			$NumPLUSsetDETECT = 1
+		Else
+			$NumPLUSsetDETECT = 0
+		EndIf
+		IniWrite($sPath_ini, "EditSET", "$NumPLUSsetDETECT", $NumPLUSsetDETECT)
+		DetectCheck()
+	EndIf
+	
+	
+	ReloadPrefs()
+	GUISetState(@SW_ENABLE, $mainwindow)
+	GUIDelete($keysetupwin)
 EndFunc
 
-Func NumPLUSsetClose()
-	$NumPLUStext = GUICtrlRead($NumPLUSsetEdit)
-	GUICtrlSetData ($NumPLUSedit, $NumPLUStext)
-	IniWrite($sPath_ini, "EditDATA", "$NumPLUStext", $NumPLUStext)
+Func KeySetupNameDetect($Name)
+	If $Name == "$INSERTtext" Then
+		Return "Клавиша INSERT"
+	ElseIf $Name == "$ENDtext" Then
+		Return "Клавиша END"
+	ElseIf $Name == "$PGDNtext" Then
+		Return "Клавиша PAGE DOWN"
+	ElseIf $Name == "$HOMEtext" Then
+		Return "Клавиша HOME"
+	ElseIf $Name == "$PGUPtext" Then
+		Return "Клавиша PAGE UP"
+	ElseIf $Name == "$f1text" Then
+		Return "Клавиша F1"
+	ElseIf $Name == "$f2text" Then
+		Return "Клавиша F2"
+	ElseIf $Name == "$f3text" Then
+		Return "Клавиша F3"
+	ElseIf $Name == "$f4text" Then
+		Return "Клавиша F4"
+	ElseIf $Name == "$f5text" Then
+		Return "Клавиша F5"
+	ElseIf $Name == "$f6text" Then
+		Return "Клавиша F6"
+	ElseIf $Name == "$f7text" Then
+		Return "Клавиша F7"
+	ElseIf $Name == "$f8text" Then
+		Return "Клавиша F8"
+	ElseIf $Name == "$f9text" Then
+		Return "Клавиша F9"
+	ElseIf $Name == "$numplustext" Then
+		Return "Клавиша NUM +"
+	EndIf
+EndFunc
 
-   If BitAND(GUICtrlRead($NumPLUSsetENABLEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $NumPLUSsetENABLE = 1
-   Else
-	 $NumPLUSsetENABLE = 0
-   EndIf
 
-   If BitAND(GUICtrlRead($NumPLUSsetAddENTERchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $NumPLUSsetAddENTER = 1
-   Else
-	 $NumPLUSsetAddENTER = 0
-   EndIf
 
-   If BitAND(GUICtrlRead($NumPLUSsetAddBACKSPACEchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $NumPLUSsetAddBACKSPACE = 1
-   Else
-	 $NumPLUSsetAddBACKSPACE = 0
-   EndIf
 
-   If BitAND(GUICtrlRead($NumPLUSsetDETECTchkbx), $GUI_CHECKED) = $GUI_CHECKED Then
-	 $NumPLUSsetDETECT = 1
-   Else
-	 $NumPLUSsetDETECT = 0
-   EndIf
 
-   IniWrite($sPath_ini, "EditSET", "$NumPLUSsetENABLE", $NumPLUSsetENABLE)
-   IniWrite($sPath_ini, "EditSET", "$NumPLUSsetAddENTER", $NumPLUSsetAddENTER)
-   IniWrite($sPath_ini, "EditSET", "$NumPLUSsetAddBACKSPACE", $NumPLUSsetAddBACKSPACE)
-   IniWrite($sPath_ini, "EditSET", "$NumPLUSsetDETECT", $NumPLUSsetDETECT)
+Func SetMouseClickInitialize()
+	$KeyText = GUICtrlRead($KeySetupEdit)
+	IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+	
+	$returnedValue = MsgBox($MB_OKCANCEL, "Создать клик", "Наведите курсор на место и нажмите F10 !", 10)
+	If $returnedValue == 1 Then
+		SetOnEventA("{F10}", "SetMouseClickPopup", $paramByVal, $KeySetupEdit)
+	EndIf
+EndFunc
 
-   DetectCheck()
 
-   GUISetState(@SW_ENABLE, $mainwindow)
-   GUIDelete($NumPLUSsetwin)
+Func SetMouseClickPopup($editfield)
+	SetOnEventA("{F10}", "")
+	Local $aPos = MouseGetPos()
+	Global $SetMouseClickXPos = $aPos[0]
+	Global $SetMouseClickYPos = $aPos[1]
+	
+	Global $SetMouseClickEdit = $editfield
+	
+	Global $MouseClickPopupWin = GUICreate("",170,75)
+	GUISetState(@SW_SHOW)
+	Local $DescLabel1 = GUICtrlCreateLabel("Координаты:", 10, 10, 200, 18)
+	GUICtrlSetData($DescLabel1, "Координаты - X: " & $aPos[0] & ", Y: " & $aPos[1])
+	Local $DescLabel2 = GUICtrlCreateLabel("Выберите клавишу:", 10, 25, 150, 18)
+	Local $MouseSetLkeybtn = GUICtrlCreateButton("Левая", 15, 45, 65, 20)
+	Local $MouseSetRkeybtn = GUICtrlCreateButton("Правая", 90, 45, 65, 20)
+	SetOnEventA($MouseSetLkeybtn, "SetMouseClickL", $paramByRef, "$SetMouseClickXPos", $paramByRef, "$SetMouseClickYPos", $paramByRef, "$SetMouseClickEdit")
+	SetOnEventA($MouseSetRkeybtn, "SetMouseClickR", $paramByRef, "$SetMouseClickXPos", $paramByRef, "$SetMouseClickYPos", $paramByRef, "$SetMouseClickEdit")
+
+	GUISetOnEvent($GUI_EVENT_CLOSE, "MouseClickPopupClose")
+EndFunc
+
+
+Func SetMouseClickL($xPos, $yPos, $editfield)
+	
+	Local $editfieldtext = GUICtrlRead($editfield)
+	$editfieldtext = $editfieldtext & "<[McL-" & $xPos & "-" & $yPos & "]>"
+	GUICtrlSetData ($editfield, $editfieldtext)
+	SetMouseClickPopupClose()
+	;MsgBox($MB_SYSTEMMODAL, "Lkey", $editfieldtext & "-" & $xPos & "-" & $yPos)
+EndFunc
+
+
+Func SetMouseClickR($xPos, $yPos, $editfield)
+	
+	Local $editfieldtext = GUICtrlRead($editfield)
+	$editfieldtext = $editfieldtext & "<[McR-" & $xPos & "-" & $yPos & "]>"
+	GUICtrlSetData ($editfield, $editfieldtext)
+	SetMouseClickPopupClose()
+EndFunc
+
+
+Func SetMouseClickPopupClose()
+	GUIDelete($MouseClickPopupWin)
+	GUISetState(@SW_SHOW)
+	GUICtrlSetData ($KeySetupEdit, $KeyText)
 EndFunc
 
 
@@ -2066,6 +1378,7 @@ EndFunc
 
 Func f1()
    If $f1setENABLE = 1 Then
+		;MsgBox(0, 'Debug', $f1text)
 		CommandInterpreter($f1text)
 		If $f1setAddBACKSPACE = 1 Then
 		  Send("{BACKSPACE}")
@@ -2203,78 +1516,82 @@ Func CommandInterpreter($Command)
 	
 	Local $LastCommEnd = 1
 	
-	
-	While $LastCommEnd <> $CommandLenght
-		If $LastCommEnd <> $CommandLenght - 2 Then
-		
-			$checksymb1 = StringMid($Command, $LastCommEnd, 1)
-			$checksymb2 = StringMid($Command, $LastCommEnd+1, 1)
-		
-			If $checksymb1 == "<" AND $checksymb2 == "[" Then
-				$CommStart = $LastCommEnd + 2
-				For $c = $LastCommEnd to $CommandLenght
-					$checksymb1 = StringMid($Command, $c, 1)
-					$checksymb2 = StringMid($Command, $c+1, 1)
-					If $checksymb1 == "]" AND $checksymb2 == ">" Then
-						$CommEnd = $c - 1
-						ExitLoop
+	If $CommandLenght < 11 Then
+		_ArrayAdd($CommandArray, $Command)
+		_ArrayAdd($CommandTypeArray, '0')
+	Else
+		While $LastCommEnd <> $CommandLenght
+			If $LastCommEnd <> $CommandLenght - 2 Then
+			
+				$checksymb1 = StringMid($Command, $LastCommEnd, 1)
+				$checksymb2 = StringMid($Command, $LastCommEnd+1, 1)
+			
+				If $checksymb1 == "<" AND $checksymb2 == "[" Then
+					$CommStart = $LastCommEnd + 2
+					For $c = $LastCommEnd to $CommandLenght
+						$checksymb1 = StringMid($Command, $c, 1)
+						$checksymb2 = StringMid($Command, $c+1, 1)
+						If $checksymb1 == "]" AND $checksymb2 == ">" Then
+							$CommEnd = $c - 1
+							ExitLoop
+						EndIf
+					Next
+					If $CommEnd == 0 OR $CommEnd <= $CommStart Then
+						$CommStart = $LastCommEnd
+						$CommEnd = $CommandLenght
+						$CommType = 0
+						;'Legacy'
+					Else
+						$CommType = 1
+						;'Command'
 					EndIf
-				Next
-				If $CommEnd == 0 OR $CommEnd <= $CommStart Then
-					$CommStart = $LastCommEnd
-					$CommEnd = $CommandLenght
-					$CommType = 0
-					;'Legacy'
+					
 				Else
-					$CommType = 1
-					;'Command'
+					;'Legacy'
+					$CommType = 0
+					$CommStart = $LastCommEnd
+					For $c = $LastCommEnd to $CommandLenght
+						$checksymb1 = StringMid($Command, $c, 1)
+						$checksymb2 = StringMid($Command, $c+1, 1)
+						If $checksymb1 == "<" AND $checksymb2 == "[" Then
+							$CommEnd = $c - 1
+							ExitLoop
+						EndIf
+					Next
+					If $CommEnd == 0 Then
+						$CommEnd = $CommandLenght
+					EndIf
 				EndIf
 				
-			Else
-				;'Legacy'
-				$CommType = 0
-				$CommStart = $LastCommEnd
-				For $c = $LastCommEnd to $CommandLenght
-					$checksymb1 = StringMid($Command, $c, 1)
-					$checksymb2 = StringMid($Command, $c+1, 1)
-					If $checksymb1 == "<" AND $checksymb2 == "[" Then
-						$CommEnd = $c - 1
-						ExitLoop
+				
+				
+				$ExecCommand =  StringMid($Command, $CommStart, $CommEnd - $CommStart + 1)
+				_ArrayAdd($CommandArray, $ExecCommand)
+				
+				If $CommType == 1 Then
+					$LastCommEnd = $CommEnd + 3
+					If $LastCommEnd > $CommandLenght Then
+						$LastCommEnd = $CommandLenght
 					EndIf
-				Next
-				If $CommEnd == 0 Then
-					$CommEnd = $CommandLenght
+					_ArrayAdd($CommandTypeArray, '1')
+				Else
+					$LastCommEnd = $CommEnd + 1
+					If $LastCommEnd > $CommandLenght Then
+						$LastCommEnd = $CommandLenght
+					EndIf
+					_ArrayAdd($CommandTypeArray, '0')
 				EndIf
-			EndIf
-			
-			
-			
-			$ExecCommand =  StringMid($Command, $CommStart, $CommEnd - $CommStart + 1)
-			_ArrayAdd($CommandArray, $ExecCommand)
-			
-			If $CommType == 1 Then
-				$LastCommEnd = $CommEnd + 3
-				If $LastCommEnd > $CommandLenght Then
-					$LastCommEnd = $CommandLenght
-				EndIf
-				_ArrayAdd($CommandTypeArray, '1')
+				
+				;MsgBox(0, 'Debug', $CommType & @CRLF & $CommStart & ' - ' & $CommEnd & @CRLF & 'LastCommEnd ' & $LastCommEnd & ', len ' & $CommandLenght & @CRLF & $ExecCommand)
+				$CommStart = 0
+				$CommEnd = 0
+				
 			Else
-				$LastCommEnd = $CommEnd + 1
-				If $LastCommEnd > $CommandLenght Then
-					$LastCommEnd = $CommandLenght
-				EndIf
-				_ArrayAdd($CommandTypeArray, '0')
+				ExitLoop
 			EndIf
 			
-			;MsgBox(0, 'Debug', $CommType & @CRLF & $CommStart & ' - ' & $CommEnd & @CRLF & 'LastCommEnd ' & $LastCommEnd & ', len ' & $CommandLenght & @CRLF & $ExecCommand)
-			$CommStart = 0
-			$CommEnd = 0
-			
-		Else
-			ExitLoop
-		EndIf
-		
-	WEnd
+		WEnd
+	EndIf
 	
 	
 	_ArrayDelete($CommandArray, 0)
@@ -2297,7 +1614,6 @@ EndFunc
 
 
 Func MouseManager($MouseCommand)
-
 	If StringLen($MouseCommand) > 6 Then
 		$ClickType = StringMid($MouseCommand, 1, 3)
 		$ClickX = 0
@@ -2318,8 +1634,8 @@ Func MouseManager($MouseCommand)
 		$ClickY = Number($ClickY)
 		
 		;MsgBox(0, 'Debug', 'type ' & $ClickType & @CRLF & 'clx ' & $ClickX & @CRLF & 'cly ' & $ClickY)
-	Else
-		MsgBox(0, 'Debug', 'Incorrect command')
+	;Else
+		;MsgBox(0, 'Debug', 'Incorrect command')
 	EndIf
 	
 	
@@ -2335,12 +1651,17 @@ EndFunc
 
 
 Func CommandInterpreterHowTo()
-   Global $cihowtowin = GUICreate("Справка комманд",310,130)
+   Global $cihowtowin = GUICreate("Справка комманд",310,235)
    GUISetState(@SW_SHOW)
-   Global $cihowto1 = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 20, 20, 250, 20)
-   Global $cihowto2 = GUICtrlCreateLabel("Клики мыши: <[тип.клика-коорд.X-коорд.Y]>.", 20, 50, 250, 20)
-   Global $cihowto3 = GUICtrlCreateLabel("  Типы кликов McL - левый, McR - правый", 20, 70, 250, 20)
-   Global $cihowto4 = GUICtrlCreateLabel("  Пример <[McL-50-100]> Клик левой по X=50, Y=100", 20, 90, 300, 20)
+   Local $cihowto1 = GUICtrlCreateLabel("Для ввода Enter вписать команду {ENTER}", 20, 20, 250, 20)
+   Local $cihowto2 = GUICtrlCreateLabel("  Можно указать количество нажатий,", 20, 40, 250, 20)
+   Local $cihowto3 = GUICtrlCreateLabel("  например {ENTER 2} для сразу двух нажатий", 20, 60, 250, 20)
+   Local $cihowto4 = GUICtrlCreateLabel("Добавить задержку: {Sleep время},", 20, 90, 250, 20)
+   Local $cihowto5 = GUICtrlCreateLabel("  где время - 100 для 1сек, 50 для 0,5сек и тд", 20, 110, 250, 20)
+   Local $cihowto6 = GUICtrlCreateLabel("  Пример {Sleep 130} для 1,5сек ожидания", 20, 130, 250, 20)
+   Local $cihowto7 = GUICtrlCreateLabel("Клики мыши: <[тип.клика-коорд.X-коорд.Y]>.", 20, 160, 250, 20)
+   Local $cihowto8 = GUICtrlCreateLabel("  Типы кликов McL - левый, McR - правый", 20, 180, 250, 20)
+   Local $cihowto9 = GUICtrlCreateLabel("  Пример <[McL-50-100]> Клик левой по X=50, Y=100", 20, 200, 300, 20)
 
    GUISetOnEvent($GUI_EVENT_CLOSE, "CommandInterpreterHowToClose")
 EndFunc
@@ -2354,21 +1675,20 @@ EndFunc
 
 
 Func Detect()
-
 	Local $SearchResult
 	Local $LettersFinded = 0
 
    If WinGetHandle($orbhfulltext) = 0 Then
 		;MsgBox(0, 'Ошибка', "Нет подключения")
    Else
-		If $detectlang = 0 Then
+		If $detectlang == 0 Then
 			$orbtext = ControlGetText($orbh, "", $orbitext)
 			Send("{Enter}")
 			;ControlSetText ($orbh, "", $orbitext, $orbtext)
 			ControlSend ($orbh, "", $orbitext, $orbtext)
 			Sleep(100)
 			Send("{Enter}")
-		ElseIf $detectlang = 1 Then
+		ElseIf $detectlang == 1 Then
 			fastlangchangeF2()
 			$orbtext = ControlGetText($orbh, "", $orbitext)
 			Send("{Enter}")
@@ -2377,7 +1697,7 @@ Func Detect()
 			fastlangchangeF1()
 			Sleep(100)
 			Send("{Enter}")
-		ElseIf $detectlang = 2 Then
+		ElseIf $detectlang == 2 Then
 			fastlangchangeF1()
 			$orbtext = ControlGetText($orbh, "", $orbitext)
 			Send("{Enter}")
@@ -2463,17 +1783,7 @@ EndFunc
 
 
 
-Func _WinAPI_SetKeyboardLayout($sLayout, $hWnd)
-	If Not WinExists($hWnd) Then
-		Return SetError(1, 0, 0)
-	EndIf
-	Local $Ret = DllCall('user32.dll', 'long', 'LoadKeyboardLayout', 'str', StringFormat('%08s', StringStripWS($sLayout, 8)), 'int', 0)
-	If (@error) Or ($Ret[0] = 0) Then
-		Return SetError(1, 0, 0)
-	EndIf
-	DllCall('user32.dll', 'ptr', 'SendMessage', 'hwnd', $hWnd, 'int', 0x0050, 'int', 1, 'int', $Ret[0])
-	Return SetError(0, 0, 1)
-EndFunc
+
 
 
 
@@ -2990,6 +2300,11 @@ Func SalaryClose()
 EndFunc
 
 
+Func RestartProgram()
+	Run(@ScriptDir & "\flame.exe")
+	Exit
+EndFunc
+
 
 
 
@@ -3058,7 +2373,38 @@ Func RESTOREClicked()
 EndFunc
 
 
-Func SingleScript($iMode = 0)
+
+
+
+Func _FindControlHandleByText($hCallersWindow, $SearchText)
+    $sClassList = WinGetClassList($hCallersWindow)
+    $aClassList = StringSplit($sClassList, @CRLF, 2)
+    _ArraySort($aClassList)
+    _ArrayDelete($aClassList, 0)
+
+    Local $iCurrentClass = "", $iCurrentCount = 1, $iTotalCounter = 1
+
+    For $i = 0 To UBound($aClassList) - 1
+        If $aClassList[$i] = $iCurrentClass Then
+            $iCurrentCount += 1
+        Else
+            $iCurrentClass = $aClassList[$i]
+            $iCurrentCount = 1
+        EndIf
+
+        $hControl = ControlGetHandle($hCallersWindow, "", "[CLASSNN:" & $iCurrentClass & $iCurrentCount & "]")
+        $text = StringRegExpReplace(ControlGetText($hCallersWindow, "", $hControl), "[\n\r]", "{@CRLF}")
+		
+		;If $text == $SearchText Then Return $hControl
+		If $text == $SearchText Then Return StringFormat("%19s", $iCurrentClass & $iCurrentCount)
+		
+        If Not WinExists($hCallersWindow) Then ExitLoop
+        $iTotalCounter += 1
+    Next
+EndFunc
+
+
+Func _SingleScript($iMode = 0)
 	; iMode=0  Close all executing scripts with the same name and continue.
 	; iMode=1  Wait for completion of predecessor scripts with the same name.
 	; iMode=2  Exit if other scripts with the same name are executing.
@@ -3100,7 +2446,37 @@ Func SingleScript($iMode = 0)
 EndFunc
 
 
+Func _WinAPI_SetKeyboardLayout($sLayout, $hWnd)
+	If Not WinExists($hWnd) Then
+		Return SetError(1, 0, 0)
+	EndIf
+	Local $Ret = DllCall('user32.dll', 'long', 'LoadKeyboardLayout', 'str', StringFormat('%08s', StringStripWS($sLayout, 8)), 'int', 0)
+	If (@error) Or ($Ret[0] = 0) Then
+		Return SetError(1, 0, 0)
+	EndIf
+	DllCall('user32.dll', 'ptr', 'SendMessage', 'hwnd', $hWnd, 'int', 0x0050, 'int', 1, 'int', $Ret[0])
+	Return SetError(0, 0, 1)
+EndFunc
+
+
 #comments-start
+
+Слева от перезапуска и сворачивания в трей кнопки "загрузить ini" и "сохранить ini"
+Общая функция обработки нажатия вместо f2, insert и пр
+Настройки расположения файлов чата и папки обновления
+Обновление через Git
+Интеграция Updater в бинарном виде в тело программы
+
+
+
+
+
+
+
+
+
+
+
 
 Обработчик строки памяти
 	служебные символы и команды для мыши
