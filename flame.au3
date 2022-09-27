@@ -16,10 +16,10 @@
 
 #include "OnEventFunc.au3"
 
+Sleep(100)
 
-
-Global $VersionText = "ver 7.2"
-Global $VersionNumber = 72
+Global $VersionText = "ver 8.0"
+Global $VersionNumber = 80
 
 $sPath_ini = @ScriptDir & "\prefs.ini"
 Global $UpdateRequest = 0
@@ -33,24 +33,7 @@ Global $NoPassword = 1
 Global $Rus = '00000419'; Раскладка русского языка
 Global $Eng = '00000409'; Раскладка английского языка
 
-Global $GUIsize = IniRead($sPath_ini, "ProgramDATA", "$GUIsize", "0")
-Global $GUIheight
-Global $GUIctrltoffset
-Global $GUIctrlhideoffset
-Global $GUIresizecaption
-If $GUIsize = 1 Then
-	$GUIsize = 0
-	$GUIheight = 175
-	$GUIctrltoffset = -135
-	$GUIctrlhideoffset = 150
-	$GUIresizecaption = "+"
-Else
-	$GUIsize = 1
-	$GUIheight = 367
-	$GUIctrltoffset = 55
-	$GUIctrlhideoffset = 0
-	$GUIresizecaption = "-"
-EndIf
+GUICheckSize()
 
 
 Global $ClipFileLocation = "\\zorb-srv\Operators\ORBdata\всякое\AutoIT\update channel\clip.txt"
@@ -89,7 +72,6 @@ CreateGUI()
 
 
 Func CreateGUI()
-	Sleep(100)
 	
 	Global $mainwindow = GUICreate("FLAME.exe", 665, $GUIheight)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "CLOSEClicked")
@@ -163,7 +145,7 @@ Func InitializeGUI()	; Создание все элементов GUI
 	GUICtrlSetOnEvent($MinimizeWindowButton, "MINIMIZEtoTrayClicked")
 
 	Global $ResizeGUIButton = GUICtrlCreateButton($GUIresizecaption, 15, 97, 20, 20) ; y = 91
-	GUICtrlSetOnEvent($ResizeGUIButton, "ResizeGUI")
+	GUICtrlSetOnEvent($ResizeGUIButton, "GUIResize")
 
 	Global $ChatButton = GUICtrlCreateButton("ch", 45, 97, 20, 20)
 	GUICtrlSetOnEvent($ChatButton, "ChatOpen")
@@ -502,7 +484,30 @@ Func ApplyStates()		; Применение стилей полей и HotKeySet
 EndFunc
 
 
-Func ResizeGUI()
+Func GUICheckSize()
+	Global $GUIsize = IniRead($sPath_ini, "ProgramDATA", "$GUIsize", "0")
+
+	Global $GUIheight
+	Global $GUIctrltoffset
+	Global $GUIctrlhideoffset
+	Global $GUIresizecaption
+	If $GUIsize = 0 Then
+		$GUIsize = 0
+		$GUIheight = 175
+		$GUIctrltoffset = -135
+		$GUIctrlhideoffset = 150
+		$GUIresizecaption = "+"
+	Else
+		$GUIsize = 1
+		$GUIheight = 367
+		$GUIctrltoffset = 55
+		$GUIctrlhideoffset = 0
+		$GUIresizecaption = "-"
+	EndIf
+EndFunc
+
+
+Func GUIResize()
 	If $GUIsize = 1 Then
 		$GUIsize = 0
 		$GUIheight = 175
@@ -1003,7 +1008,7 @@ Func KeySetup($KeyTextIni, $KeyEnabledIni, $KeyAddEnterIni, $KeyAddBackspaceIni)
 	GUISetState(@SW_DISABLE, $mainwindow)
 	If KeySetupNameDetect($KeyTextIni) == "Клавиша NUM +" Then
 		$guimargin = 10
-		Global $keysetupwin = GUICreate(KeySetupNameDetect($KeyTextIni),300, 335)
+		Global $keysetupwin = GUICreate(KeySetupNameDetect($KeyTextIni),300, 360)
 		GUISetState(@SW_SHOW)
 		
 		Global $KeySetupDETECTchkbx = GUICtrlCreateCheckbox("Detect", 15, 75)
@@ -1014,7 +1019,7 @@ Func KeySetup($KeyTextIni, $KeyEnabledIni, $KeyAddEnterIni, $KeyAddBackspaceIni)
 		EndIf
 	Else
 		$guimargin = 0
-		Global $keysetupwin = GUICreate(KeySetupNameDetect($KeyTextIni),300, 300+$guimargin+25)
+		Global $keysetupwin = GUICreate(KeySetupNameDetect($KeyTextIni),300, 350+$guimargin)
 		GUISetState(@SW_SHOW)
 	EndIf
 	
@@ -1045,27 +1050,29 @@ Func KeySetup($KeyTextIni, $KeyEnabledIni, $KeyAddEnterIni, $KeyAddBackspaceIni)
 	GUICtrlSetData ($KeySetupEdit, $KeyText)
 	
 	Global $KeySetupHelpbtn = GUICtrlCreateButton("？", 267, 87+$guimargin, 18, 18)
-	GUICtrlSetFont ( $RestartButton, 13 )
+	GUICtrlSetFont ($RestartButton, 13)
 	GUICtrlSetOnEvent($KeySetupHelpbtn, "CommandInterpreterHowTo")
 	
 	Global $KeySetupResetbtn = GUICtrlCreateButton("⌧", 244, 87+$guimargin, 18, 18)
-	GUICtrlSetFont ( $KeySetupResetbtn, 11 )
+	GUICtrlSetFont ($KeySetupResetbtn, 11)
 	GUICtrlSetOnEvent($KeySetupResetbtn, "KeySetupResetEdit")
 	
-	Global $StartMouseLearn = GUICtrlCreateButton("Добавить клик мыши", 14, 270+$guimargin, 140, 20)
-	GUICtrlSetOnEvent($StartMouseLearn, "SetMouseClickInitialize")
-	
-	
-	Global $AddEnterBtn = GUICtrlCreateButton("Добавить ENTER", 161, 270+$guimargin, 125, 20)
+	Global $AddEnterBtn = GUICtrlCreateButton("ENTER", 14, 270+$guimargin, 85, 20)
+	Global $AddBackspaceBtn = GUICtrlCreateButton("BACKSPACE", 107, 270+$guimargin, 85, 20)
+	Global $AddDeleteBtn = GUICtrlCreateButton("DELETE", 200, 270+$guimargin, 86, 20)
+	Global $AddEscBtn = GUICtrlCreateButton("ESC", 14, 270+$guimargin+25, 85, 20)
+	Global $AddArrowsBtn = GUICtrlCreateButton("Добавить стрелки", 107, 270+$guimargin+25, 179, 20)
+	Global $StartMouseLearn = GUICtrlCreateButton("Добавить клик мыши", 14, 270+$guimargin+50, 133, 20)
+	Global $AddSleepBtn = GUICtrlCreateButton("Добавить задержку", 153, 270+$guimargin+50, 133, 20)
+
 	SetOnEventA($AddEnterBtn, "KeySetupAdd", $paramByVal, "e")
-	
-	Global $AddBackspaceBtn = GUICtrlCreateButton("Добавить BACKSPACE", 14, 270+$guimargin+25, 140, 20)
 	SetOnEventA($AddBackspaceBtn, "KeySetupAdd", $paramByVal, "b")
-	
-	Global $AddSleepBtn = GUICtrlCreateButton("Добавить задержку", 161, 270+$guimargin+25, 125, 20)
+	SetOnEventA($AddDeleteBtn, "KeySetupAdd", $paramByVal, "d")
+	SetOnEventA($AddEscBtn, "KeySetupAdd", $paramByVal, "c")
+	SetOnEventA($AddArrowsBtn, "KeySetupAdd", $paramByVal, "a")
+	GUICtrlSetOnEvent($StartMouseLearn, "SetMouseClickInitialize")
 	SetOnEventA($AddSleepBtn, "KeySetupAdd", $paramByVal, "s")
 	
-	;Local $KeySetupHTbtn = GUICtrlCreateButton("Справка комманд", 166, 270+$guimargin, 120, 20)
 	
 	SetOnEventA($GUI_EVENT_CLOSE, "KeySetupClose", $paramByVal, $KeyTextIniToF, $paramByVal, $KeyEnabledIniToF, $paramByVal, $KeyAddEnterIniToF, $paramByVal, $KeyAddBackspaceIniToF)
 EndFunc
@@ -1104,6 +1111,28 @@ Func KeySetupAdd($type)
 		Local $btn = GUICtrlCreateButton("Добавить", 160, 13, 70, 22)
 		SetOnEventA($btn, "KeySetupAddOk", $paramByVal, "b")
 		
+	ElseIf $KeySetupAddType == "d" Then
+		Global $keysetupaddenterwin = GUICreate("DELETE", 240, 50)
+		GUISetState(@SW_SHOW)
+		GUISetOnEvent($GUI_EVENT_CLOSE, "KeySetupAddClose")
+		
+		Local $label = GUICtrlCreateLabel("Количество нажатий:", 10, 18, 115, 20)
+		Global $KeySetupAddEdit = GUICtrlCreateInput("1", 125, 14, 25)
+		
+		Local $btn = GUICtrlCreateButton("Добавить", 160, 13, 70, 22)
+		SetOnEventA($btn, "KeySetupAddOk", $paramByVal, "d")
+		
+	ElseIf $KeySetupAddType == "c" Then
+		Global $keysetupaddenterwin = GUICreate("ESC", 240, 50)
+		GUISetState(@SW_SHOW)
+		GUISetOnEvent($GUI_EVENT_CLOSE, "KeySetupAddClose")
+		
+		Local $label = GUICtrlCreateLabel("Количество нажатий:", 10, 18, 115, 20)
+		Global $KeySetupAddEdit = GUICtrlCreateInput("1", 125, 14, 25)
+		
+		Local $btn = GUICtrlCreateButton("Добавить", 160, 13, 70, 22)
+		SetOnEventA($btn, "KeySetupAddOk", $paramByVal, "c")
+		
 	ElseIf $KeySetupAddType == "s" Then
 		Global $keysetupaddenterwin = GUICreate("Задержка", 240+5, 65)
 		GUISetState(@SW_SHOW)
@@ -1116,6 +1145,23 @@ Func KeySetupAdd($type)
 		Local $btn = GUICtrlCreateButton("Добавить", 160+5, 13, 70, 22)
 		SetOnEventA($btn, "KeySetupAddOk", $paramByVal, "s")
 		
+	ElseIf $KeySetupAddType == "a" Then
+		Global $keysetupaddenterwin = GUICreate("Стрелки", 215, 100)
+		GUISetState(@SW_SHOW)
+		GUISetOnEvent($GUI_EVENT_CLOSE, "KeySetupAddClose")
+		
+		Local $btnu = GUICtrlCreateButton("Вверх", 70+10, 10, 55, 22)
+		Local $btnl = GUICtrlCreateButton("Влево", 10+10, 37, 55, 22);+27
+		Local $btnd = GUICtrlCreateButton("Вниз", 70+10, 37, 55, 22)
+		Local $btnr = GUICtrlCreateButton("Вправо", 130+10, 37, 55, 22)
+		
+		SetOnEventA($btnu, "KeySetupAddOk", $paramByVal, "au")
+		SetOnEventA($btnl, "KeySetupAddOk", $paramByVal, "al")
+		SetOnEventA($btnd, "KeySetupAddOk", $paramByVal, "ad")
+		SetOnEventA($btnr, "KeySetupAddOk", $paramByVal, "ar")
+		
+		Local $label = GUICtrlCreateLabel("Количество нажатий:", 10+10, 70, 115, 20)
+		Global $KeySetupAddEdit = GUICtrlCreateInput("1", 125+10, 66, 25)
 	EndIf
 EndFunc
 
@@ -1129,29 +1175,83 @@ Func KeySetupAddOk($type)
 			Else
 				$KeyText = $KeyText & "{ENTER " & GUICtrlRead($KeySetupAddEdit) & "}"
 			EndIf
-				
 			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
 			GUICtrlSetData ($KeySetupEdit, $KeyText)
 		ElseIf $type == "b" Then
 			$KeyText = GUICtrlRead($KeySetupEdit)
 			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
-				$KeyText = $KeyText & "{ENTER}"
+				$KeyText = $KeyText & "{BACKSPACE}"
 			Else
 				$KeyText = $KeyText & "{BACKSPACE " & GUICtrlRead($KeySetupAddEdit) & "}"
 			EndIf
-				
 			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
 			GUICtrlSetData ($KeySetupEdit, $KeyText)
-		ElseIf $type == "s" Then
+		ElseIf $type == "d" Then
 			$KeyText = GUICtrlRead($KeySetupEdit)
 			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
-				$KeyText = $KeyText & "{ENTER}"
+				$KeyText = $KeyText & "{DELETE}"
 			Else
-				$KeyText = $KeyText & "{Sleep " & GUICtrlRead($KeySetupAddEdit) & "}"
+				$KeyText = $KeyText & "{DELETE " & GUICtrlRead($KeySetupAddEdit) & "}"
 			EndIf
-				
 			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
 			GUICtrlSetData ($KeySetupEdit, $KeyText)
+		ElseIf $type == "c" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{ESC}"
+			Else
+				$KeyText = $KeyText & "{ESC " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+			
+			
+		ElseIf $type == "s" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) <> "" Then
+				$KeyText = $KeyText & "{Sleep " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+			
+			
+		ElseIf $type == "au" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{UP}"
+			Else
+				$KeyText = $KeyText & "{UP " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+		ElseIf $type == "al" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{LEFT}"
+			Else
+				$KeyText = $KeyText & "{LEFT " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+		ElseIf $type == "ad" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{DOWN}"
+			Else
+				$KeyText = $KeyText & "{DOWN " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+		ElseIf $type == "ar" Then
+			$KeyText = GUICtrlRead($KeySetupEdit)
+			If GUICtrlRead($KeySetupAddEdit) == "" OR GUICtrlRead($KeySetupAddEdit) == "1" Then
+				$KeyText = $KeyText & "{RIGHT}"
+			Else
+				$KeyText = $KeyText & "{RIGHT " & GUICtrlRead($KeySetupAddEdit) & "}"
+			EndIf
+			IniWrite($sPath_ini, "EditDATA", $KeyTextIniToF, $KeyText)
+			GUICtrlSetData ($KeySetupEdit, $KeyText)
+			
 		EndIf
 		
 		KeySetupAddClose()
@@ -1163,7 +1263,9 @@ EndFunc
 
 Func KeySetupAddClose()
 	GUIDelete($keysetupaddenterwin)
+	GUISetState(@SW_RESTORE, $mainwindow)
 	GUISetState(@SW_ENABLE, $keysetupwin)
+	GUISetState(@SW_RESTORE, $keysetupwin)
 EndFunc
 
 
@@ -1300,9 +1402,11 @@ EndFunc
 
 
 Func SetMouseClickPopupClose()
+	;GUICtrlSetData ($KeySetupEdit, $KeyText)
+	
 	GUIDelete($MouseClickPopupWin)
-	GUISetState(@SW_SHOW)
-	GUICtrlSetData ($KeySetupEdit, $KeyText)
+	;GUISetState(@SW_ENABLE, $keysetupwin)
+	;GUISetState(@SW_SHOW)
 EndFunc
 
 
